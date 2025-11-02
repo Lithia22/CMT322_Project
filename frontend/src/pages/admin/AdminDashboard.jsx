@@ -112,10 +112,6 @@ const AdminDashboard = () => {
             Overview of hostel complaints
           </p>
         </div>
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" />
-          Export Report
-        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -341,73 +337,77 @@ const AdminDashboard = () => {
         </TabsList>
 
         <TabsContent value="complaints">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Complaints</CardTitle>
-              <CardDescription>Latest submissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockComplaints.slice(0, 5).map((complaint) => (
-                  <div key={complaint.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                    <div className="space-y-1 flex-1">
-                      <p className="font-medium">{complaint.facilityType}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {complaint.studentName} • {complaint.hostelName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {complaint.issueDescription}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <Badge variant={getUrgencyVariant(complaint.urgencyLevel)} className="w-20 justify-center">
-                        {complaint.urgencyLevel}
-                      </Badge>
-                      <Badge variant={getStatusVariant(complaint.status)} className="w-24 justify-center">
-                        {complaint.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+  <Card>
+    <CardContent className="pt-6">
+      <div className="space-y-4">
+        {mockComplaints.slice(0, 5).map((complaint) => (
+          <div
+            key={complaint.id}
+            className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+          >
+            <div className="space-y-1 flex-1">
+              <p className="font-medium">{complaint.facilityType}</p>
+              <p className="text-sm text-muted-foreground">
+                {complaint.studentName} • {complaint.hostelName}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {complaint.issueDescription}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <Badge
+                variant={getUrgencyVariant(complaint.urgencyLevel)}
+                className="w-20 justify-center"
+              >
+                {complaint.urgencyLevel}
+              </Badge>
+              <Badge
+                variant={getStatusVariant(complaint.status)}
+                className="w-24 justify-center"
+              >
+                {complaint.status}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
 
-        <TabsContent value="feedback">
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Feedback</CardTitle>
-              <CardDescription>Latest ratings and comments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockFeedbacks.map((feedback) => (
-                  <div key={feedback.id} className="border-b pb-4 last:border-0 last:pb-0">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <p className="font-medium">{feedback.studentName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Complaint #{feedback.complaintId}
-                        </p>
-                        <p className="text-sm mt-2">{feedback.comment}</p>
-                      </div>
-                      <div className="flex items-center gap-1 ml-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={16}
-                            className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+
+<TabsContent value="feedback">
+  <Card>
+    <CardContent className="pt-6">
+      <div className="space-y-4">
+        {mockFeedbacks.map((feedback) => (
+          <div key={feedback.id} className="border-b pb-4 last:border-0 last:pb-0">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1 flex-1">
+                <p className="font-medium">{feedback.studentName}</p>
+                <p className="text-sm mt-2">{feedback.comment}</p>
+              </div>
+              <div className="flex items-center gap-1 ml-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={16}
+                    className={
+                      star <= feedback.rating
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-gray-300'
+                    }
+                  />
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+</TabsContent>
+
       </Tabs>
     </div>
   );

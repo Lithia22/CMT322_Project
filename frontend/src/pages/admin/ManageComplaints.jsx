@@ -141,7 +141,6 @@ const ManageComplaints = () => {
                   <TableRow key={complaint.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">#{complaint.id}</p>
                         <p className="text-sm text-muted-foreground">{complaint.studentName}</p>
                         <p className="text-xs text-muted-foreground">{complaint.studentId}</p>
                       </div>
@@ -186,7 +185,7 @@ const ManageComplaints = () => {
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Edit Complaint #{complaint.id}</DialogTitle>
+                            <DialogTitle>Edit Complaint</DialogTitle>
                             <DialogDescription>Update status and add remarks</DialogDescription>
                           </DialogHeader>
                           <Form {...form}>
