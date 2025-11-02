@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Star, Send, ThumbsUp, MessageCircle } from 'lucide-react';
-import { mockComplaints, mockFeedbacks } from '../data/mockData';
-import { useAuth } from '../contexts/AuthContext';
+import { mockComplaints, mockFeedbacks } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Feedback = () => {
   const { user } = useAuth();

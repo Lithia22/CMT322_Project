@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { hostelOptions, facilityTypes, urgencyLevels } from '../data/mockData';
-import { useAuth } from '../contexts/AuthContext';
+import { hostelOptions, facilityTypes, urgencyLevels } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SubmitComplaint = () => {
   const navigate = useNavigate();

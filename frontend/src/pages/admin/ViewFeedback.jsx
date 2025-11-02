@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Star, Search, Filter, Calendar, User, MessageSquare } from 'lucide-react';
-import { mockFeedbacks, mockComplaints } from '../data/mockData';
+import { mockFeedbacks, mockComplaints } from '../../data/mockData';
 
 const ViewFeedback = () => {
   const [feedbacks] = useState(mockFeedbacks);

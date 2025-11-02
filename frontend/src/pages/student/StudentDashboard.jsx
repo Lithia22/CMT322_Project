@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FileText, Eye, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { mockComplaints } from '../data/mockData';
-import { useAuth } from '../contexts/AuthContext';
+import { mockComplaints } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const StudentDashboard = () => {
   const { user } = useAuth();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, Filter, Calendar, MapPin, AlertCircle } from 'lucide-react';
-import { mockComplaints } from '../data/mockData';
+import { mockComplaints } from '../../data/mockData';
 
 const ViewComplaints = () => {
   const [searchTerm, setSearchTerm] = useState('');

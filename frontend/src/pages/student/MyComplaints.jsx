@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Search, Filter, Calendar, MapPin, AlertCircle } from 'lucide-react';
-import { mockComplaints } from '../data/mockData';
-import { useAuth } from '../contexts/AuthContext';
+import { mockComplaints } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const MyComplaints = () => {
   const { user } = useAuth();

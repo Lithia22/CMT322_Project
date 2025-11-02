@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BarChart3, TrendingUp, Clock, CheckCircle, AlertTriangle, Users, MessageSquare, PieChart, BarChart } from 'lucide-react';
-import { mockComplaints, mockFeedbacks, mockUsers } from '../data/mockData';
+import { mockComplaints, mockFeedbacks, mockUsers } from '../../data/mockData';
 
 const AdminDashboard = () => {
   const [complaints] = useState(mockComplaints);

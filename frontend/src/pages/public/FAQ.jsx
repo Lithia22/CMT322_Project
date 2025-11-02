@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
-import { faqData } from '../data/mockData';
+import { faqData } from '../../data/mockData';
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);

@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { FileText, Eye, Search, TrendingUp, Clock, CheckCircle, AlertCircle, Users, ShieldCheck, MessageSquare } from 'lucide-react';
-import { mockComplaints } from '../data/mockData';
-import { useAuth } from '../contexts/AuthContext';
+import { mockComplaints } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
