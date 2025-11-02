@@ -1,242 +1,218 @@
 import { useState } from 'react';
-import { Star, Search, Filter, Calendar, User, MessageSquare } from 'lucide-react';
-import { mockFeedbacks, mockComplaints } from '../../data/mockData';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Search, Filter, Star, Calendar, User, MessageSquare } from 'lucide-react';
+import { mockFeedbacks, mockComplaints } from '@/data/mockData';
 
 const ViewFeedback = () => {
-  const [feedbacks] = useState(mockFeedbacks);
   const [searchTerm, setSearchTerm] = useState('');
-  const [ratingFilter, setRatingFilter] = useState('All');
+  const [ratingFilter, setRatingFilter] = useState('all');
 
-  // Combine feedback with complaint details
-  const feedbackWithDetails = feedbacks.map(feedback => {
+  const feedbackWithDetails = mockFeedbacks.map(feedback => {
     const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
-    return {
-      ...feedback,
-      complaintDetails: complaint
-    };
+    return { ...feedback, complaintDetails: complaint };
   });
 
-  // Filter feedback
   const filteredFeedbacks = feedbackWithDetails.filter(feedback => {
     const matchesSearch = 
       feedback.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       feedback.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (feedback.complaintDetails?.facilityType.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesRating = ratingFilter === 'All' || feedback.rating.toString() === ratingFilter;
-
+    const matchesRating = ratingFilter === 'all' || feedback.rating.toString() === ratingFilter;
     return matchesSearch && matchesRating;
   });
 
-  // Calculate statistics
-  const totalFeedbacks = feedbacks.length;
-  const averageRating = feedbacks.length > 0 
-    ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1)
+  const totalFeedbacks = mockFeedbacks.length;
+  const averageRating = mockFeedbacks.length > 0 
+    ? (mockFeedbacks.reduce((sum, f) => sum + f.rating, 0) / mockFeedbacks.length).toFixed(1)
     : 0;
 
   const ratingDistribution = {
-    5: feedbacks.filter(f => f.rating === 5).length,
-    4: feedbacks.filter(f => f.rating === 4).length,
-    3: feedbacks.filter(f => f.rating === 3).length,
-    2: feedbacks.filter(f => f.rating === 2).length,
-    1: feedbacks.filter(f => f.rating === 1).length
-  };
-
-  const getRatingColor = (rating) => {
-    switch (rating) {
-      case 5: return 'text-green-600 bg-green-100';
-      case 4: return 'text-blue-600 bg-blue-100';
-      case 3: return 'text-yellow-600 bg-yellow-100';
-      case 2: return 'text-orange-600 bg-orange-100';
-      case 1: return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
+    5: mockFeedbacks.filter(f => f.rating === 5).length,
+    4: mockFeedbacks.filter(f => f.rating === 4).length,
+    3: mockFeedbacks.filter(f => f.rating === 3).length,
+    2: mockFeedbacks.filter(f => f.rating === 2).length,
+    1: mockFeedbacks.filter(f => f.rating === 1).length
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="container mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Student Feedback</h1>
-          <p className="text-gray-600">View ratings and comments from students</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold">Student Feedback</h2>
+        <p className="text-muted-foreground">View ratings and comments from students</p>
+      </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-3">
-              <MessageSquare className="text-blue-600" size={24} />
-              <h3 className="text-lg font-semibold text-gray-800">Total Feedback</h3>
-            </div>
-            <p className="text-3xl font-bold text-gray-800">{totalFeedbacks}</p>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Feedback</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalFeedbacks}</div>
+          </CardContent>
+        </Card>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-3">
-              <Star className="text-yellow-600" size={24} />
-              <h3 className="text-lg font-semibold text-gray-800">Average Rating</h3>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <p className="text-3xl font-bold text-gray-800">{averageRating}</p>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
+            <Star className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl font-bold">{averageRating}</div>
               <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    size={16}
+                    size={14}
                     className={star <= averageRating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
                   />
                 ))}
               </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">Rating Distribution</h3>
-            <div className="space-y-2">
-              {[5, 4, 3, 2, 1].map((rating) => (
-                <div key={rating} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">{rating} stars</span>
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          size={12}
-                          className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                        />
-                      ))}
-                    </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Rating Distribution</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {[5, 4, 3, 2, 1].map((rating) => (
+              <div key={rating} className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
+                  <span className="text-muted-foreground">{rating}</span>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={10}
+                        className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                      />
+                    ))}
                   </div>
-                  <span className="text-sm font-semibold text-gray-800">{ratingDistribution[rating]}</span>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+                <span className="font-semibold">{ratingDistribution[rating]}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+          <CardDescription>Search and filter feedback</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                placeholder="Search feedback..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+              <Input 
+                placeholder="Search feedback..." 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+                className="pl-10" 
               />
             </div>
 
-            {/* Rating Filter */}
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-              <select
-                value={ratingFilter}
-                onChange={(e) => setRatingFilter(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-              >
-                <option value="All">All Ratings</option>
-                <option value="5">5 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="2">2 Stars</option>
-                <option value="1">1 Star</option>
-              </select>
-            </div>
+            <Select value={ratingFilter} onValueChange={setRatingFilter}>
+              <SelectTrigger>
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by rating" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ratings</SelectItem>
+                <SelectItem value="5">5 Stars</SelectItem>
+                <SelectItem value="4">4 Stars</SelectItem>
+                <SelectItem value="3">3 Stars</SelectItem>
+                <SelectItem value="2">2 Stars</SelectItem>
+                <SelectItem value="1">1 Star</SelectItem>
+              </SelectContent>
+            </Select>
 
-            {/* Results Count */}
-            <div className="flex items-center justify-center text-sm text-gray-600 bg-gray-50 rounded-lg">
-              Showing {filteredFeedbacks.length} of {feedbacks.length} feedback entries
+            <div className="flex items-center justify-center bg-muted rounded-md px-3 text-sm">
+              Showing {filteredFeedbacks.length} of {mockFeedbacks.length}
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Feedback List */}
-        <div className="space-y-6">
-          {filteredFeedbacks.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-              <MessageSquare className="mx-auto text-gray-400 mb-4" size={64} />
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No Feedback Found</h3>
-              <p className="text-gray-500">Try adjusting your filters or search terms</p>
-            </div>
-          ) : (
-            filteredFeedbacks.map((feedback) => (
-              <div key={feedback.id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
+      {filteredFeedbacks.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Feedback Found</h3>
+            <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {filteredFeedbacks.map((feedback) => (
+            <Card key={feedback.id}>
+              <CardContent className="pt-6">
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                  {/* Left Section - Rating and Student Info */}
                   <div className="flex-1">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-3 rounded-full ${getRatingColor(feedback.rating)}`}>
-                          <User size={24} />
+                    <div className="flex items-start space-x-4 mb-4">
+                      <Avatar>
+                        <AvatarFallback>
+                          <User size={20} />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold">{feedback.studentName}</h3>
+                            <p className="text-sm text-muted-foreground">Student ID: {feedback.studentId}</p>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={18}
+                                className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                              />
+                            ))}
+                            <span className="ml-2 text-sm font-semibold">{feedback.rating}.0</span>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-800 text-lg">{feedback.studentName}</h3>
-                          <p className="text-sm text-gray-600">Student ID: {feedback.studentId}</p>
-                        </div>
-                      </div>
-                      
-                      {/* Rating Stars */}
-                      <div className="flex items-center space-x-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={20}
-                            className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                          />
-                        ))}
-                        <span className="ml-2 text-sm font-semibold text-gray-800">
-                          {feedback.rating}.0
-                        </span>
+
+                        <p className="text-muted-foreground mb-4">{feedback.comment}</p>
+
+                        {feedback.complaintDetails && (
+                          <Card className="bg-muted/50">
+                            <CardContent className="pt-4">
+                              <h4 className="font-semibold text-sm mb-2">Related Complaint</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                                <div><span className="font-medium">Facility:</span> {feedback.complaintDetails.facilityType}</div>
+                                <div><span className="font-medium">Hostel:</span> {feedback.complaintDetails.hostelName}</div>
+                                <div><span className="font-medium">Room:</span> {feedback.complaintDetails.roomNumber}</div>
+                                <div><span className="font-medium">Issue:</span> {feedback.complaintDetails.issueDescription}</div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
                       </div>
                     </div>
-
-                    {/* Comment */}
-                    <div className="mb-4">
-                      <p className="text-gray-700 leading-relaxed">{feedback.comment}</p>
-                    </div>
-
-                    {/* Complaint Details */}
-                    {feedback.complaintDetails && (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="font-semibold text-gray-800 mb-2">Related Complaint</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
-                          <div>
-                            <span className="font-medium">Facility:</span> {feedback.complaintDetails.facilityType}
-                          </div>
-                          <div>
-                            <span className="font-medium">Hostel:</span> {feedback.complaintDetails.hostelName}
-                          </div>
-                          <div>
-                            <span className="font-medium">Room:</span> {feedback.complaintDetails.roomNumber}
-                          </div>
-                          <div>
-                            <span className="font-medium">Issue:</span> {feedback.complaintDetails.issueDescription}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Right Section - Date */}
-                  <div className="lg:text-right">
-                    <div className="flex items-center lg:justify-end space-x-2 text-sm text-gray-500 mb-2">
-                      <Calendar size={16} />
+                  <div className="text-right">
+                    <div className="flex items-center justify-end space-x-2 text-sm text-muted-foreground mb-2">
+                      <Calendar size={14} />
                       <span>{feedback.submittedDate}</span>
                     </div>
-                    <div className="text-xs text-gray-400">
-                      Complaint ID: #{feedback.complaintId}
-                    </div>
+                    <p className="text-xs text-muted-foreground">Complaint ID: #{feedback.complaintId}</p>
                   </div>
                 </div>
-              </div>
-            ))
-          )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 };

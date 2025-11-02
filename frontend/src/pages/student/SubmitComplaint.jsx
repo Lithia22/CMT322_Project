@@ -1,330 +1,332 @@
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label'; 
+import { CheckCircle2, Upload, AlertCircle } from 'lucide-react';
+import { hostelOptions, facilityTypes } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { hostelOptions, facilityTypes, urgencyLevels } from '../../data/mockData';
-import { useAuth } from '../../contexts/AuthContext';
+
+const complaintSchema = z.object({
+  hostelName: z.string().min(1, 'Please select a hostel'),
+  roomNumber: z.string().min(1, 'Room number is required'),
+  facilityType: z.string().min(1, 'Please select facility type'),
+  issueDescription: z.string().min(10, 'Description must be at least 10 characters'),
+  urgencyLevel: z.enum(['Low', 'Medium', 'High']),
+  photo: z.any().optional(),
+});
 
 const SubmitComplaint = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    studentId: user?.studentId || '',
-    hostelName: '',
-    roomNumber: '',
-    facilityType: '',
-    issueDescription: '',
-    urgencyLevel: 'Medium',
-    photo: null
+  const [submitted, setSubmitted] = useState(false);
+
+  const form = useForm({
+    resolver: zodResolver(complaintSchema),
+    defaultValues: {
+      urgencyLevel: 'Medium',
+    },
   });
 
-  const [submitted, setSubmitted] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error for this field
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData(prev => ({
-        ...prev,
-        photo: file.name
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.hostelName) {
-      newErrors.hostelName = 'Please select a hostel';
-    }
-    if (!formData.roomNumber.trim()) {
-      newErrors.roomNumber = 'Room number is required';
-    }
-    if (!formData.facilityType) {
-      newErrors.facilityType = 'Please select facility type';
-    }
-    if (!formData.issueDescription.trim()) {
-      newErrors.issueDescription = 'Please describe the issue';
-    } else if (formData.issueDescription.trim().length < 10) {
-      newErrors.issueDescription = 'Description should be at least 10 characters';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      // In real app, this would send to backend
-      console.log('Complaint submitted:', {
-        ...formData,
-        studentName: user?.name,
-        status: 'Pending',
-        submittedDate: new Date().toLocaleDateString()
-      });
-      setSubmitted(true);
-      
-      // Redirect to my complaints after 3 seconds
-      setTimeout(() => {
-        navigate('/my-complaints');
-      }, 3000);
-    }
+  const onSubmit = (data) => {
+    console.log('Complaint submitted:', {
+      ...data,
+      studentId: user.studentId,
+      studentName: user.name,
+      status: 'Pending',
+      submittedDate: new Date().toLocaleDateString(),
+    });
+    setSubmitted(true);
   };
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-          <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 size={48} className="text-green-600" />
-          </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">
-            Complaint Submitted Successfully!
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Your complaint has been registered. You can track its status in the "My Complaints" section.
+      <div className="space-y-6">
+        <div className="text-center">
+          <CheckCircle2 className="mx-auto h-16 w-16 text-green-600 mb-4" />
+          <h1 className="text-3xl font-bold tracking-tight">Complaint Submitted Successfully!</h1>
+          <p className="text-muted-foreground mt-2">
+            Your complaint has been registered and will be reviewed by our maintenance team.
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>Complaint ID:</strong> #{Math.floor(Math.random() * 10000)}
-            </p>
-            <p className="text-sm text-blue-800 mt-2">
-              <strong>Status:</strong> Pending Review
-            </p>
-          </div>
         </div>
+
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle>Complaint Details</CardTitle>
+            <CardDescription>Here's a summary of your submitted complaint</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Complaint ID</p>
+                <p className="font-semibold">#{Math.floor(Math.random() * 10000)}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Status</p>
+                <Badge variant="outline">Pending Review</Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Student</p>
+                <p className="font-semibold">{user?.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Student ID</p>
+                <p className="font-semibold">{user?.studentId}</p>
+              </div>
+            </div>
+            
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                You can track your complaint status in the "My Complaints" section.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex gap-4">
+              <Button asChild className="flex-1">
+                <a href="/my-complaints">View My Complaints</a>
+              </Button>
+              <Button variant="outline" onClick={() => setSubmitted(false)}>
+                Submit Another
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="container mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-3">Submit a Complaint</h1>
-          <p className="text-gray-600">
-            Report any hostel facility issues and we'll resolve them quickly
-          </p>
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Student Info (Auto-filled) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Student Name
-                </label>
-                <input
-                  type="text"
-                  value={user?.name || ''}
-                  disabled
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Student ID
-                </label>
-                <input
-                  type="text"
-                  value={user?.studentId || ''}
-                  disabled
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                />
-              </div>
-            </div>
-
-            {/* Hostel Name */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Hostel Name <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="hostelName"
-                value={formData.hostelName}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.hostelName ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select your hostel</option>
-                {hostelOptions.map((hostel, index) => (
-                  <option key={index} value={hostel}>{hostel}</option>
-                ))}
-              </select>
-              {errors.hostelName && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <AlertCircle size={14} className="mr-1" />
-                  {errors.hostelName}
-                </p>
-              )}
-            </div>
-
-            {/* Room Number */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Room Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="roomNumber"
-                value={formData.roomNumber}
-                onChange={handleChange}
-                placeholder="e.g., A-101"
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.roomNumber ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.roomNumber && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <AlertCircle size={14} className="mr-1" />
-                  {errors.roomNumber}
-                </p>
-              )}
-            </div>
-
-            {/* Facility Type */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Facility Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="facilityType"
-                value={formData.facilityType}
-                onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.facilityType ? 'border-red-500' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select facility type</option>
-                {facilityTypes.map((type, index) => (
-                  <option key={index} value={type}>{type}</option>
-                ))}
-              </select>
-              {errors.facilityType && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <AlertCircle size={14} className="mr-1" />
-                  {errors.facilityType}
-                </p>
-              )}
-            </div>
-
-            {/* Issue Description */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Issue Description <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                name="issueDescription"
-                value={formData.issueDescription}
-                onChange={handleChange}
-                rows="4"
-                placeholder="Describe the issue in detail..."
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${
-                  errors.issueDescription ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.issueDescription && (
-                <p className="text-red-500 text-sm mt-1 flex items-center">
-                  <AlertCircle size={14} className="mr-1" />
-                  {errors.issueDescription}
-                </p>
-              )}
-            </div>
-
-            {/* Urgency Level */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Urgency Level <span className="text-red-500">*</span>
-              </label>
-              <div className="flex space-x-4">
-                {urgencyLevels.map((level) => (
-                  <label key={level} className="flex items-center cursor-pointer">
-                    <input
-                      type="radio"
-                      name="urgencyLevel"
-                      value={level}
-                      checked={formData.urgencyLevel === level}
-                      onChange={handleChange}
-                      className="mr-2 w-4 h-4 text-blue-600"
-                    />
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      level === 'High' ? 'bg-red-100 text-red-800' :
-                      level === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {level}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Photo Upload */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Upload Photo (Optional)
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
-                <Upload className="mx-auto text-gray-400 mb-2" size={32} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
-                  id="photo-upload"
-                />
-                <label htmlFor="photo-upload" className="cursor-pointer">
-                  <span className="text-blue-600 hover:text-blue-800 font-semibold">
-                    Choose a file
-                  </span>
-                  <span className="text-gray-500"> or drag and drop</span>
-                </label>
-                {formData.photo && (
-                  <p className="text-sm text-green-600 mt-2">
-                    ✓ {formData.photo}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
-            >
-              Submit Complaint
-            </button>
-          </form>
-        </div>
-
-        {/* Info Box */}
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> Your complaint will be reviewed by our maintenance team within 24 hours. 
-            You can track the status in the "My Complaints" section.
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Submit a Complaint</h1>
+        <p className="text-muted-foreground">
+          Report any hostel facility issues and we'll resolve them quickly
+        </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Complaint Details</CardTitle>
+          <CardDescription>Fill in the form below to submit your facility complaint</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Student Info (Read-only) - Use regular Label here */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                <div className="space-y-2">
+                  <Label htmlFor="student-name">Student Name</Label>
+                  <Input id="student-name" value={user?.name} disabled className="bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="student-id">Student ID</Label>
+                  <Input id="student-id" value={user?.studentId} disabled className="bg-background" />
+                </div>
+              </div>
+
+              {/* Hostel Selection */}
+              <FormField
+                control={form.control}
+                name="hostelName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hostel Name</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your hostel" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {hostelOptions.map((hostel) => (
+                          <SelectItem key={hostel} value={hostel}>
+                            {hostel}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Room Number */}
+              <FormField
+                control={form.control}
+                name="roomNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Room Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., A-101" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Facility Type */}
+              <FormField
+                control={form.control}
+                name="facilityType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facility Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select facility type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {facilityTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Issue Description */}
+              <FormField
+                control={form.control}
+                name="issueDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Issue Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the issue in detail..."
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Please provide as much detail as possible to help us resolve the issue quickly.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Urgency Level */}
+              <FormField
+                control={form.control}
+                name="urgencyLevel"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Urgency Level</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Low" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                              Low
+                            </Badge>
+                            <span className="ml-2">Minor issues that don't affect daily activities</span>
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="Medium" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                              Medium
+                            </Badge>
+                            <span className="ml-2">Issues that cause inconvenience</span>
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="High" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                              High
+                            </Badge>
+                            <span className="ml-2">Urgent issues affecting safety or basic needs</span>
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Photo Upload (Optional) */}
+              <FormField
+                control={form.control}
+                name="photo"
+                render={({ field: { value, onChange, ...fieldProps } }) => (
+                  <FormItem>
+                    <FormLabel>Upload Photo (Optional)</FormLabel>
+                    <FormControl>
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
+                        <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => onChange(e.target.files?.[0])}
+                          className="hidden"
+                          id="photo-upload"
+                          {...fieldProps}
+                        />
+                        <label htmlFor="photo-upload" className="cursor-pointer">
+                          <span className="text-primary hover:underline font-semibold">Choose a file</span>
+                          <span className="text-muted-foreground"> or drag and drop</span>
+                        </label>
+                        {value && (
+                          <p className="text-sm text-green-600 mt-2">
+                            ✓ {value.name}
+                          </p>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload a photo to help us better understand the issue
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" size="lg" className="w-full">
+                Submit Complaint
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          Your complaint will be reviewed by our maintenance team within 24 hours. 
+          You can track the status in the "My Complaints" section.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

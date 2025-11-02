@@ -1,129 +1,101 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ShieldCheck, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import PublicLayout from '@/components/layout/PublicLayout';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+
+  const form = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
   });
-  const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    setError('');
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-
-    const result = login(formData.email, formData.password);
-
+  const onSubmit = (data) => {
+    const result = login(data.email, data.password);
     if (result.success) {
-      // Redirect based on role
-      if (result.user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(result.user.role === 'admin' ? '/admin' : '/dashboard');
     } else {
-      setError(result.error);
+      form.setError('root', { message: result.error });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="bg-blue-600 text-white p-3 rounded-full">
-              <ShieldCheck size={32} />
-            </div>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome Back</h1>
-          <p className="text-gray-600">Login to USM Hostel Care System</p>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <p className="text-sm text-blue-800 font-semibold mb-2">Demo Credentials:</p>
-          <p className="text-xs text-blue-700">Student: student@usm.my / password</p>
-          <p className="text-xs text-blue-700">Admin: admin@usm.my / password</p>
-        </div>
-
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-2">
-                <AlertCircle size={16} className="text-red-600" />
-                <p className="text-red-600 text-sm">{error}</p>
+    <PublicLayout>
+      <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center bg-muted/50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="bg-primary text-primary-foreground p-3 rounded-full">
+                <ShieldCheck size={32} />
               </div>
-            )}
+            </div>
+            <CardTitle className="text-2xl">Welcome Back</CardTitle>
+            <CardDescription>Login to USM Hostel Care System</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert className="mb-6">
+              <AlertDescription className="text-sm">
+                <p className="font-semibold mb-1">Demo Credentials:</p>
+                <p>Student: student@usm.my / password</p>
+                <p>Admin: admin@usm.my / password</p>
+              </AlertDescription>
+            </Alert>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="email"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {form.formState.errors.root && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+                  </Alert>
+                )}
+
+                <FormField
+                  control={form.control}
                   name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="your.email@usm.my"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl><Input placeholder="your.email@usm.my" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="password"
+                <FormField
+                  control={form.control}
                   name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl><Input type="password" placeholder="Enter your password" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg"
-            >
-              Login
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account? <Link to="/" className="text-blue-600 hover:underline font-semibold">Contact administration</Link>
-            </p>
-          </div>
-        </div>
+                <Button type="submit" className="w-full">Login</Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </PublicLayout>
   );
 };
 

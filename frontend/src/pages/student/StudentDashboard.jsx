@@ -1,156 +1,176 @@
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { FileText, Eye, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
-import { mockComplaints } from '../../data/mockData';
-import { useAuth } from '../../contexts/AuthContext';
+import { mockComplaints } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   
-  // Filter complaints for current student
   const studentComplaints = mockComplaints.filter(
     complaint => complaint.studentId === user?.studentId
   );
 
-  // Calculate statistics
-  const totalComplaints = studentComplaints.length;
-  const pendingComplaints = studentComplaints.filter(c => c.status === 'Pending').length;
-  const inProgressComplaints = studentComplaints.filter(c => c.status === 'In Progress').length;
-  const resolvedComplaints = studentComplaints.filter(c => c.status === 'Resolved').length;
-
   const stats = [
-    { label: 'Total Complaints', value: totalComplaints, icon: TrendingUp, color: 'bg-blue-500' },
-    { label: 'Pending', value: pendingComplaints, icon: Clock, color: 'bg-yellow-500' },
-    { label: 'In Progress', value: inProgressComplaints, icon: AlertCircle, color: 'bg-orange-500' },
-    { label: 'Resolved', value: resolvedComplaints, icon: CheckCircle, color: 'bg-green-500' },
+    { 
+      label: 'Total Complaints', 
+      value: studentComplaints.length, 
+      icon: TrendingUp,
+      description: 'All your complaints'
+    },
+    { 
+      label: 'Pending', 
+      value: studentComplaints.filter(c => c.status === 'Pending').length, 
+      icon: Clock,
+      description: 'Awaiting review'
+    },
+    { 
+      label: 'In Progress', 
+      value: studentComplaints.filter(c => c.status === 'In Progress').length, 
+      icon: AlertCircle,
+      description: 'Being resolved'
+    },
+    { 
+      label: 'Resolved', 
+      value: studentComplaints.filter(c => c.status === 'Resolved').length, 
+      icon: CheckCircle,
+      description: 'Completed'
+    },
   ];
 
   const quickActions = [
     {
       icon: FileText,
-      label: 'Submit New Complaint',
+      label: 'Submit Complaint',
       description: 'Report a new facility issue',
       path: '/submit-complaint',
-      color: 'bg-blue-500 hover:bg-blue-600'
+      variant: 'default'
     },
     {
       icon: Eye,
-      label: 'View My Complaints',
-      description: 'Check status of your complaints',
+      label: 'View Complaints', 
+      description: 'Check your complaint status',
       path: '/my-complaints',
-      color: 'bg-green-500 hover:bg-green-600'
+      variant: 'outline'
     },
     {
       icon: MessageSquare,
-      label: 'Provide Feedback',
+      label: 'Give Feedback',
       description: 'Rate resolved complaints',
       path: '/feedback',
-      color: 'bg-purple-500 hover:bg-purple-600'
+      variant: 'outline'
     }
   ];
 
   const recentComplaints = studentComplaints.slice(0, 3);
 
+  const getStatusVariant = (status) => {
+    switch (status) {
+      case 'Resolved': return 'default';
+      case 'In Progress': return 'secondary';
+      case 'Pending': return 'outline';
+      default: return 'outline';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-      <div className="container mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            Welcome back, {user?.name}!
-          </h1>
-          <p className="text-gray-600">
-            Here's an overview of your complaints and quick actions you can take.
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name}!</h1>
+        <p className="text-muted-foreground">
+          Here's an overview of your complaints and quick actions.
+        </p>
+      </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-600 text-sm mb-1">{stat.label}</p>
-                    <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
-                  </div>
-                  <div className={`${stat.color} p-4 rounded-lg`}>
-                    <Icon size={32} className="text-white" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* Stats Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">{stat.description}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <Link
-                      key={index}
-                      to={action.path}
-                      className={`${action.color} text-white rounded-xl p-6 text-center hover:shadow-lg transition transform hover:scale-105`}
-                    >
-                      <Icon size={32} className="mx-auto mb-3" />
-                      <h3 className="font-semibold mb-2">{action.label}</h3>
-                      <p className="text-white/90 text-sm">{action.description}</p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Common tasks you can perform</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            {quickActions.map((action, index) => {
+              const Icon = action.icon;
+              return (
+                <Button
+                  key={index}
+                  variant={action.variant}
+                  className="h-auto p-4 justify-start"
+                  asChild
+                >
+                  <Link to={action.path}>
+                    <Icon className="mr-3 h-5 w-5" />
+                    <div className="text-left">
+                      <div className="font-semibold">{action.label}</div>
+                      <div className="text-sm text-muted-foreground">{action.description}</div>
+                    </div>
+                  </Link>
+                </Button>
+              );
+            })}
+          </CardContent>
+        </Card>
 
-          {/* Recent Complaints */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Recent Complaints</h2>
+        {/* Recent Complaints */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Complaints</CardTitle>
+            <CardDescription>Your most recent submissions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {recentComplaints.length === 0 ? (
               <div className="text-center py-8">
-                <FileText className="mx-auto text-gray-400 mb-4" size={48} />
-                <p className="text-gray-600">No complaints yet</p>
-                <Link
-                  to="/submit-complaint"
-                  className="text-blue-600 hover:text-blue-800 font-semibold mt-2 inline-block"
-                >
-                  Submit your first complaint →
-                </Link>
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No complaints yet</p>
+                <Button asChild variant="link" className="mt-2">
+                  <Link to="/submit-complaint">Submit your first complaint</Link>
+                </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <>
                 {recentComplaints.map((complaint) => (
-                  <div key={complaint.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-semibold text-gray-800">{complaint.facilityType}</h4>
-                        <p className="text-sm text-gray-600">{complaint.hostelName}</p>
-                        <p className="text-xs text-gray-500 mt-1 truncate">{complaint.issueDescription}</p>
-                      </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        complaint.status === 'Resolved' ? 'bg-green-100 text-green-800' :
-                        complaint.status === 'In Progress' ? 'bg-orange-100 text-orange-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {complaint.status}
-                      </span>
+                  <div key={complaint.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                    <div className="space-y-1">
+                      <p className="font-medium">{complaint.facilityType}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {complaint.hostelName} • {complaint.roomNumber}
+                      </p>
                     </div>
+                    <Badge variant={getStatusVariant(complaint.status)}>
+                      {complaint.status}
+                    </Badge>
                   </div>
                 ))}
-                <Link
-                  to="/my-complaints"
-                  className="block text-center text-blue-600 hover:text-blue-800 font-semibold mt-4"
-                >
-                  View All Complaints →
-                </Link>
-              </div>
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/my-complaints">View All Complaints</Link>
+                </Button>
+              </>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
