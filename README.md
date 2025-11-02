@@ -41,8 +41,8 @@ A comprehensive hostel facility complaint management system built with React, Vi
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
-   cd hostel-complaint-system
+   git clone https://github.com/Lithia22/CMT322.git
+   cd CMT322
 
 2. **Navigate to frontend directory**
    ```bash
