@@ -60,6 +60,76 @@ export const mockComplaints = [
     submittedDate: "2024-10-25",
     photo: null,
     adminRemarks: "Replaced with new table on 30th Oct"
+  },
+  {
+    id: 4,
+    studentId: "STU003",
+    studentName: "Lee Student",
+    hostelName: "Desasiswa Restu",
+    roomNumber: "D-402",
+    facilityType: "Electrical",
+    issueDescription: "Power socket not working in bedroom",
+    urgencyLevel: "High",
+    status: "Resolved",
+    submittedDate: "2024-10-20",
+    photo: null,
+    adminRemarks: "Fixed by electrician"
+  },
+  {
+    id: 5,
+    studentId: "STU004",
+    studentName: "Kumar Student",
+    hostelName: "Desasiswa Tekun",
+    roomNumber: "E-105",
+    facilityType: "Plumbing",
+    issueDescription: "Toilet clogged, water overflowing",
+    urgencyLevel: "High",
+    status: "In Progress",
+    submittedDate: "2024-10-30",
+    photo: null,
+    adminRemarks: "Plumber on the way"
+  },
+  {
+    id: 6,
+    studentId: "STU005",
+    studentName: "Fatimah Student",
+    hostelName: "Desasiswa Bakti Permai",
+    roomNumber: "A-203",
+    facilityType: "Door/Window",
+    issueDescription: "Door lock jammed, cannot lock properly",
+    urgencyLevel: "Medium",
+    status: "Pending",
+    submittedDate: "2024-10-31",
+    photo: null,
+    adminRemarks: ""
+  },
+  {
+    id: 7,
+    studentId: "STU006",
+    studentName: "David Student",
+    hostelName: "Desasiswa Indah Kembara",
+    roomNumber: "B-108",
+    facilityType: "Lighting",
+    issueDescription: "Ceiling light flickering and dim",
+    urgencyLevel: "Low",
+    status: "Resolved",
+    submittedDate: "2024-10-18",
+    photo: null,
+    adminRemarks: "Replaced bulb"
+  },
+  {
+    id: 8,
+    studentId: "STU007",
+    studentName: "Nurul Student",
+    hostelName: "Desasiswa Aman Damai",
+    roomNumber: "C-501",
+    facilityType: "Air Conditioner",
+    issueDescription: "AC remote control missing",
+    urgencyLevel: "Low",
+    status: "Pending",
+    submittedDate: "2024-11-01",
+    photo: null,
+    adminRemarks: ""
   }
 ];
 
@@ -72,6 +142,24 @@ export const mockFeedbacks = [
     rating: 5,
     comment: "Very quick response! Table was replaced within 2 days. Thank you!",
     submittedDate: "2024-10-31"
+  },
+  {
+    id: 2,
+    complaintId: 4,
+    studentId: "STU003",
+    studentName: "Lee Student",
+    rating: 4,
+    comment: "Good service, electrician was professional",
+    submittedDate: "2024-10-22"
+  },
+  {
+    id: 3,
+    complaintId: 7,
+    studentId: "STU006",
+    studentName: "David Student",
+    rating: 3,
+    comment: "Took a while but eventually fixed",
+    submittedDate: "2024-10-19"
   }
 ];
 

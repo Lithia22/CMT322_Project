@@ -1,52 +1,89 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useMemo } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  BarChart3, 
-  TrendingUp, 
   Clock, 
   CheckCircle, 
   AlertTriangle, 
-  Users, 
-  MessageSquare,
   FileText,
-  Download
+  Download,
+  TrendingUp,
+  Star
 } from 'lucide-react';
-import { mockComplaints, mockFeedbacks, mockUsers } from '@/data/mockData';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Area, AreaChart, PieChart, Pie, Cell } from 'recharts';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@/components/ui/chart';
+import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 
 const AdminDashboard = () => {
-  const complaints = mockComplaints;
-  const feedbacks = mockFeedbacks;
-  const students = mockUsers.filter(u => u.role === 'student');
+  const [timeRange, setTimeRange] = useState("30d");
 
-  // Statistics
   const stats = {
-    totalComplaints: complaints.length,
-    pending: complaints.filter(c => c.status === 'Pending').length,
-    inProgress: complaints.filter(c => c.status === 'In Progress').length,
-    resolved: complaints.filter(c => c.status === 'Resolved').length,
-    totalStudents: students.length,
-    totalFeedbacks: feedbacks.length,
-    avgRating: feedbacks.length > 0 
-      ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1)
-      : 0
+    totalComplaints: mockComplaints.length,
+    pending: mockComplaints.filter(c => c.status === 'Pending').length,
+    inProgress: mockComplaints.filter(c => c.status === 'In Progress').length,
+    resolved: mockComplaints.filter(c => c.status === 'Resolved').length,
   };
 
-  // Facility type distribution
-  const facilityDistribution = [...new Set(complaints.map(c => c.facilityType))].map(type => ({
+  const generateTimeSeriesData = () => {
+    const data = [];
+    const today = new Date();
+    const days = timeRange === "7d" ? 7 : 30;
+    
+    for (let i = days - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      data.push({
+        date: dateStr,
+        complaints: Math.floor(Math.random() * 12) + 3,
+      });
+    }
+    return data;
+  };
+
+  const timeSeriesData = useMemo(() => generateTimeSeriesData(), [timeRange]);
+
+  // Pie Chart - Top Facilities
+  const facilityData = [...new Set(mockComplaints.map(c => c.facilityType))].map((type, index) => ({
     name: type,
-    value: complaints.filter(c => c.facilityType === type).length
+    value: mockComplaints.filter(c => c.facilityType === type).length,
+    fill: `hsl(${217 - index * 15}, 91%, ${60 - index * 5}%)`,
   }));
 
-  // Urgency distribution
-  const urgencyDistribution = ['High', 'Medium', 'Low'].map(level => ({
-    name: level,
-    value: complaints.filter(c => c.urgencyLevel === level).length
+  const totalFacilityComplaints = facilityData.reduce((sum, item) => sum + item.value, 0);
+
+  // Bar Chart - Hostels
+  const hostelData = [...new Set(mockComplaints.map(c => c.hostelName))].map(hostel => ({
+    hostel: hostel.replace('Desasiswa ', ''),
+    count: mockComplaints.filter(c => c.hostelName === hostel).length,
   }));
 
-  const recentComplaints = complaints.slice(0, 5);
-  const recentFeedbacks = feedbacks.slice(0, 5);
+  const areaChartConfig = {
+    complaints: {
+      label: "Complaints",
+      color: "hsl(217, 91%, 60%)",
+    },
+  };
+
+  const barChartConfig = {
+    count: {
+      label: "Complaints",
+      color: "hsl(217, 91%, 60%)",
+    },
+  };
+
+  const pieChartConfig = {
+    value: {
+      label: "Complaints",
+    },
+  };
 
   const getStatusVariant = (status) => {
     switch (status) {
@@ -60,51 +97,11 @@ const AdminDashboard = () => {
   const getUrgencyVariant = (urgency) => {
     switch (urgency) {
       case 'High': return 'destructive';
-      case 'Medium': return 'default';
+      case 'Medium': return 'secondary';
       case 'Low': return 'outline';
       default: return 'outline';
     }
   };
-
-  // Simple chart components
-  const BarChart = ({ data, title, color = 'bg-blue-500' }) => (
-    <div className="space-y-2">
-      <h4 className="text-sm font-medium">{title}</h4>
-      {data.map((item, index) => {
-        const maxValue = Math.max(...data.map(d => d.value));
-        const percentage = (item.value / maxValue) * 100;
-        return (
-          <div key={index} className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span>{item.name}</span>
-              <span className="font-medium">{item.value}</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div 
-                className={`h-2 rounded-full ${color} transition-all duration-500`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-
-  const DonutChart = ({ data, title }) => (
-    <div className="space-y-3">
-      <h4 className="text-sm font-medium">{title}</h4>
-      {data.map((item, index) => (
-        <div key={index} className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-sm">{item.name}</span>
-          </div>
-          <span className="font-medium">{item.value}</span>
-        </div>
-      ))}
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -112,7 +109,7 @@ const AdminDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="text-muted-foreground">
-            Comprehensive overview of the hostel complaint system
+            Overview of hostel complaints
           </p>
         </div>
         <Button variant="outline">
@@ -121,7 +118,7 @@ const AdminDashboard = () => {
         </Button>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -130,7 +127,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalComplaints}</div>
-            <p className="text-xs text-muted-foreground">All time complaints</p>
+            <p className="text-xs text-muted-foreground mt-1">All submissions</p>
           </CardContent>
         </Card>
 
@@ -141,7 +138,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">Awaiting action</p>
+            <p className="text-xs text-muted-foreground mt-1">Awaiting action</p>
           </CardContent>
         </Card>
 
@@ -152,7 +149,7 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">Being resolved</p>
+            <p className="text-xs text-muted-foreground mt-1">Being resolved</p>
           </CardContent>
         </Card>
 
@@ -163,108 +160,210 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.resolved}</div>
-            <p className="text-xs text-muted-foreground">Completed</p>
+            <p className="text-xs text-muted-foreground mt-1">Completed</p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Area Chart */}
+      <Card>
+        <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+          <div className="grid flex-1 gap-1 text-center sm:text-left">
+            <CardTitle>Complaints Trend</CardTitle>
+            <CardDescription>
+              Showing complaints for the last {timeRange === "7d" ? "7 days" : "30 days"}
+            </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={timeRange === "30d" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTimeRange("30d")}
+            >
+              Last 30 days
+            </Button>
+            <Button
+              variant={timeRange === "7d" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setTimeRange("7d")}
+            >
+              Last 7 days
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <ChartContainer
+            config={areaChartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <AreaChart data={timeSeriesData}>
+              <defs>
+                <linearGradient id="fillComplaints" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(217, 91%, 60%)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(217, 91%, 60%)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                minTickGap={32}
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) => {
+                      return new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      });
+                    }}
+                  />
+                }
+              />
+              <Area
+                dataKey="complaints"
+                type="natural"
+                fill="url(#fillComplaints)"
+                stroke="hsl(217, 91%, 60%)"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      {/* Bar Chart and Pie Chart Side by Side */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Charts */}
+        {/* Bar Chart - Hostels */}
         <Card>
           <CardHeader>
-            <CardTitle>Analytics Overview</CardTitle>
-            <CardDescription>Complaint distribution and trends</CardDescription>
+            <CardTitle>Complaints by Hostel</CardTitle>
+            <CardDescription>Number of complaints per hostel</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <BarChart 
-              data={facilityDistribution} 
-              title="Complaints by Facility Type"
-              color="bg-blue-500"
-            />
-            <BarChart 
-              data={urgencyDistribution} 
-              title="Complaints by Urgency Level" 
-              color="bg-orange-500"
-            />
+          <CardContent>
+            <ChartContainer config={barChartConfig} className="h-[300px] w-full">
+              <BarChart accessibilityLayer data={hostelData} layout="vertical">
+                <CartesianGrid horizontal={false} />
+                <YAxis
+                  dataKey="hostel"
+                  type="category"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={10}
+                />
+                <XAxis type="number" hide />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar 
+                  dataKey="count" 
+                  fill="hsl(217, 91%, 60%)" 
+                  radius={[0, 4, 4, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
 
-        {/* Quick Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle>System Overview</CardTitle>
-            <CardDescription>Key metrics and statistics</CardDescription>
+        {/* Pie Chart - Top Facilities */}
+        <Card className="flex flex-col">
+          <CardHeader className="items-center pb-0">
+            <CardTitle>Top Facilities</CardTitle>
+            <CardDescription>Complaints by facility type</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Total Students</span>
-                </div>
-                <p className="text-2xl font-bold">{stats.totalStudents}</p>
-              </div>
-              
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Total Feedback</span>
-                </div>
-                <p className="text-2xl font-bold">{stats.totalFeedbacks}</p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Avg. Rating</span>
-                </div>
-                <p className="text-2xl font-bold">{stats.avgRating}/5</p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2">
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Resolution Rate</span>
-                </div>
-                <p className="text-2xl font-bold">
-                  {stats.totalComplaints > 0 ? Math.round((stats.resolved / stats.totalComplaints) * 100) : 0}%
-                </p>
-              </div>
-            </div>
+          <CardContent className="flex-1 pb-0">
+            <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[300px]">
+              <PieChart>
+                <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                <Pie
+                  data={facilityData}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={100}
+                  strokeWidth={5}
+                >
+                  <text
+                    x="50%"
+                    y="50%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-foreground text-3xl font-bold"
+                  >
+                    {totalFacilityComplaints}
+                  </text>
+                  <text
+                    x="50%"
+                    y="58%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="fill-muted-foreground"
+                  >
+                    Complaints
+                  </text>
+                  {facilityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ChartContainer>
           </CardContent>
+          <CardFooter className="flex-col gap-2 text-sm">
+            <div className="flex items-center gap-2 leading-none font-medium">
+              Tracking facility issues <TrendingUp className="h-4 w-4" />
+            </div>
+          </CardFooter>
         </Card>
       </div>
 
-      <Tabs defaultValue="complaints" className="space-y-6">
+      {/* Recent Activity Tabs */}
+      <Tabs defaultValue="complaints" className="space-y-4">
         <TabsList>
           <TabsTrigger value="complaints">Recent Complaints</TabsTrigger>
           <TabsTrigger value="feedback">Recent Feedback</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="complaints" className="space-y-4">
+        <TabsContent value="complaints">
           <Card>
             <CardHeader>
               <CardTitle>Recent Complaints</CardTitle>
-              <CardDescription>Latest complaint submissions</CardDescription>
+              <CardDescription>Latest submissions</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentComplaints.map((complaint) => (
+                {mockComplaints.slice(0, 5).map((complaint) => (
                   <div key={complaint.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                    <div className="space-y-1">
+                    <div className="space-y-1 flex-1">
                       <p className="font-medium">{complaint.facilityType}</p>
                       <p className="text-sm text-muted-foreground">
                         {complaint.studentName} • {complaint.hostelName}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate max-w-md">
+                      <p className="text-xs text-muted-foreground">
                         {complaint.issueDescription}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant={getUrgencyVariant(complaint.urgencyLevel)}>
+                    <div className="flex items-center gap-2 ml-4">
+                      <Badge variant={getUrgencyVariant(complaint.urgencyLevel)} className="w-20 justify-center">
                         {complaint.urgencyLevel}
                       </Badge>
-                      <Badge variant={getStatusVariant(complaint.status)}>
+                      <Badge variant={getStatusVariant(complaint.status)} className="w-24 justify-center">
                         {complaint.status}
                       </Badge>
                     </div>
@@ -275,34 +374,32 @@ const AdminDashboard = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="feedback" className="space-y-4">
+        <TabsContent value="feedback">
           <Card>
             <CardHeader>
               <CardTitle>Recent Feedback</CardTitle>
-              <CardDescription>Latest student ratings and comments</CardDescription>
+              <CardDescription>Latest ratings and comments</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentFeedbacks.map((feedback) => (
+                {mockFeedbacks.map((feedback) => (
                   <div key={feedback.id} className="border-b pb-4 last:border-0 last:pb-0">
                     <div className="flex items-start justify-between">
-                      <div className="space-y-1">
+                      <div className="space-y-1 flex-1">
                         <p className="font-medium">{feedback.studentName}</p>
                         <p className="text-sm text-muted-foreground">
                           Complaint #{feedback.complaintId}
                         </p>
-                        <p className="text-sm">{feedback.comment}</p>
+                        <p className="text-sm mt-2">{feedback.comment}</p>
                       </div>
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-1 ml-4">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <div
+                          <Star
                             key={star}
-                            className={`w-3 h-3 rounded-full ${
-                              star <= feedback.rating ? 'bg-yellow-400' : 'bg-muted'
-                            }`}
+                            size={16}
+                            className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
                           />
                         ))}
-                        <span className="text-sm font-medium ml-1">{feedback.rating}.0</span>
                       </div>
                     </div>
                   </div>
