@@ -1,7 +1,5 @@
 # USM Hostel Complaint Management System
 
-A comprehensive hostel facility complaint management system built with React, Vite, and Tailwind CSS. This system allows students to submit facility complaints and administrators to manage and track them efficiently.
-
 ## Features
 
 ### Public Features
