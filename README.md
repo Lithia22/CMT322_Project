@@ -1,16 +1,71 @@
-# React + Vite
+# USM Hostel Complaint Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive hostel facility complaint management system built with React, Vite, and Tailwind CSS. This system allows students to submit facility complaints and administrators to manage and track them efficiently.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Public Features
+- **Home Page** with system overview and complaint search
+- **FAQ Section** for common questions
+- **Contact Page** with support information
+- **Login System** with role-based access
 
-## React Compiler
+### Student Features  
+- **Submit Complaints** with facility details and urgency levels
+- **Track Complaint Status** in real-time
+- **Personal Dashboard** with complaint statistics
+- **Provide Feedback** on resolved complaints
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Admin Features
+- **Admin Dashboard** with charts and analytics
+- **Manage Complaints** with status updates
+- **View Student Feedback** and ratings
+- **System Statistics** and reporting
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend**: React 18, Vite, Tailwind CSS
+- **UI Components**: shadcn/ui, Lucide React icons
+- **State Management**: React Context API
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+
+## Installation & Setup
+
+### Prerequisites
+- Node.js (version 16 or higher)
+- npm or yarn
+
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repository-url>
+   cd hostel-complaint-system
+
+2. **Navigate to frontend directory**
+   ```bash
+   cd frontend
+
+3. **Install dependencies**
+   ```bash
+   npm install
+
+4. **Start development server**
+   ```bash
+   npm run dev
+
+5. **Open your browser**
+   ```bash
+   Navigate to http://localhost:5173
+
+## Demo Credentials
+
+### Student Login
+- Email: student@usm.my
+- Password: password
+
+### Admin Login
+- Email: admin@usm.my
+- Password: password
