@@ -5,7 +5,6 @@
 ### Public Features
 - **Home Page** with system overview and complaint search
 - **FAQ Section** for common questions
-- **Contact Page** with support information
 - **Login System** with role-based access
 
 ### Student Features  

@@ -41,11 +41,8 @@ const FAQ = () => {
             <AlertDescription className="text-center">
               <h3 className="font-semibold text-lg mb-2">Still need help?</h3>
               <p className="mb-4 text-muted-foreground">
-                Can't find the answer you're looking for? Please contact our support team.
+                Can't find the answer you're looking for? Please email or call us.
               </p>
-              <Button asChild>
-                <Link to="/contact">Contact Support</Link>
-              </Button>
             </AlertDescription>
           </Alert>
         </div>

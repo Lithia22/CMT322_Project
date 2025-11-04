@@ -10,7 +10,6 @@ const PublicLayout = ({ children }) => {
   const navItems = [
     { path: '/', label: 'Home', icon: HomeIcon },
     { path: '/faq', label: 'FAQ', icon: HelpCircle },
-    { path: '/contact', label: 'Contact', icon: Phone },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -110,13 +109,11 @@ const PublicLayout = ({ children }) => {
               <ul className="space-y-2 text-sm">
                 <li><Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link></li>
                 <li><Link to="/faq" className="text-muted-foreground hover:text-foreground">FAQ</Link></li>
-                <li><Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
                 <li><Link to="/login" className="text-muted-foreground hover:text-foreground">Login</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4">Contact Us</h3>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2">
                   <MapPin size={16} />

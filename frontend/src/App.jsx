@@ -6,7 +6,6 @@ import { Toaster } from '@/components/ui/sonner'; // Add this import
 // Public pages
 import Home from './pages/public/Home';
 import FAQ from './pages/public/FAQ';
-import Contact from './pages/public/Contact';
 import Login from './pages/public/Login';
 
 // Student pages
@@ -40,7 +39,6 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
           
           {/* Protected Student Routes */}
           <Route 
