@@ -104,12 +104,12 @@ function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
+<DropdownMenuGroup>
+  <DropdownMenuItem onClick={() => navigate('/edit-profile')}>
+    <User className="mr-2 h-4 w-4" />
+    <span>Profile</span>
+  </DropdownMenuItem>
+</DropdownMenuGroup>
             <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
@@ -143,25 +143,29 @@ const DashboardLayout = ({ children }) => {
 
   const AppSidebar = () => (
     <Sidebar variant="floating">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg">
-              <div className="flex items-center space-x-3">
-                <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <ShieldCheck className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">USM Hostel Care</span>
-                  <span className="text-xs text-muted-foreground">
-                    {user?.role === 'admin' ? 'Admin Portal' : 'Student Portal'}
-                  </span>
-                </div>
-              </div>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
+<SidebarHeader>
+  <SidebarMenu>
+    <SidebarMenuItem>
+      <SidebarMenuButton size="lg" className="pl-2 pr-0">
+        <div className="flex items-center space-x-3">
+          <div className="flex aspect-square size-12 items-center justify-center rounded-lg">
+            <img 
+              src="/USM.svg" 
+              alt="USM Logo" 
+              className="h-10 w-10"
+            />
+          </div>
+          <div className="flex flex-col gap-0.5 leading-none">
+            <span className="font-semibold">USM Hostel Care</span>
+            <span className="text-xs text-muted-foreground">
+              {user?.role === 'admin' ? 'Admin Portal' : 'Student Portal'}
+            </span>
+          </div>
+        </div>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  </SidebarMenu>
+</SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>

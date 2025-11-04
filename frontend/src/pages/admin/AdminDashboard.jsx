@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Clock, CheckCircle, AlertTriangle, FileText, Star } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { ComplaintsTrendChart } from '@/components/charts/ComplaintsTrendChart';
@@ -10,6 +11,14 @@ import { FacilityPieChart } from '@/components/charts/FacilityPieChart';
 
 const AdminDashboard = () => {
   const [timeRange, setTimeRange] = useState("30d");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate API loading
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
 
   const stats = {
     totalComplaints: mockComplaints.length,
@@ -46,14 +55,90 @@ const AdminDashboard = () => {
     count: mockComplaints.filter(c => c.hostelName === hostel).length,
   }));
 
-const getUrgencyColor = (urgency) => {
-  switch (urgency) {
-    case 'High': return 'bg-red-500 text-white hover:bg-red-500';
-    case 'Medium': return 'bg-yellow-500 text-white hover:bg-yellow-500';
-    case 'Low': return 'bg-green-500 text-white hover:bg-green-500';
-    default: return 'bg-gray-500 text-white hover:bg-gray-500';
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Resolved': return 'bg-green-50 text-green-700 hover:bg-green-50';
+      case 'In Progress': return 'bg-blue-50 text-blue-700 hover:bg-blue-50';
+      case 'Pending': return 'bg-gray-50 text-gray-700 hover:bg-gray-50';
+      default: return 'bg-gray-50 text-gray-700 hover:bg-gray-50';
+    }
+  };
+
+  // Skeleton components with gray background
+  const StatsSkeleton = () => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Skeleton className="h-4 w-20 bg-muted" />
+            <Skeleton className="h-4 w-4 rounded-full bg-muted" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-12 mb-2 bg-muted" />
+            <Skeleton className="h-3 w-24 bg-muted" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const ChartSkeleton = () => (
+    <div className="space-y-6">
+      <Skeleton className="h-10 w-48 bg-muted" />
+      <Skeleton className="h-80 w-full bg-muted" />
+    </div>
+  );
+
+  const RecentActivitySkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-4 w-32 bg-muted" />
+            <Skeleton className="h-3 w-48 bg-muted" />
+            <Skeleton className="h-3 w-64 bg-muted" />
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            <Skeleton className="h-6 w-20 rounded-full bg-muted" />
+            <Skeleton className="h-6 w-24 rounded-full bg-muted" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-64 mb-2 bg-muted" />
+          <Skeleton className="h-4 w-96 bg-muted" />
+        </div>
+        
+        <StatsSkeleton />
+        <ChartSkeleton />
+        
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+
+        <Tabs defaultValue="complaints" className="space-y-4">
+          <TabsList>
+            <Skeleton className="h-10 w-32 bg-muted" />
+            <Skeleton className="h-10 w-32 bg-muted" />
+          </TabsList>
+          <TabsContent value="complaints">
+            <Card>
+              <CardContent className="pt-6">
+                <RecentActivitySkeleton />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
   }
-};
 
   return (
     <div className="space-y-6">
@@ -141,14 +226,11 @@ const getUrgencyColor = (urgency) => {
                       </p>
                       <p className="text-xs text-muted-foreground">{complaint.issueDescription}</p>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-<Badge className={`${getUrgencyColor(complaint.urgencyLevel)} w-20 justify-center`}>
-  {complaint.urgencyLevel}
-</Badge>
-<Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 w-24 justify-center">
-  {complaint.status}
-</Badge>
-                    </div>
+<div className="flex items-center justify-start w-24">
+  <Badge className={`${getStatusColor(complaint.status)} text-xs`}>
+    {complaint.status}
+  </Badge>
+</div>
                   </div>
                 ))}
               </div>

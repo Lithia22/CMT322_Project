@@ -36,10 +36,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('currentUser');
   };
 
+const updateProfile = async (profileData) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const updatedUser = { ...user, ...profileData };
+      setUser(updatedUser);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      resolve(updatedUser);
+    }, 500);
+  });
+};
+
   const value = {
     user,
     login,
     logout,
+    updateProfile,
     loading,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',

@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import DashboardLayout from './components/layout/DashboardLayout';
-import { Toaster } from '@/components/ui/sonner'; // Add this import
+import { Toaster } from '@/components/ui/sonner';
 
 // Public pages
 import Home from './pages/public/Home';
@@ -18,6 +18,7 @@ import Feedback from './pages/student/Feedback';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageComplaints from './pages/admin/ManageComplaints';
 import ViewFeedback from './pages/admin/ViewFeedback';
+import EditProfile from './pages/admin/EditProfile';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -96,6 +97,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ViewFeedback />
+              </ProtectedRoute>
+            } 
+          />
+\          <Route 
+            path="/edit-profile" 
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             } 
           />

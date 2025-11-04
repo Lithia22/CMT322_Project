@@ -21,9 +21,13 @@ const PublicLayout = ({ children }) => {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-                <ShieldCheck size={24} />
-              </div>
+              <div className="flex aspect-square size-16 items-center justify-center rounded-lg">
+          <img 
+            src="/USM.svg" 
+            alt="USM Logo" 
+            className="h-14 w-14"
+          />
+        </div>
               <span className="font-bold text-xl">USM Hostel Care</span>
             </Link>
 
