@@ -199,14 +199,6 @@ const ViewFeedback = () => {
                       </div>
                     </div>
                   </div>
-
-                  <div className="text-right">
-                    <div className="flex items-center justify-end space-x-2 text-sm text-muted-foreground mb-2">
-                      <Calendar size={14} />
-                      <span>{feedback.submittedDate}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Complaint ID: #{feedback.complaintId}</p>
-                  </div>
                 </div>
               </CardContent>
             </Card>
