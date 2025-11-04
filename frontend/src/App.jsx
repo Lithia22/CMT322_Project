@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import DashboardLayout from './components/layout/DashboardLayout';
+import { Toaster } from '@/components/ui/sonner'; // Add this import
 
 // Public pages
 import Home from './pages/public/Home';
@@ -101,6 +102,7 @@ function App() {
             } 
           />
         </Routes>
+        <Toaster />
       </Router>
     </AuthProvider>
   );
