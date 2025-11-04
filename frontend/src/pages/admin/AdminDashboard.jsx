@@ -46,23 +46,14 @@ const AdminDashboard = () => {
     count: mockComplaints.filter(c => c.hostelName === hostel).length,
   }));
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case 'Resolved': return 'default';
-      case 'In Progress': return 'secondary';
-      case 'Pending': return 'outline';
-      default: return 'outline';
-    }
-  };
-
-  const getUrgencyVariant = (urgency) => {
-    switch (urgency) {
-      case 'High': return 'destructive';
-      case 'Medium': return 'secondary';
-      case 'Low': return 'outline';
-      default: return 'outline';
-    }
-  };
+const getUrgencyColor = (urgency) => {
+  switch (urgency) {
+    case 'High': return 'bg-red-500 text-white hover:bg-red-500';
+    case 'Medium': return 'bg-yellow-500 text-white hover:bg-yellow-500';
+    case 'Low': return 'bg-green-500 text-white hover:bg-green-500';
+    default: return 'bg-gray-500 text-white hover:bg-gray-500';
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -151,12 +142,12 @@ const AdminDashboard = () => {
                       <p className="text-xs text-muted-foreground">{complaint.issueDescription}</p>
                     </div>
                     <div className="flex items-center gap-2 ml-4">
-                      <Badge variant={getUrgencyVariant(complaint.urgencyLevel)} className="w-20 justify-center">
-                        {complaint.urgencyLevel}
-                      </Badge>
-                      <Badge variant={getStatusVariant(complaint.status)} className="w-24 justify-center">
-                        {complaint.status}
-                      </Badge>
+<Badge className={`${getUrgencyColor(complaint.urgencyLevel)} w-20 justify-center`}>
+  {complaint.urgencyLevel}
+</Badge>
+<Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 w-24 justify-center">
+  {complaint.status}
+</Badge>
                     </div>
                   </div>
                 ))}

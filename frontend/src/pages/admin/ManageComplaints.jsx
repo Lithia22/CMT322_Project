@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -9,214 +9,73 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Filter, ArrowUpDown, Edit } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Search, MoreVertical, Edit, Trash, ImageIcon, ArrowUpDown } from 'lucide-react';
 import { mockComplaints } from '@/data/mockData';
-
-// TanStack React Table
-import { useReactTable, getCoreRowModel, getPaginationRowModel, getSortedRowModel, getFilteredRowModel, flexRender } from '@tanstack/react-table';
+import { toast } from 'sonner';
 
 const ManageComplaints = () => {
   const [complaints, setComplaints] = useState(mockComplaints);
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [urgencyTab, setUrgencyTab] = useState('all');
   const [editingComplaint, setEditingComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [complaintToDelete, setComplaintToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Show 5 items per page
 
   const form = useForm();
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case 'Resolved': return 'default';
-      case 'In Progress': return 'secondary';
-      case 'Pending': return 'outline';
-      default: return 'outline';
+  // Count by urgency
+  const totalComplaints = complaints.length;
+  const highPriorityCount = complaints.filter(c => c.urgencyLevel === 'High').length;
+  const mediumPriorityCount = complaints.filter(c => c.urgencyLevel === 'Medium').length;
+  const lowPriorityCount = complaints.filter(c => c.urgencyLevel === 'Low').length;
+
+  // Sorting function
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
     }
+    setSortConfig({ key, direction });
   };
 
-  const getUrgencyVariant = (urgency) => {
-    switch (urgency) {
-      case 'High': return 'destructive';
-      case 'Medium': return 'default';
-      case 'Low': return 'outline';
-      default: return 'outline';
-    }
-  };
+  // Filter and sort complaints
+  const filteredComplaints = complaints
+    .filter(complaint => {
+      const matchesSearch = 
+        complaint.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        complaint.facilityType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        complaint.issueDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        complaint.hostelName.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesUrgency = urgencyTab === 'all' || complaint.urgencyLevel === urgencyTab;
 
-  // Updated columns - all content properly left-aligned
-  const columns = [
-    {
-      accessorKey: "submittedDate",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="p-0 hover:bg-transparent font-medium"
-            >
-              Date
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <div className="text-sm font-medium">
-            {complaint.submittedDate}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "studentName",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="p-0 hover:bg-transparent font-medium"
-            >
-              Student
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <div>
-            <p className="font-medium">{complaint.studentName}</p>
-            <p className="text-sm text-muted-foreground">{complaint.studentId}</p>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "hostelName",
-      header: "Location",
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <div>
-            <p className="font-medium">{complaint.hostelName}</p>
-            <p className="text-sm text-muted-foreground">Room {complaint.roomNumber}</p>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "facilityType",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="p-0 hover:bg-transparent font-medium"
-            >
-              Facility & Issue
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <div>
-            <p className="font-medium">{complaint.facilityType}</p>
-            <p className="text-sm text-muted-foreground line-clamp-2">{complaint.issueDescription}</p>
-            {complaint.adminRemarks ? (
-              <p className="text-xs text-blue-600 mt-1 font-medium">Remarks: {complaint.adminRemarks}</p>
-            ) : (
-              <p className="text-xs text-muted-foreground mt-1">No Remarks</p>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "urgencyLevel",
-      header: "Urgency",
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <Badge 
-            variant={getUrgencyVariant(complaint.urgencyLevel)} 
-            className="w-20"
-          >
-            {complaint.urgencyLevel}
-          </Badge>
-        );
-      },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const complaint = row.original;
-        return (
-          <Badge 
-            variant={getStatusVariant(complaint.status)} 
-            className="w-24"
-          >
-            {complaint.status}
-          </Badge>
-        );
-      },
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const complaint = row.original;
+      return matchesSearch && matchesUrgency;
+    })
+    .sort((a, b) => {
+      if (!sortConfig.key) return 0;
+      
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
 
-        return (
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="h-8 px-2"
-            onClick={() => {
-              setEditingComplaint(complaint);
-              form.reset({ 
-                status: complaint.status, 
-                adminRemarks: complaint.adminRemarks || '' 
-              });
-              setDialogOpen(true);
-            }}
-          >
-            <Edit className="h-4 w-4 mr-1" />
-            Edit
-          </Button>
-        );
-      },
-    },
-  ];
-
-  const table = useReactTable({
-    data: complaints,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  });
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredComplaints.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredComplaints.length / itemsPerPage);
 
   const handleEditSubmit = (data) => {
     setComplaints(prev => prev.map(c => 
@@ -224,149 +83,272 @@ const ManageComplaints = () => {
     ));
     setDialogOpen(false);
     setEditingComplaint(null);
+    toast.success('Complaint updated successfully!');
+  };
+
+  const handleDeleteComplaint = (complaint) => {
+    setComplaintToDelete(complaint);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (complaintToDelete) {
+      setComplaints(prev => prev.filter(c => c.id !== complaintToDelete.id));
+      toast.success('Complaint deleted successfully!');
+      setDeleteDialogOpen(false);
+      setComplaintToDelete(null);
+    }
+  };
+
+  const getUrgencyColor = (urgency) => {
+    switch (urgency) {
+      case 'High': return 'bg-red-500 text-white hover:bg-red-500';
+      case 'Medium': return 'bg-yellow-500 text-white hover:bg-yellow-500';
+      case 'Low': return 'bg-green-500 text-white hover:bg-green-500';
+      default: return 'bg-gray-500 text-white hover:bg-gray-500';
+    }
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Complaint Management</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage and track all hostel facility complaints in one place
-          </p>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Complaint Management</h1>
+        <p className="text-muted-foreground">Manage and track all hostel facility complaints</p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search by facility, issue, student, or hostel..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
       </div>
 
-      {/* PUT THIS RIGHT AFTER THE HEADER SECTION */}
-<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-  <div className="relative flex-1 max-w-md">
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-    <Input
-      placeholder="Search by facility, issue, or student..."
-      value={(table.getColumn("facilityType")?.getFilterValue() ?? "")}
-      onChange={(event) =>
-        table.getColumn("facilityType")?.setFilterValue(event.target.value)
-      }
-      className="pl-10"
-    />
-  </div>
-  
-  <Select
-    value={(table.getColumn("status")?.getFilterValue() ?? "all")}
-    onValueChange={(value) => 
-      table.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
-    }
-  >
-    <SelectTrigger className="w-[180px]">
-      <Filter className="mr-2 h-4 w-4" />
-      <SelectValue placeholder="Filter status" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">All Status</SelectItem>
-      <SelectItem value="Pending">Pending</SelectItem>
-      <SelectItem value="In Progress">In Progress</SelectItem>
-      <SelectItem value="Resolved">Resolved</SelectItem>
-    </SelectContent>
-  </Select>
+      {/* Tabs and Table */}
+      <div className="space-y-4">
+        <Tabs value={urgencyTab} onValueChange={setUrgencyTab}>
+          <TabsList>
+            <TabsTrigger value="all">
+              All Complaints <span className="ml-2 text-xs text-muted-foreground">{totalComplaints}</span>
+            </TabsTrigger>
+            <TabsTrigger value="High">
+              High Priority <span className="ml-2 text-xs text-muted-foreground">{highPriorityCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="Medium">
+              Medium Priority <span className="ml-2 text-xs text-muted-foreground">{mediumPriorityCount}</span>
+            </TabsTrigger>
+            <TabsTrigger value="Low">
+              Low Priority <span className="ml-2 text-xs text-muted-foreground">{lowPriorityCount}</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-  <Select
-    value={(table.getColumn("urgencyLevel")?.getFilterValue() ?? "all")}
-    onValueChange={(value) => 
-      table.getColumn("urgencyLevel")?.setFilterValue(value === "all" ? "" : value)
-    }
-  >
-    <SelectTrigger className="w-[180px]">
-      <SelectValue placeholder="Urgency level" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="all">All Urgency</SelectItem>
-      <SelectItem value="High">High</SelectItem>
-      <SelectItem value="Medium">Medium</SelectItem>
-      <SelectItem value="Low">Low</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
-      {/* Complaints Table - All content properly left-aligned */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id} className="text-left">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+        {/* Table */}
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('submittedDate')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Date
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('studentName')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Student
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('hostelName')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Location
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('facilityType')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Facility & Issue
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>Remarks</TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('urgencyLevel')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Urgency
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('status')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Status
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-left align-top">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+            </TableHeader>
+            <TableBody>
+              {currentItems.length > 0 ? (
+                currentItems.map((complaint) => (
+                  <TableRow key={complaint.id}>
+                    <TableCell className="text-sm font-medium">
+                      {complaint.submittedDate}
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{complaint.studentName}</p>
+                      <p className="text-sm text-muted-foreground">{complaint.studentId}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{complaint.hostelName}</p>
+                      <p className="text-sm text-muted-foreground">Room {complaint.roomNumber}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{complaint.facilityType}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {complaint.issueDescription}
+                      </p>
+                    </TableCell>
+                    <TableCell>
+                      {complaint.adminRemarks ? (
+                        <p className="text-sm">{complaint.adminRemarks}</p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">No remarks</p>
                       )}
                     </TableCell>
-                  ))}
+                    <TableCell>
+                      <Badge className={`${getUrgencyColor(complaint.urgencyLevel)} w-20 justify-center`}>
+                        {complaint.urgencyLevel}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 w-24 justify-center">
+                        {complaint.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem
+                            className="gap-2"
+                            onClick={() => {
+                              setEditingComplaint(complaint);
+                              form.reset({
+                                status: complaint.status,
+                                adminRemarks: complaint.adminRemarks || ''
+                              });
+                              setDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="gap-2"
+                            onClick={() => {
+                              setSelectedImage(complaint.photo);
+                              setImageDialogOpen(true);
+                            }}
+                          >
+                            <ImageIcon className="h-4 w-4" />
+                            View Image
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="gap-2 text-red-600"
+                            onClick={() => handleDeleteComplaint(complaint)}
+                          >
+                            <Trash className="h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    <div className="text-muted-foreground">
+                      No complaints found matching your filters.
+                    </div>
+                  </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  <div className="text-muted-foreground">
-                    No complaints found matching your filters.
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              )}
+            </TableBody>
+          </Table>
+        </Card>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+{/* Pagination */}
+{filteredComplaints.length > itemsPerPage && (
+  <div className="w-full">
+    <Pagination className="w-full flex justify-end">
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+          />
+        </PaginationItem>
+
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <PaginationItem key={page}>
+            <PaginationLink
+              onClick={() => setCurrentPage(page)}
+              isActive={currentPage === page}
+              className="cursor-pointer"
+            >
+              {page}
+            </PaginationLink>
+          </PaginationItem>
+        ))}
+
+        <PaginationItem>
+          <PaginationNext
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  </div>
+)}
+
+</div>
 
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -408,10 +390,10 @@ const ManageComplaints = () => {
                   <FormItem>
                     <FormLabel>Admin Remarks</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Add your remarks or update about the complaint resolution..." 
+                      <Textarea
+                        placeholder="Add your remarks or update about the complaint resolution..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                   </FormItem>
@@ -419,9 +401,9 @@ const ManageComplaints = () => {
               />
 
               <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => setDialogOpen(false)}
                 >
                   Cancel
@@ -430,6 +412,68 @@ const ManageComplaints = () => {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash className="h-5 w-5 text-red-500" />
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription className="pt-4">
+              This action cannot be undone and will permanently remove the complaint from the system.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Delete Complaint
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image View Dialog */}
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Complaint Image</DialogTitle>
+            <DialogDescription>
+              Image uploaded by {selectedImage ? 'student' : 'No image available'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center p-4">
+            {selectedImage ? (
+              <img 
+                src={selectedImage} 
+                alt="Complaint" 
+                className="max-w-full max-h-[500px] rounded-lg object-contain"
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <ImageIcon className="h-12 w-12" />
+                <p>No image available for this complaint</p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setImageDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
