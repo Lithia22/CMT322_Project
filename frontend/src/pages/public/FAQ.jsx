@@ -1,50 +1,76 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { HelpCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { faqData } from '@/data/mockData';
 import PublicLayout from '@/components/layout/PublicLayout';
 
 const FAQ = () => {
+  const faqData = [
+    {
+      question: "What types of issues can I report through this system?",
+      answer: "Plumbing, electrical, furniture, cleaning, Wi-Fi, security, and maintenance issues."
+    },
+    {
+      question: "How do I create an account to report issues?",
+      answer: "Use your USM student ID and university email to register."
+    },
+    {
+      question: "Is there a mobile app available for reporting issues?",
+      answer: "No, but the website works on all devices including phones."
+    },
+    {
+      question: "What information should I include when submitting a complaint?",
+      answer: "Clear description, photos, and urgency level."
+    },
+    {
+      question: "How can I check the status of my submitted complaint?",
+      answer: "Check your dashboard for status updates."
+    },
+    {
+      question: "What should I do for emergency maintenance situations?",
+      answer: "Contact hostel office directly for urgent safety issues."
+    },
+    {
+      question: "Can I submit complaints anonymously?",
+      answer: "No, student login is required for tracking."
+    },
+    {
+      question: "What happens after my complaint has been resolved?",
+      answer: "You can provide feedback on the service."
+    }
+  ];
+
   return (
     <PublicLayout>
-      <div className="bg-muted/50 py-12 px-4">
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl">
+          {/* Header Section */}
           <div className="text-center mb-12">
-            <div className="flex justify-center mb-4">
-              <div className="bg-primary text-primary-foreground p-3 rounded-full">
-                <HelpCircle size={32} />
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold mb-3">Frequently Asked Questions</h1>
-            <p className="text-muted-foreground text-lg">
-              Find answers to common questions about our hostel complaint system
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h1>
+            <p className="text-gray-600 text-lg">
+              Common questions about our hostel complaint system
             </p>
           </div>
 
-          <Card>
-            <CardContent className="pt-6">
+          {/* FAQ Accordion */}
+          <Card className="border border-gray-200 shadow-sm">
+            <CardContent className="p-6">
               <Accordion type="single" collapsible className="w-full">
                 {faqData.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`}>
-                    <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                  <AccordionItem 
+                    key={index} 
+                    value={`item-${index}`}
+                    className="border-b border-gray-200 last:border-b-0"
+                  >
+                    <AccordionTrigger className="text-left px-4 py-4 hover:no-underline text-gray-900 font-semibold text-base">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4 text-gray-600 text-sm">
+                      {faq.answer}
+                    </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
             </CardContent>
           </Card>
-
-          <Alert className="mt-8">
-            <AlertDescription className="text-center">
-              <h3 className="font-semibold text-lg mb-2">Still need help?</h3>
-              <p className="mb-4 text-muted-foreground">
-                Can't find the answer you're looking for? Please email or call us.
-              </p>
-            </AlertDescription>
-          </Alert>
         </div>
       </div>
     </PublicLayout>

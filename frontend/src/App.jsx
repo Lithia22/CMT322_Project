@@ -7,7 +7,8 @@ import { Toaster } from '@/components/ui/sonner';
 import Home from './pages/public/Home';
 import FAQ from './pages/public/FAQ';
 import Login from './pages/public/Login';
-import AboutUs from './pages/public/AboutUs';
+import Contact from './pages/public/Contact';
+import SignUp from './pages/public/SignUp';
 
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -41,7 +42,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/faq" element={<FAQ />} />
-          <Route path="/about" element={<AboutUs />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/signup" element={<SignUp />} />
 
           {/* Protected Student Routes */}
           <Route 

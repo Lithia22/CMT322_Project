@@ -42,10 +42,10 @@ export function HostelBarChart({ data }) {
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Bar
               dataKey="count"
-              fill="#60A5FA"        // Same blue as your theme
+              fill="hsl(270, 76%, 70%)" 
               strokeWidth={2}
               radius={8}
-              activeBar={false}     // Removes hover highlight completely
+              activeBar={false}  
             />
           </BarChart>
         </ChartContainer>

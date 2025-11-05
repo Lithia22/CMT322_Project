@@ -20,7 +20,14 @@ const chartConfig = {
   },
 }
 
-const COLORS = ["#0047FF", "#336CFF", "#5B8EFF", "#A4C2FF"]
+const COLORS = [
+  "hsl(270, 76%, 53%)", 
+  "hsl(270, 76%, 60%)", 
+  "hsl(270, 76%, 70%)", 
+  "hsl(270, 76%, 80%)", 
+  "hsl(270, 50%, 65%)",  
+  "hsl(270, 40%, 75%)"  
+]
 
 export function FacilityPieChart({ data, total }) {
   return (

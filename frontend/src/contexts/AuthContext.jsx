@@ -15,10 +15,35 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const register = (userData) => {
+    const existingUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+    const existingUser = existingUsers.find(u => u.email === userData.email);
+    
+    if (existingUser) {
+      return { success: false, error: 'User already exists with this email' };
+    }
+
+    const newUser = {
+      id: Date.now(),
+      ...userData,
+      role: 'student'
+    };
+
+    existingUsers.push(newUser);
+    localStorage.setItem('mockUsers', JSON.stringify(existingUsers));
+    
+    return { success: true, user: newUser };
+  };
+
   const login = (email, password) => {
-    const foundUser = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
+    // Check mock users first
+    let foundUser = mockUsers.find(u => u.email === email && u.password === password);
+    
+    // Then check localStorage for registered users
+    if (!foundUser) {
+      const registeredUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+      foundUser = registeredUsers.find(u => u.email === email && u.password === password);
+    }
 
     if (foundUser) {
       const userWithoutPassword = { ...foundUser };
@@ -36,20 +61,21 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('currentUser');
   };
 
-const updateProfile = async (profileData) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const updatedUser = { ...user, ...profileData };
-      setUser(updatedUser);
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-      resolve(updatedUser);
-    }, 500);
-  });
-};
+  const updateProfile = async (profileData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const updatedUser = { ...user, ...profileData };
+        setUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        resolve(updatedUser);
+      }, 500);
+    });
+  };
 
   const value = {
     user,
     login,
+    register,
     logout,
     updateProfile,
     loading,

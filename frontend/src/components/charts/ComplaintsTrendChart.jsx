@@ -16,7 +16,7 @@ import {
 const chartConfig = {
   complaints: {
     label: "Complaints",
-    color: "hsl(217, 91%, 60%)",
+    color: "hsl(270, 76%, 53%)",
   },
 }
 
@@ -35,6 +35,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             variant={timeRange === "30d" ? "default" : "outline"}
             size="sm"
             onClick={() => onTimeRangeChange("30d")}
+            className={timeRange === "30d" ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
           >
             Last 30 days
           </Button>
@@ -42,6 +43,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             variant={timeRange === "7d" ? "default" : "outline"}
             size="sm"
             onClick={() => onTimeRangeChange("7d")}
+            className={timeRange === "7d" ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
           >
             Last 7 days
           </Button>
@@ -52,8 +54,8 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
           <AreaChart data={data}>
             <defs>
               <linearGradient id="fillComplaints" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.1} />
+                <stop offset="5%" stopColor="hsl(270, 76%, 53%)" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="hsl(270, 76%, 53%)" stopOpacity={0.1} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -88,7 +90,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
               dataKey="complaints"
               type="natural"
               fill="url(#fillComplaints)"
-              stroke="hsl(217, 91%, 60%)"
+              stroke="hsl(270, 76%, 53%)" 
               strokeWidth={2}
             />
           </AreaChart>

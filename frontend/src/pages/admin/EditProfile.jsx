@@ -12,9 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { User, Mail, Shield, Save } from 'lucide-react';
 
-// Validation schema - simplified without passwords
+// Validation schema 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
@@ -61,20 +60,20 @@ const EditProfile = () => {
   // Skeleton components with gray background
   const HeaderSkeleton = () => (
     <div className="space-y-2">
-      <Skeleton className="h-8 w-64 bg-muted" />
-      <Skeleton className="h-4 w-96 bg-muted" />
+      <Skeleton className="h-8 w-64 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
     </div>
   );
 
   const ProfileCardSkeleton = () => (
-    <Card className="lg:col-span-1">
+    <Card className="lg:col-span-1 border border-gray-200">
       <CardContent className="p-6">
         <div className="flex flex-col items-center space-y-4">
-          <Skeleton className="h-24 w-24 rounded-full bg-muted" />
+          <Skeleton className="h-24 w-24 rounded-full bg-gray-200" />
           <div className="text-center space-y-2 w-full">
-            <Skeleton className="h-6 w-32 mx-auto bg-muted" />
-            <Skeleton className="h-4 w-40 mx-auto bg-muted" />
-            <Skeleton className="h-6 w-24 mx-auto bg-muted" />
+            <Skeleton className="h-6 w-32 mx-auto bg-gray-200" />
+            <Skeleton className="h-4 w-40 mx-auto bg-gray-200" />
+            <Skeleton className="h-6 w-24 mx-auto bg-gray-200" />
           </div>
         </div>
       </CardContent>
@@ -82,23 +81,23 @@ const EditProfile = () => {
   );
 
   const FormSkeleton = () => (
-    <Card className="lg:col-span-2">
+    <Card className="lg:col-span-2 border border-gray-200">
       <CardHeader>
-        <Skeleton className="h-6 w-48 bg-muted" />
-        <Skeleton className="h-4 w-64 bg-muted" />
+        <Skeleton className="h-6 w-48 bg-gray-200" />
+        <Skeleton className="h-4 w-64 bg-gray-200" />
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Skeleton className="h-4 w-20 bg-muted" />
-          <Skeleton className="h-10 w-full bg-muted" />
+          <Skeleton className="h-4 w-20 bg-gray-200" />
+          <Skeleton className="h-10 w-full bg-gray-200" />
         </div>
         <div className="space-y-2">
-          <Skeleton className="h-4 w-24 bg-muted" />
-          <Skeleton className="h-10 w-full bg-muted" />
+          <Skeleton className="h-4 w-24 bg-gray-200" />
+          <Skeleton className="h-10 w-full bg-gray-200" />
         </div>
         <div className="flex justify-end space-x-3">
-          <Skeleton className="h-10 w-20 bg-muted" />
-          <Skeleton className="h-10 w-32 bg-muted" />
+          <Skeleton className="h-10 w-20 bg-gray-200" />
+          <Skeleton className="h-10 w-32 bg-gray-200" />
         </div>
       </CardContent>
     </Card>
@@ -120,13 +119,13 @@ const EditProfile = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Edit Profile</h1>
-        <p className="text-muted-foreground">Update your personal information</p>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Edit Profile</h1>
+        <p className="text-gray-600">Update your personal information</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Info - Big avatar with text below */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1 border border-gray-200 shadow-sm">
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="h-24 w-24 border-2 border-gray-300">
@@ -137,11 +136,10 @@ const EditProfile = () => {
               </Avatar>
 
               <div className="text-center space-y-2">
-                <h3 className="font-semibold text-lg">{user?.name}</h3>
-                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                <h3 className="font-semibold text-lg text-gray-900">{user?.name}</h3>
+                <p className="text-sm text-gray-600">{user?.email}</p>
                 <div className="pt-2">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                    <Shield className="h-3 w-3 mr-1" />
+                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
                     {user?.role === 'admin' ? 'Administrator' : 'User'}
                   </Badge>
                 </div>
@@ -151,10 +149,10 @@ const EditProfile = () => {
         </Card>
 
         {/* Edit Form */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle>Profile Information</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-gray-900">Profile Information</CardTitle>
+            <CardDescription className="text-gray-600">
               Update your name and email address
             </CardDescription>
           </CardHeader>
@@ -166,9 +164,13 @@ const EditProfile = () => {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel className="text-gray-700">Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter your full name" {...field} />
+                        <Input 
+                          placeholder="Enter your full name" 
+                          {...field} 
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -180,9 +182,14 @@ const EditProfile = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">Email Address</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="Enter your email" {...field} />
+                        <Input 
+                          type="email" 
+                          placeholder="Enter your email" 
+                          {...field}
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -195,10 +202,15 @@ const EditProfile = () => {
                     variant="outline"
                     onClick={() => navigate(-1)}
                     disabled={isLoading}
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
                     {isLoading ? (
                       <>
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />

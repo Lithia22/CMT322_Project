@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -36,34 +36,28 @@ const Login = () => {
 
   return (
     <PublicLayout>
-      <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center bg-muted/50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
+      <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center bg-gray-50 p-4">
+        <Card className="w-full max-w-md border border-gray-200 shadow-lg">
+          <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
-                <div className="flex aspect-square size-20 items-center justify-center rounded-lg">
-                  <img 
-                    src="/USM.svg" 
-                    alt="USM Logo" 
-                    className="h-18 w-18"
-                  />
-                </div>
+              <div className="flex items-center justify-center rounded-lg">
+                <img 
+                  src="/USM.svg" 
+                  alt="USM Logo" 
+                  className="h-16 w-16"
+                />
+              </div>
             </div>
-            <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Login to DesaFix System</CardDescription>
+            <div>
+              <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
+              <CardDescription className="text-gray-600">Login to DesaFix System</CardDescription>
+            </div>
           </CardHeader>
           <CardContent>
-            <Alert className="mb-6">
-              <AlertDescription className="text-sm">
-                <p className="font-semibold mb-1">Demo Credentials:</p>
-                <p>Student: student@usm.my / password</p>
-                <p>Admin: admin@usm.my / password</p>
-              </AlertDescription>
-            </Alert>
-
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 {form.formState.errors.root && (
-                  <Alert variant="destructive">
+                  <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
                   </Alert>
@@ -74,8 +68,14 @@ const Login = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
-                      <FormControl><Input placeholder="your.email@usm.my" {...field} /></FormControl>
+                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="your.email@usm.my" 
+                          {...field} 
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -86,14 +86,34 @@ const Login = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl><Input type="password" placeholder="Enter your password" {...field} /></FormControl>
+                      <FormLabel className="text-gray-700">Password</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password" 
+                          placeholder="Enter your password" 
+                          {...field}
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <Button type="submit" className="w-full">Login</Button>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5"
+                >
+                  Login
+                </Button>
+                <div className="text-center mt-4">
+                  <p className="text-sm text-gray-600">
+                    Don't have an account?{' '}
+                    <Link to="/signup" className="text-purple-600 hover:text-purple-700 font-semibold">
+                      Sign up here
+                    </Link>
+                  </p>
+                </div>
               </form>
             </Form>
           </CardContent>
