@@ -2,6 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Add your animations here */
+@keyframes subtleZoom {
+  0% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.9);
+  }
+}
+
+@keyframes buttonPulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 25px rgba(250, 204, 21, 0.3);
+  }
+  50% {
+    box-shadow: 0 15px 35px rgba(250, 204, 21, 0.5);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

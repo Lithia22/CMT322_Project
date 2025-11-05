@@ -39,13 +39,17 @@ const Login = () => {
       <div className="min-h-[calc(100vh-16rem)] flex items-center justify-center bg-muted/50 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="bg-primary text-primary-foreground p-3 rounded-full">
-                <ShieldCheck size={32} />
-              </div>
+            <div className="flex justify-center">
+                <div className="flex aspect-square size-20 items-center justify-center rounded-lg">
+                  <img 
+                    src="/USM.svg" 
+                    alt="USM Logo" 
+                    className="h-18 w-18"
+                  />
+                </div>
             </div>
             <CardTitle className="text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Login to USM Hostel Care System</CardDescription>
+            <CardDescription>Login to DesaFix System</CardDescription>
           </CardHeader>
           <CardContent>
             <Alert className="mb-6">
