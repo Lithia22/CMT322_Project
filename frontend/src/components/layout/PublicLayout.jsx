@@ -165,10 +165,6 @@ const PublicLayout = ({ children }) => {
                   <Phone size={16} className="text-yellow-400" />
                   <span>+604-653 3888</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Mail size={16} className="text-yellow-400" />
-                  <span>hostelcare@usm.my</span>
-                </div>
               </div>
             </div>
           </div>

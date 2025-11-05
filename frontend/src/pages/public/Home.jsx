@@ -115,74 +115,67 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Student Life Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
-            <div>
-              <div className="inline-block mb-4 sm:mb-6">
-                <span className="px-4 py-2 bg-purple-100 text-purple-700 font-semibold text-xs sm:text-sm rounded-lg">
-                  STUDENT LIFE
-                </span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight">
-                Your Comfort,<br />Our Priority
-              </h2>
-              <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
+{/* Student Life Section */}
+<section className="py-12 sm:py-16 lg:py-20 bg-white">
+  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
+      <div>
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight">
+          Your Comfort is Our Priority
+        </h2>
+        <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                 Living in USM hostels should be comfortable and worry-free. DesaFix ensures every student has a voice when it comes to maintaining quality living conditions.
-              </p>
-              <ul className="space-y-4 sm:space-y-6 mb-8 sm:mb-10">
-                <li className="flex items-start gap-3 sm:gap-4">
-                  <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">Fast Response Time</div>
-                    <div className="text-sm sm:text-base text-gray-600">Average 24-hour response for urgent issues</div>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 sm:gap-4">
-                  <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">Real-Time Tracking</div>
-                    <div className="text-sm sm:text-base text-gray-600">Monitor your complaint status every step of the way</div>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3 sm:gap-4">
-                  <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <div className="font-semibold text-gray-900 text-base sm:text-lg">Direct Communication</div>
-                    <div className="text-sm sm:text-base text-gray-600">Stay updated with notifications and feedback</div>
-                  </div>
-                </li>
-              </ul>
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 w-full sm:w-auto" asChild>
-                <Link to="/login">Get Started</Link>
-              </Button>
-            </div>
 
-            <div className="relative mt-8 md:mt-0">
-              <div className="rounded-2xl overflow-hidden shadow-2xl">
-                <img 
-                  src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80" 
-                  alt="USM Hostel Room"
-                  className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
-                />
-              </div>
-              {/* Floating card */}
-              <div className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-[200px] sm:max-w-xs border border-gray-100">
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <div className="text-xl sm:text-2xl font-bold text-gray-900">4.8/5</div>
-                    <div className="text-xs sm:text-sm text-gray-600">Student Satisfaction</div>
-                  </div>
-                </div>
-              </div>
+        </p>
+        <ul className="space-y-4 sm:space-y-6 mb-8 sm:mb-10">
+          <li className="flex items-start gap-3 sm:gap-4">
+            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+            <div>
+              <div className="font-semibold text-gray-900 text-base sm:text-lg">Quick Help When You Need It</div>
+              <div className="text-sm sm:text-base text-gray-600">Report problems and get help fast</div>
+            </div>
+          </li>
+          <li className="flex items-start gap-3 sm:gap-4">
+            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+            <div>
+              <div className="font-semibold text-gray-900 text-base sm:text-lg">Know What's Happening</div>
+              <div className="text-sm sm:text-base text-gray-600">See updates on your repair requests</div>
+            </div>
+          </li>
+          <li className="flex items-start gap-3 sm:gap-4">
+            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+            <div>
+              <div className="font-semibold text-gray-900 text-base sm:text-lg">Easy to Use</div>
+              <div className="text-sm sm:text-base text-gray-600">Simple process from start to finish</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div className="relative mt-8 md:mt-0">
+        <div className="rounded-2xl overflow-hidden shadow-2xl">
+          <img 
+            src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80" 
+            alt="USM Hostel Room"
+            className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
+          />
+        </div>
+        {/* Floating card */}
+        <div className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-[200px] sm:max-w-xs border border-gray-100">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">4.8/5</div>
+              <div className="text-xs sm:text-sm text-gray-600">Student Satisfaction</div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
 {/* Features Section */}
 <section className="py-12 sm:py-16 lg:py-20 relative overflow-hidden">
