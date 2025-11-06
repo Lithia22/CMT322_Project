@@ -354,7 +354,6 @@ const ManageComplaints = () => {
                             setDialogOpen(true);
                           }}
                         >
-                          <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -363,14 +362,12 @@ const ManageComplaints = () => {
                             setImageDialogOpen(true);
                           }}
                         >
-                          <Image className="mr-2 h-4 w-4" />
                           View Image
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-red-600"
                           onClick={() => handleDeleteComplaint(complaint)}
                         >
-                          <Trash className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
