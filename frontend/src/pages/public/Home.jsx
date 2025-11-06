@@ -83,18 +83,18 @@ const Home = () => {
                 Report hostel issues fast and<br className="hidden sm:inline" /> get solutions faster
               </p>
               <div className="mb-8 sm:mb-12">
-                <Button 
-                  size="lg" 
-                  className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-bold h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto"
-                  style={{
-                    animation: 'buttonPulse 2s ease-in-out infinite'
-                  }}
-                  asChild
-                >
-                  <Link to="/login">
-                    REPORT ISSUE NOW
-                  </Link>
-                </Button>
+<Button 
+  size="lg" 
+  className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 font-bold h-12 sm:h-14 px-6 sm:px-10 text-base sm:text-lg shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 w-auto"
+  style={{
+    animation: 'buttonPulse 2s ease-in-out infinite'
+  }}
+  asChild
+>
+  <Link to="/login" onClick={() => window.scrollTo(0, 0)}>
+    REPORT ISSUE NOW
+  </Link>
+</Button>
               </div>
             </div>
             <div 
@@ -116,60 +116,63 @@ const Home = () => {
       </section>
 
 {/* Student Life Section */}
-<section className="py-12 sm:py-16 lg:py-20 bg-white">
-  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
-      <div>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 sm:mb-8 leading-tight">
+<section className="py-16 sm:py-20 lg:py-24 bg-white">
+  <div className="container mx-auto px-6 sm:px-8 lg:px-12">
+    <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center max-w-7xl mx-auto">
+      <div className="order-2 md:order-1">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 sm:mb-10 leading-tight">
           Your Comfort is Our Priority
         </h2>
-        <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                Living in USM hostels should be comfortable and worry-free. DesaFix ensures every student has a voice when it comes to maintaining quality living conditions.
-
+        <p className="text-lg sm:text-xl text-gray-600 mb-10 sm:mb-12 leading-relaxed">
+          Living in USM hostels should be comfortable and worry-free. DesaFix ensures every student has a voice when it comes to maintaining quality living conditions.
         </p>
-        <ul className="space-y-4 sm:space-y-6 mb-8 sm:mb-10">
-          <li className="flex items-start gap-3 sm:gap-4">
-            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+        <ul className="space-y-6 sm:space-y-8 mb-10 sm:mb-12">
+          <li className="flex items-start gap-4 sm:gap-5 group cursor-pointer transition-all duration-300 hover:translate-x-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-purple-600 rounded-full border-2 border-yellow-400 flex-shrink-0 mt-1 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300"></div>
             <div>
-              <div className="font-semibold text-gray-900 text-base sm:text-lg">Quick Help When You Need It</div>
-              <div className="text-sm sm:text-base text-gray-600">Report problems and get help fast</div>
+              <div className="font-bold text-gray-900 text-xl sm:text-2xl mb-2 group-hover:text-purple-600 transition-colors duration-300">Quick Help When You Need It</div>
+              <div className="text-base sm:text-lg text-gray-600 leading-relaxed">Report problems and get help fast</div>
             </div>
           </li>
-          <li className="flex items-start gap-3 sm:gap-4">
-            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+          <li className="flex items-start gap-4 sm:gap-5 group cursor-pointer transition-all duration-300 hover:translate-x-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-purple-600 rounded-full border-2 border-yellow-400 flex-shrink-0 mt-1 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300"></div>
             <div>
-              <div className="font-semibold text-gray-900 text-base sm:text-lg">Know What's Happening</div>
-              <div className="text-sm sm:text-base text-gray-600">See updates on your repair requests</div>
+              <div className="font-bold text-gray-900 text-xl sm:text-2xl mb-2 group-hover:text-purple-600 transition-colors duration-300">Know What's Happening</div>
+              <div className="text-base sm:text-lg text-gray-600 leading-relaxed">See updates on your repair requests</div>
             </div>
           </li>
-          <li className="flex items-start gap-3 sm:gap-4">
-            <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 flex-shrink-0 mt-1" />
+          <li className="flex items-start gap-4 sm:gap-5 group cursor-pointer transition-all duration-300 hover:translate-x-2">
+            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-purple-600 rounded-full border-2 border-yellow-400 flex-shrink-0 mt-1 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300"></div>
             <div>
-              <div className="font-semibold text-gray-900 text-base sm:text-lg">Easy to Use</div>
-              <div className="text-sm sm:text-base text-gray-600">Simple process from start to finish</div>
+              <div className="font-bold text-gray-900 text-xl sm:text-2xl mb-2 group-hover:text-purple-600 transition-colors duration-300">Easy to Use</div>
+              <div className="text-base sm:text-lg text-gray-600 leading-relaxed">Simple process from start to finish</div>
             </div>
           </li>
         </ul>
       </div>
 
-      <div className="relative mt-8 md:mt-0">
-        <div className="rounded-2xl overflow-hidden shadow-2xl">
-          <img 
-            src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80" 
-            alt="USM Hostel Room"
-            className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
-          />
+      <div className="relative order-1 md:order-2">
+        <div className="rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-300 hover:scale-[1.02]">
+<img 
+  src="/student-section.jpg" 
+  alt="USM Hostel Room"
+  className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
+/>
         </div>
-        {/* Floating card */}
-        <div className="absolute -bottom-4 sm:-bottom-6 -left-4 sm:-left-6 bg-white rounded-xl shadow-xl p-4 sm:p-6 max-w-[200px] sm:max-w-xs border border-gray-100">
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <Star className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-            </div>
-            <div>
-              <div className="text-xl sm:text-2xl font-bold text-gray-900">4.8/5</div>
-              <div className="text-xs sm:text-sm text-gray-600">Student Satisfaction</div>
-            </div>
+        {/* Floating card - FAQ CTA */}
+        <div className="absolute -bottom-6 sm:-bottom-8 -left-6 sm:-left-8 bg-white rounded-xl shadow-2xl p-5 sm:p-7 max-w-[240px] sm:max-w-sm transform transition-all duration-300 hover:scale-105">
+          <div>
+            <div className="text-base sm:text-lg font-bold text-gray-900 mb-3">Have Questions?</div>
+<Link 
+  to="/faq" 
+  onClick={() => window.scrollTo(0, 0)}
+  className="text-sm sm:text-base text-purple-600 hover:text-purple-700 font-semibold inline-flex items-center gap-3 group"
+>
+  Visit our FAQ
+  <div className="w-7 h-7 rounded-full bg-purple-600 border-2 border-yellow-400 flex items-center justify-center group-hover:bg-purple-700 transition-all duration-300 group-hover:translate-x-1">
+    <ArrowRight className="w-3.5 h-3.5 text-white" />
+  </div>
+</Link>
           </div>
         </div>
       </div>

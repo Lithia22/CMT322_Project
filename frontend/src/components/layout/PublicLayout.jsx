@@ -66,14 +66,15 @@ const PublicLayout = ({ children }) => {
               {navItems.map((item) => {
                 return (
                   <div key={item.path} className="relative">
-                    <Link 
-                      to={item.path}
-                      className={`font-semibold text-lg transition-all duration-300 group ${
-                        isActive(item.path) 
-                          ? 'text-purple-600' 
-                          : 'text-gray-700 hover:text-purple-600'
-                      }`}
-                    >
+<Link 
+  to={item.path}
+  onClick={() => window.scrollTo(0, 0)}
+  className={`font-semibold text-lg transition-all duration-300 group ${
+    isActive(item.path) 
+      ? 'text-purple-600' 
+      : 'text-gray-700 hover:text-purple-600'
+  }`}
+>
                       <div className="flex items-center space-x-2 px-2 py-1">
                         <span>{item.label}</span>
                       </div>
@@ -99,16 +100,19 @@ const PublicLayout = ({ children }) => {
             <div className="md:hidden py-6 space-y-4 border-t border-gray-200">
               {navItems.map((item) => {
                 return (
-                  <Link 
-                    key={item.path} 
-                    to={item.path}
-                    className={`flex items-center space-x-3 w-full py-3 px-4 rounded-lg transition-all duration-200 ${
-                      isActive(item.path) 
-                        ? 'bg-purple-50 text-purple-600 border border-purple-100' 
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
-                    }`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
+<Link 
+  key={item.path} 
+  to={item.path}
+  onClick={() => {
+    window.scrollTo(0, 0);
+    setMobileMenuOpen(false);
+  }}
+  className={`flex items-center space-x-3 w-full py-3 px-4 rounded-lg transition-all duration-200 ${
+    isActive(item.path) 
+      ? 'bg-purple-50 text-purple-600 border border-purple-100' 
+      : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
+  }`}
+>
                     <span className="font-semibold text-lg">{item.label}</span>
                   </Link>
                 );
@@ -146,10 +150,10 @@ const PublicLayout = ({ children }) => {
             <div>
               <h3 className="font-bold text-lg mb-4 text-yellow-400">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/" className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Home</Link></li>
-                <li><Link to="/contact" className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Contact Us</Link></li>
-                <li><Link to="/faq" className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">FAQ</Link></li>
-                <li><Link to="/login" className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Login</Link></li>
+<li><Link to="/" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Home</Link></li>
+<li><Link to="/contact" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Contact Us</Link></li>
+<li><Link to="/faq" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">FAQ</Link></li>
+<li><Link to="/login" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Login</Link></li>
               </ul>
             </div>
 
