@@ -128,7 +128,7 @@ const ManageComplaints = () => {
     }
   };
 
-  // Skeleton components with gray background
+  // Skeleton components
   const HeaderSkeleton = () => (
     <div className="space-y-2">
       <Skeleton className="h-8 w-64 bg-muted" />
@@ -152,14 +152,12 @@ const ManageComplaints = () => {
     <Card>
       <CardContent className="p-6">
         <div className="space-y-4">
-          {/* Table Header Skeleton */}
           <div className="flex gap-4 border-b pb-4">
             {[...Array(7)].map((_, i) => (
               <Skeleton key={i} className="h-4 flex-1 bg-muted" />
             ))}
           </div>
           
-          {/* Table Rows Skeleton */}
           {[...Array(5)].map((_, rowIndex) => (
             <div key={rowIndex} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
               {[...Array(7)].map((_, cellIndex) => (
@@ -199,35 +197,53 @@ const ManageComplaints = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* Header */}
+      <div 
+        className="rounded-xl p-6 text-white shadow-lg"
+        style={{
+          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+        }}
+      >
         <h1 className="text-3xl font-bold tracking-tight">Complaint Management</h1>
-        <p className="text-muted-foreground">Manage and track hostel facility complaints</p>
+        <p className="text-white/90">Manage and track hostel facility complaints</p>
       </div>
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <Input
           placeholder="Search by facility, issue, student, or hostel"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+          className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
         />
       </div>
 
       {/* Urgency Tabs */}
       <Tabs value={urgencyTab} onValueChange={setUrgencyTab}>
         <TabsList>
-          <TabsTrigger value="all">
+          <TabsTrigger 
+            value="all"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
             All <span className="ml-1.5 text-xs">({totalComplaints})</span>
           </TabsTrigger>
-          <TabsTrigger value="High">
+          <TabsTrigger 
+            value="High"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
             High <span className="ml-1.5 text-xs">({highPriorityCount})</span>
           </TabsTrigger>
-          <TabsTrigger value="Medium">
+          <TabsTrigger 
+            value="Medium"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
             Medium <span className="ml-1.5 text-xs">({mediumPriorityCount})</span>
           </TabsTrigger>
-          <TabsTrigger value="Low">
+          <TabsTrigger 
+            value="Low"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
             Low <span className="ml-1.5 text-xs">({lowPriorityCount})</span>
           </TabsTrigger>
         </TabsList>
@@ -242,7 +258,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('submittedDate')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Date <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -251,7 +267,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('studentName')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Student <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -260,7 +276,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('hostelName')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Location <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -269,7 +285,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('facilityType')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Issue <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -278,7 +294,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('urgencyLevel')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Priority <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -287,7 +303,7 @@ const ManageComplaints = () => {
                 <Button
                   variant="ghost"
                   onClick={() => handleSort('status')}
-                  className="h-auto p-0 font-medium hover:bg-transparent"
+                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
                 >
                   Status <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
@@ -299,29 +315,29 @@ const ManageComplaints = () => {
             {currentItems.length > 0 ? (
               currentItems.map((complaint) => (
                 <TableRow key={complaint.id}>
-<TableCell className="text-sm text-muted-foreground">
-  {new Date(complaint.submittedDate).toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric',
-    year: 'numeric'
-  })}
-</TableCell>
+                  <TableCell className="text-sm text-gray-600">
+                    {new Date(complaint.submittedDate).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium text-sm">{complaint.studentName}</div>
-                      <div className="text-xs text-muted-foreground">{complaint.studentId}</div>
+                      <div className="font-medium text-sm text-black">{complaint.studentName}</div>
+                      <div className="text-xs text-gray-600">{complaint.studentId}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="text-sm">{complaint.hostelName}</div>
-                      <div className="text-xs text-muted-foreground">Room {complaint.roomNumber}</div>
+                      <div className="text-sm text-black">{complaint.hostelName}</div>
+                      <div className="text-xs text-gray-600">Room {complaint.roomNumber}</div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="max-w-xs">
-                      <div className="text-sm font-medium">{complaint.facilityType}</div>
-                      <div className="text-xs text-muted-foreground line-clamp-1">
+                      <div className="text-sm font-medium text-black">{complaint.facilityType}</div>
+                      <div className="text-xs text-gray-600 line-clamp-1">
                         {complaint.issueDescription}
                       </div>
                     </div>
@@ -332,14 +348,14 @@ const ManageComplaints = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge className={`${getStatusColor(complaint.status)} text-xs`}>
+                    <Badge className={`${getStatusColor(complaint.status)} text-xs border`}>
                       {complaint.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-600 hover:text-purple-600">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -354,6 +370,7 @@ const ManageComplaints = () => {
                             setDialogOpen(true);
                           }}
                         >
+                          <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -362,12 +379,14 @@ const ManageComplaints = () => {
                             setImageDialogOpen(true);
                           }}
                         >
+                          <Image className="mr-2 h-4 w-4" />
                           View Image
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                          className="text-red-600"
+                          className="text-red-600 focus:bg-red-50 focus:text-red-700"
                           onClick={() => handleDeleteComplaint(complaint)}
                         >
+                          <Trash className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -377,7 +396,7 @@ const ManageComplaints = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={7} className="h-32 text-center text-sm text-gray-600">
                   No complaints found
                 </TableCell>
               </TableRow>
@@ -388,13 +407,13 @@ const ManageComplaints = () => {
 
       {/* Pagination */}
       {filteredComplaints.length > itemsPerPage && (
-  <div className="w-full">
-    <Pagination className="w-full flex justify-end">
+        <div className="w-full">
+          <Pagination className="w-full flex justify-end">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer text-purple-700 hover:text-purple-900"}
                 />
               </PaginationItem>
 
@@ -403,7 +422,11 @@ const ManageComplaints = () => {
                   <PaginationLink
                     onClick={() => setCurrentPage(page)}
                     isActive={currentPage === page}
-                    className="cursor-pointer"
+                    className={`cursor-pointer ${
+                      currentPage === page 
+                        ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                        : 'text-purple-700 hover:text-purple-900'
+                    }`}
                   >
                     {page}
                   </PaginationLink>
@@ -413,7 +436,7 @@ const ManageComplaints = () => {
               <PaginationItem>
                 <PaginationNext
                   onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer text-purple-700 hover:text-purple-900"}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -425,8 +448,8 @@ const ManageComplaints = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Update Complaint</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-black">Update Complaint</DialogTitle>
+            <DialogDescription className="text-gray-600">
               Update status and remarks for this complaint
             </DialogDescription>
           </DialogHeader>
@@ -437,10 +460,10 @@ const ManageComplaints = () => {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
+                    <FormLabel className="text-black">Status</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
@@ -459,11 +482,11 @@ const ManageComplaints = () => {
                 name="adminRemarks"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Remarks</FormLabel>
+                    <FormLabel className="text-black">Remarks</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Add your remarks or update about the complaint resolution"
-                        className="min-h-24"
+                        className="min-h-24 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         {...field}
                       />
                     </FormControl>
@@ -472,10 +495,21 @@ const ManageComplaints = () => {
               />
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setDialogOpen(false)}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
                   Cancel
                 </Button>
-                <Button type="button" onClick={form.handleSubmit(handleEditSubmit)}>Save</Button>
+                <Button 
+                  type="button" 
+                  onClick={form.handleSubmit(handleEditSubmit)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Save
+                </Button>
               </div>
             </div>
           </Form>
@@ -486,11 +520,11 @@ const ManageComplaints = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Trash className="h-5 w-5 text-red-500" />
+            <DialogTitle className="flex items-center gap-2 text-black">
+              <Trash className="h-5 w-5" />
               Confirm Deletion
             </DialogTitle>
-            <DialogDescription className="pt-4">
+            <DialogDescription className="pt-4 text-gray-600">
               This action cannot be undone and will permanently remove the complaint from the system.
             </DialogDescription>
           </DialogHeader>
@@ -499,6 +533,7 @@ const ManageComplaints = () => {
               type="button"
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </Button>
@@ -517,7 +552,7 @@ const ManageComplaints = () => {
       <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Complaint Image</DialogTitle>
+            <DialogTitle className="text-black">Complaint Image</DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-4">
             {selectedImage ? (
@@ -527,16 +562,11 @@ const ManageComplaints = () => {
                 className="max-w-full max-h-[500px] rounded-lg object-contain"
               />
             ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <div className="flex flex-col items-center gap-2 text-gray-600">
                 <Image className="h-12 w-12" />
                 <p>No image available for this complaint</p>
               </div>
             )}
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setImageDialogOpen(false)}>
-              Close
-            </Button>
           </div>
         </DialogContent>
       </Dialog>

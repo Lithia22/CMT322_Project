@@ -35,7 +35,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             variant={timeRange === "30d" ? "default" : "outline"}
             size="sm"
             onClick={() => onTimeRangeChange("30d")}
-            className={timeRange === "30d" ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
+            className={timeRange === "30d" ? "border-purple-600 text-purple-600 bg-white hover:bg-purple-50" : "border-gray-100 text-gray-700 hover:bg-gray-50"}
           >
             Last 30 days
           </Button>
@@ -43,7 +43,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             variant={timeRange === "7d" ? "default" : "outline"}
             size="sm"
             onClick={() => onTimeRangeChange("7d")}
-            className={timeRange === "7d" ? "bg-purple-600 hover:bg-purple-700 text-white" : "border-purple-600 text-purple-600 hover:bg-purple-50"}
+            className={timeRange === "7d" ? "border-purple-600 text-purple-600 bg-white hover:bg-purple-50" : "border-gray-100 text-gray-700 hover:bg-gray-50"}
           >
             Last 7 days
           </Button>
@@ -55,7 +55,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             <defs>
               <linearGradient id="fillComplaints" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(270, 76%, 53%)" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="hsl(270, 76%, 53%)" stopOpacity={0.1} />
+                <stop offset="95%" stopColor="hsl(45, 93%, 47%)" stopOpacity={0.2} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />

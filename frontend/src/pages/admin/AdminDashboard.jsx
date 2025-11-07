@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, CheckCircle, AlertTriangle, FileText, Star } from 'lucide-react';
+import { Clock, CheckCircle, AlertTriangle, FileText, Star, Users, TrendingUp, MessageSquare } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { ComplaintsTrendChart } from '@/components/charts/ComplaintsTrendChart';
 import { HostelBarChart } from '@/components/charts/HostelBarChart';
@@ -57,25 +57,25 @@ const AdminDashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Resolved': return 'bg-green-50 text-green-700 hover:bg-green-50';
-      case 'In Progress': return 'bg-blue-50 text-blue-700 hover:bg-blue-50';
-      case 'Pending': return 'bg-gray-50 text-gray-700 hover:bg-gray-50';
-      default: return 'bg-gray-50 text-gray-700 hover:bg-gray-50';
+      case 'Resolved': return 'bg-green-50 text-green-700 border-green-200';
+      case 'In Progress': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Pending': return 'bg-amber-50 text-amber-700 border-amber-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
-  // Skeleton components with gray background
+  // Skeleton components
   const StatsSkeleton = () => (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {[...Array(4)].map((_, i) => (
-        <Card key={i}>
+        <Card key={i} className="border-2 border-gray-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <Skeleton className="h-4 w-20 bg-muted" />
-            <Skeleton className="h-4 w-4 rounded-full bg-muted" />
+            <Skeleton className="h-4 w-20 bg-gray-200" />
+            <Skeleton className="h-4 w-4 rounded-full bg-gray-200" />
           </CardHeader>
           <CardContent>
-            <Skeleton className="h-8 w-12 mb-2 bg-muted" />
-            <Skeleton className="h-3 w-24 bg-muted" />
+            <Skeleton className="h-8 w-12 mb-2 bg-gray-200" />
+            <Skeleton className="h-3 w-24 bg-gray-200" />
           </CardContent>
         </Card>
       ))}
@@ -142,54 +142,68 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div>
+      {/* Header */}
+      <div 
+        className="rounded-xl p-6 text-white shadow-lg"
+        style={{
+          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+        }}
+      >
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Overview of hostel complaints</p>
+        <p className="text-white/90">Overview of hostel complaints and system performance</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        {/* Total Complaints */}
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Complaints</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Total Complaints</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+<FileText className="h-4 w-4 text-black" />            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalComplaints}</div>
-            <p className="text-xs text-muted-foreground mt-1">All submissions</p>
+            <div className="text-2xl font-bold text-black">{stats.totalComplaints}</div>
+            <p className="text-xs text-gray-600 mt-1">All submissions</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Pending */}
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Pending</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+<Clock className="h-4 w-4 text-black" />            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground mt-1">Awaiting action</p>
+            <div className="text-2xl font-bold text-black">{stats.pending}</div>
+            <p className="text-xs text-gray-600 mt-1">Awaiting action</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* In Progress */}
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">In Progress</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+<AlertTriangle className="h-4 w-4 text-black" />            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground mt-1">Being resolved</p>
+            <div className="text-2xl font-bold text-black">{stats.inProgress}</div>
+            <p className="text-xs text-gray-600 mt-1">Being resolved</p>
           </CardContent>
         </Card>
 
-        <Card>
+        {/* Resolved */}
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolved</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Resolved</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+<CheckCircle className="h-4 w-4 text-black" />            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.resolved}</div>
-            <p className="text-xs text-muted-foreground mt-1">Completed</p>
+            <div className="text-2xl font-bold text-black">{stats.resolved}</div>
+            <p className="text-xs text-gray-600 mt-1">Completed</p>
           </CardContent>
         </Card>
       </div>
@@ -206,12 +220,22 @@ const AdminDashboard = () => {
         <FacilityPieChart data={facilityData} total={stats.totalComplaints} />
       </div>
 
-      {/* Recent Activity Tabs */}
-      <Tabs defaultValue="complaints" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="complaints">Recent Complaints</TabsTrigger>
-          <TabsTrigger value="feedback">Recent Feedback</TabsTrigger>
-        </TabsList>
+{/* Recent Activity Tabs */}
+<Tabs defaultValue="complaints" className="space-y-4">
+  <TabsList>
+    <TabsTrigger 
+      value="complaints"
+      className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+    >
+      Recent Complaints
+    </TabsTrigger>
+    <TabsTrigger 
+      value="feedback"
+      className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+    >
+      Recent Feedback
+    </TabsTrigger>
+  </TabsList>
 
         <TabsContent value="complaints">
           <Card>
@@ -220,17 +244,17 @@ const AdminDashboard = () => {
                 {mockComplaints.slice(0, 5).map((complaint) => (
                   <div key={complaint.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
                     <div className="space-y-1 flex-1">
-                      <p className="font-medium">{complaint.facilityType}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-black">{complaint.facilityType}</p>
+                      <p className="text-sm text-gray-600">
                         {complaint.studentName} • {complaint.hostelName}
                       </p>
-                      <p className="text-xs text-muted-foreground">{complaint.issueDescription}</p>
+                      <p className="text-xs text-gray-500">{complaint.issueDescription}</p>
                     </div>
-<div className="flex items-center justify-start w-24">
-  <Badge className={`${getStatusColor(complaint.status)} text-xs`}>
-    {complaint.status}
-  </Badge>
-</div>
+                    <div className="flex items-center justify-start w-24">
+                      <Badge className={`${getStatusColor(complaint.status)} text-xs`}>
+                        {complaint.status}
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -246,18 +270,18 @@ const AdminDashboard = () => {
                   <div key={feedback.id} className="border-b pb-4 last:border-0 last:pb-0">
                     <div className="flex items-start justify-between">
                       <div className="space-y-1 flex-1">
-                        <p className="font-medium">{feedback.studentName}</p>
-                        <p className="text-sm mt-2">{feedback.comment}</p>
+                        <p className="font-medium text-black">{feedback.studentName}</p>
+                        <p className="text-sm text-gray-600 mt-2">{feedback.comment}</p>
                       </div>
-                      <div className="flex items-center gap-1 ml-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={16}
-                            className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                          />
-                        ))}
-                      </div>
+<div className="flex items-center gap-1 ml-4">
+  {[1, 2, 3, 4, 5].map((star) => (
+    <Star
+      key={star}
+      size={20}
+      className={star <= feedback.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+    />
+  ))}
+</div>
                     </div>
                   </div>
                 ))}

@@ -1,5 +1,5 @@
 import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
 import {
   Card,
   CardContent,
@@ -23,15 +23,19 @@ const chartConfig = {
 export function HostelBarChart({ data }) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Complaints by Hostel</CardTitle>
-        <CardDescription>Number of complaints per hostel</CardDescription>
-      </CardHeader>
-
-      {/* Fixed container height + full width like AreaChart */}
+<CardHeader className="text-center">
+  <CardTitle>Complaints by Hostel</CardTitle>
+  <CardDescription>Number of complaints per hostel</CardDescription>
+</CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
           <BarChart accessibilityLayer data={data}>
+            <defs>
+              <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(270, 76%, 53%)" />
+                <stop offset="100%" stopColor="hsl(270, 76%, 70%)" />
+              </linearGradient>
+            </defs>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="hostel"
@@ -42,15 +46,15 @@ export function HostelBarChart({ data }) {
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Bar
               dataKey="count"
-              fill="hsl(270, 76%, 70%)" 
+              fill="url(#barGradient)"
               strokeWidth={2}
               radius={8}
-              activeBar={false}  
+              activeBar={false}
             />
           </BarChart>
         </ChartContainer>
       </CardContent>
-
+      
       <CardFooter className="flex flex-col items-center gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium">
           Tracking hostel issues <TrendingUp className="h-4 w-4" />

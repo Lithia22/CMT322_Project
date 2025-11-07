@@ -21,12 +21,12 @@ const chartConfig = {
 }
 
 const COLORS = [
-  "hsl(270, 76%, 53%)", 
-  "hsl(270, 76%, 60%)", 
-  "hsl(270, 76%, 70%)", 
-  "hsl(270, 76%, 80%)", 
-  "hsl(270, 50%, 65%)",  
-  "hsl(270, 40%, 75%)"  
+  "hsl(270, 76%, 60%)",    
+  "hsl(270, 76%, 67%)",     
+  "hsl(270, 76%, 74%)",     
+  "hsl(45, 93%, 67%)",     
+  "hsl(45, 93%, 60%)",     
+  "hsl(45, 93%, 53%)"    
 ]
 
 export function FacilityPieChart({ data, total }) {
@@ -73,15 +73,15 @@ export function FacilityPieChart({ data, total }) {
           </PieChart>
         </ChartContainer>
       </CardContent>
-<CardFooter className="flex flex-col items-center gap-2 text-sm">
-  <div className="flex items-center gap-2 leading-none font-medium">
-    Tracking facility issues <TrendingUp className="h-4 w-4" />
-  </div>
-  <div className="text-muted-foreground leading-none">
-    Showing total complaints for all facilities
-  </div>
-</CardFooter>
-
+      <CardFooter className="flex flex-col items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 leading-none font-medium">
+          Tracking facility issues <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="text-muted-foreground leading-none">
+          Showing total complaints for all facilities
+        </div>
+      </CardFooter>
+      
     </Card>
   )
 }

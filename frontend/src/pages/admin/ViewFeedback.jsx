@@ -60,18 +60,36 @@ const ViewFeedback = () => {
   const positiveFeedbackCount = mockFeedbacks.filter(f => f.rating >= 4).length;
   const positiveFeedbackRate = totalFeedbacks > 0 ? Math.round((positiveFeedbackCount / totalFeedbacks) * 100) : 0;
 
-  // Skeleton components with gray background
+  // Skeleton components
   const StatsSkeleton = () => (
-    <div className="grid grid-cols-2 gap-4">
-      {[...Array(2)].map((_, i) => (
-        <Card key={i} className="p-3">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-16 bg-muted" />
-            <Skeleton className="h-4 w-4 rounded-full bg-muted" />
-          </div>
-          <Skeleton className="h-6 w-12 mt-2 bg-muted" />
-        </Card>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader className="pb-3">
+          <Skeleton className="h-5 w-32 bg-muted" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <Skeleton className="h-4 w-24 bg-muted" />
+              <Skeleton className="h-4 w-8 bg-muted" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <Skeleton className="h-5 w-32 bg-muted" />
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex justify-between items-center">
+              <Skeleton className="h-4 w-20 bg-muted" />
+              <Skeleton className="h-4 w-8 bg-muted" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -151,28 +169,15 @@ const ViewFeedback = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Student Feedback</h2>
-        <p className="text-muted-foreground">View ratings and comments from students</p>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Total Feedback</span>
-            <MessageSquare className="h-4 w-4" />
-          </div>
-          <div className="text-xl font-bold mt-1">{totalFeedbacks}</div>
-        </Card>
-
-        <Card className="p-3">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Positive Feedback</span>
-            <Star className="h-4 w-4" />
-          </div>
-          <div className="text-xl font-bold mt-1">{positiveFeedbackRate}%</div>
-        </Card>
+      {/* Header */}
+      <div 
+        className="rounded-xl p-6 text-white shadow-lg"
+        style={{
+          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+        }}
+      >
+        <h1 className="text-3xl font-bold tracking-tight">Student Feedback</h1>
+        <p className="text-white/90">View ratings and comments from students</p>
       </div>
 
       {/* Additional Insights */}
@@ -206,8 +211,8 @@ const ViewFeedback = () => {
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        size={10}
-                        className={star <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                        size={20}
+                        className={star <= rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
                       />
                     ))}
                   </div>
@@ -227,12 +232,12 @@ const ViewFeedback = () => {
             placeholder="Search by student, comment, or facility..." 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)} 
-            className="pl-9 h-9" 
+            className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500" 
           />
         </div>
 
         <Select value={ratingFilter} onValueChange={setRatingFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] h-9">
+          <SelectTrigger className="w-full sm:w-[180px] h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
             <Filter className="mr-2 h-4 w-4" />
             <SelectValue placeholder="Filter by rating" />
           </SelectTrigger>
@@ -277,17 +282,17 @@ const ViewFeedback = () => {
                       <div className="flex items-center space-x-4">
                         <div>
                           <h3 className="font-semibold text-sm">{feedback.studentName}</h3>
-<div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
-  <span>ID: {feedback.studentId}</span>
-</div>
+                          <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
+                            <span>ID: {feedback.studentId}</span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            size={14}
-                            className={star <= feedback.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+                            size={20}
+                            className={star <= feedback.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
                           />
                         ))}
                         <span className="text-sm font-semibold ml-1">{feedback.rating}.0</span>
@@ -296,31 +301,31 @@ const ViewFeedback = () => {
 
                     <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{feedback.comment}</p>
 
-{feedback.complaintDetails && (
-<div className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground">
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1">
-    <div>
-      <span className="font-medium">Facility:</span> {feedback.complaintDetails.facilityType}
-    </div>
-    <div className="flex items-center gap-2">
-      <span className="font-medium">Hostel:</span>
-      <span>{feedback.complaintDetails.hostelName}</span>
-      <Badge variant="outline" className="h-4 text-xs">
-        Room {feedback.complaintDetails.roomNumber}
-      </Badge>
-    </div>
-    <div className="flex items-center gap-1">
-      <span className="font-medium">Issue:</span>
-      <span>{feedback.complaintDetails.issueDescription}</span>
-    </div>
-    <div className="flex items-center gap-1">
-      <Calendar size={10} />
-      <span>{feedback.complaintDetails.submittedDate}</span>
-    </div>
-  </div>
-</div>
-
-)}
+                    {feedback.complaintDetails && (
+                      <div className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1">
+                          <div>
+                            <span className="font-medium">Facility:</span> {feedback.complaintDetails.facilityType}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">Hostel:</span>
+                            <span>{feedback.complaintDetails.hostelName}</span>
+                            <Badge variant="outline" className="h-4 text-xs">
+                              Room {feedback.complaintDetails.roomNumber}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Issue:</span>
+                            <span>{feedback.complaintDetails.issueDescription}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={10} />
+                            <span>{feedback.complaintDetails.submittedDate}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    )}
                   </div>
                 </div>
               </CardContent>
