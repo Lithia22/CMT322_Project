@@ -1,15 +1,15 @@
-// frontend/src/pages/student/Feedback.jsx
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Star, Send, ThumbsUp, Calendar, MessageSquare, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Star, Send } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -24,18 +24,32 @@ const Feedback = () => {
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const resolvedComplaints = mockComplaints.filter(
+  // Get stored complaints and merge with mock data
+  const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
+  const allComplaints = [...mockComplaints, ...storedComplaints];
+
+  const resolvedComplaints = allComplaints.filter(
     complaint => complaint.status === 'Resolved' && complaint.matricNumber === user?.matricNumber
   );
 
-  const studentFeedbacks = mockFeedbacks.filter(
+  // Get stored feedbacks and merge with mock data
+  const storedFeedbacks = JSON.parse(localStorage.getItem('mockFeedbacks') || '[]');
+  const allFeedbacks = [...mockFeedbacks, ...storedFeedbacks];
+
+  const studentFeedbacks = allFeedbacks.filter(
     feedback => feedback.matricNumber === user?.matricNumber
   );
 
-  // Check which resolved complaints don't have feedback yet
+  // Complaints without feedback (for Give Feedback tab)
   const complaintsWithoutFeedback = resolvedComplaints.filter(complaint => 
     !studentFeedbacks.some(feedback => feedback.complaintId === complaint.id)
   );
+
+  // Complaints with feedback (for Feedback Done tab)
+  const complaintsWithFeedback = studentFeedbacks.map(feedback => {
+    const complaint = allComplaints.find(c => c.id === feedback.complaintId);
+    return { ...feedback, complaint };
+  });
 
   const form = useForm({
     resolver: zodResolver(feedbackSchema),
@@ -57,7 +71,6 @@ const Feedback = () => {
       submittedDate: new Date().toISOString().split('T')[0]
     };
 
-    // Save to localStorage for demo purposes
     const existingFeedbacks = JSON.parse(localStorage.getItem('mockFeedbacks') || '[]');
     existingFeedbacks.push(newFeedback);
     localStorage.setItem('mockFeedbacks', JSON.stringify(existingFeedbacks));
@@ -66,6 +79,7 @@ const Feedback = () => {
     setDialogOpen(false);
     form.reset();
     setSelectedComplaint(null);
+    window.location.reload();
   };
 
   const openFeedbackDialog = (complaint) => {
@@ -87,142 +101,124 @@ const Feedback = () => {
         <p className="text-white/90">Share your experience with our complaint resolution service</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Resolved Complaints Available for Feedback */}
-        <div>
-          <Card className="border border-gray-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-black">Resolved Complaints</CardTitle>
-              <CardDescription className="text-gray-600">
-                Provide feedback for your resolved issues
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {complaintsWithoutFeedback.length === 0 ? (
-                <div className="text-center py-8">
-                  <ThumbsUp className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2 text-black">No Pending Feedback</h3>
-                  <p className="text-gray-600">
-                    All your resolved complaints have been reviewed or no complaints are resolved yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {complaintsWithoutFeedback.map((complaint) => (
-                    <Card key={complaint.id} className="border border-gray-200 hover:shadow-md transition-shadow">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-black mb-1">{complaint.facilityType}</h4>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                              <MapPin size={14} />
-                              <span>{complaint.hostelName} • Room {complaint.roomNumber}</span>
-                            </div>
-                            <p className="text-sm text-gray-600 line-clamp-2">{complaint.issueDescription}</p>
-                          </div>
-                          <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">
-                            Resolved
-                          </Badge>
-                        </div>
-                        
-                        {complaint.adminRemarks && (
-                          <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
-                            <p className="text-sm font-medium text-blue-800 mb-1">Admin Remarks:</p>
-                            <p className="text-sm text-blue-700">{complaint.adminRemarks}</p>
-                          </div>
-                        )}
+      {/* Tabs for Give Feedback and Feedback Done */}
+      <Tabs defaultValue="give-feedback" className="space-y-4">
+        <TabsList>
+          <TabsTrigger 
+            value="give-feedback"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Give Feedback
+          </TabsTrigger>
+          <TabsTrigger 
+            value="feedback-done"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Feedback Done
+          </TabsTrigger>
+        </TabsList>
 
-                        <div className="flex items-center justify-between">
-                          <div className="text-xs text-gray-500">
-                            <Calendar size={12} className="inline mr-1" />
-                            Resolved on {complaint.submittedDate}
-                          </div>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                size="sm"
-                                onClick={() => openFeedbackDialog(complaint)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white"
-                              >
-                                <MessageSquare className="mr-2 h-4 w-4" />
-                                Give Feedback
-                              </Button>
-                            </DialogTrigger>
-                          </Dialog>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Give Feedback Tab */}
+        <TabsContent value="give-feedback">
+          {complaintsWithoutFeedback.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <h3 className="text-lg font-semibold mb-2 text-black">No Resolved Issues Yet</h3>
+                <p className="text-gray-600">
+                  You can only provide feedback for complaints marked as Resolved.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {complaintsWithoutFeedback.map((complaint) => (
+                <Card key={complaint.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-black mb-1">{complaint.facilityType}</h4>
+                      </div>
+                      <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">
+                        Resolved
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{complaint.issueDescription}</p>
+                    
+                    {complaint.adminRemarks ? (
+<div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
+  <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
+  <p className="text-xs text-gray-700 line-clamp-2">{complaint.adminRemarks}</p>
+</div>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
+                    )}
+<div className="flex items-center justify-end">
+  <Button 
+    size="sm"
+    onClick={() => openFeedbackDialog(complaint)}
+    className="bg-purple-600 hover:bg-purple-700 text-white h-8"
+  >
+    Give Feedback
+  </Button>
+</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
 
-        {/* Previous Feedbacks */}
-        <div>
-          <Card className="border border-gray-200 shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-black">Your Previous Feedbacks</CardTitle>
-              <CardDescription className="text-gray-600">Your feedback history</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {studentFeedbacks.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-600">No feedback submitted yet</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {studentFeedbacks.map((feedback) => {
-                    const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
-                    return (
-                      <Card key={feedback.id} className="border border-gray-200">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <h4 className="font-semibold text-black text-sm">
-                                {complaint?.facilityType || 'Unknown Facility'}
-                              </h4>
-                              <p className="text-xs text-gray-600">
-                                {complaint?.hostelName} • Room {complaint?.roomNumber}
-                              </p>
-                            </div>
-                            <div className="flex space-x-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  size={14}
-                                  className={
-                                    star <= feedback.rating
-                                      ? 'fill-yellow-400 text-yellow-400'
-                                      : 'text-gray-300'
-                                  }
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-700 mb-2">{feedback.comment}</p>
-                          <div className="flex items-center text-xs text-gray-500">
-                            <Calendar size={12} className="mr-1" />
-                            {feedback.submittedDate}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Alert className="mt-4 bg-purple-50 border-purple-200">
-            <AlertDescription className="text-purple-800 text-sm">
-              <strong>Note:</strong> You can only provide feedback for complaints marked as "Resolved" that you haven't reviewed yet.
-            </AlertDescription>
-          </Alert>
-        </div>
-      </div>
+        {/* Feedback Done Tab */}
+        <TabsContent value="feedback-done">
+          {complaintsWithFeedback.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <h3 className="text-lg font-semibold mb-2 text-black">No Feedback Submitted Yet</h3>
+                <p className="text-gray-600">
+                  You haven't provided any feedback yet. Once you submit feedback for resolved complaints, they will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {complaintsWithFeedback.map((feedbackItem) => (
+                <Card key={feedbackItem.id} className="border border-gray-200 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-black mb-1">
+                          {feedbackItem.complaint?.facilityType || 'Unknown Facility'}
+                        </h4>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            size={16}
+                            className={star <= feedbackItem.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-3">{feedbackItem.comment}</p>
+                    
+{feedbackItem.complaint?.adminRemarks ? (
+  <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
+    <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
+    <p className="text-xs text-gray-700 line-clamp-2">{feedbackItem.complaint.adminRemarks}</p>
+  </div>
+) : (
+  <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
+)}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Feedback Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -258,7 +254,7 @@ const Feedback = () => {
                                 size={32}
                                 className={
                                   star <= (hoverRating || rating)
-                                    ? 'fill-yellow-400 text-yellow-400'
+                                    ? 'fill-purple-600 text-yellow-400'
                                     : 'text-gray-300'
                                 }
                               />

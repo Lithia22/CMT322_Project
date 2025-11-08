@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, Filter, MapPin, Calendar, AlertCircle, Plus } from 'lucide-react';
+import { Search, Filter, MapPin, Calendar, AlertCircle, Plus, Upload } from 'lucide-react';
 import { mockComplaints, facilityTypes } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 const complaintSchema = z.object({
   facilityType: z.string().min(1, 'Please select a facility type'),
   issueDescription: z.string().min(10, 'Description must be at least 10 characters'),
+  photo: z.any().optional(),
 });
 
 const MyComplaints = () => {
@@ -27,9 +28,9 @@ const MyComplaints = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Get complaints from localStorage first, then fallback to mockData
+  // Get stored complaints and merge with mock data
   const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
-  const allComplaints = storedComplaints.length > 0 ? storedComplaints : mockComplaints;
+  const allComplaints = [...mockComplaints, ...storedComplaints];
   
   const studentComplaints = allComplaints.filter(
     complaint => complaint.matricNumber === user?.matricNumber
@@ -62,11 +63,10 @@ const MyComplaints = () => {
       ...data,
       status: 'Pending',
       submittedDate: new Date().toISOString().split('T')[0],
-      photo: null,
+      photo: data.photo ? data.photo.name : null,
       adminRemarks: ''
     };
 
-    // Save to localStorage
     const existingComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
     existingComplaints.push(newComplaint);
     localStorage.setItem('mockComplaints', JSON.stringify(existingComplaints));
@@ -74,6 +74,7 @@ const MyComplaints = () => {
     toast.success('Complaint submitted successfully!');
     setDialogOpen(false);
     form.reset();
+    window.location.reload(); // Refresh to show new complaint
   };
 
   const getStatusColor = (status) => {
@@ -94,48 +95,81 @@ const MyComplaints = () => {
           background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
         }}
       >
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">My Complaints</h2>
-            <p className="text-white/90">Manage and track your submitted complaints</p>
+        <h2 className="text-3xl font-bold tracking-tight">My Complaints</h2>
+        <p className="text-white/90">Manage and track your submitted complaints</p>
+      </div>
+
+      {/* Search and Filters Row */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
+          <div className="relative w-full sm:max-w-lg">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={16} />
+            <Input 
+              placeholder="Search by facility, issue..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+              className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500 w-full" 
+            />
           </div>
+
+          <div className="flex gap-3 items-center w-full sm:w-auto justify-between sm:justify-start">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px] h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Resolved">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Badge variant="secondary" className="h-7 whitespace-nowrap">
+              {filteredComplaints.length} of {studentComplaints.length}
+            </Badge>
+          </div>
+        </div>
+
+        <div className="sm:ml-auto w-full sm:w-auto">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-white text-purple-600 hover:bg-gray-100 font-semibold">
+              <Button className="bg-purple-600 text-white hover:bg-purple-700 h-9 whitespace-nowrap w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 New Complaint
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
-                <DialogDescription className="text-gray-600">
-                  Report an issue with your hostel facility
-                </DialogDescription>
-              </DialogHeader>
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+  <DialogHeader>
+    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
+    <DialogDescription className="text-gray-600">
+      Report an issue with your hostel facility
+    </DialogDescription>
+  </DialogHeader>
               
-              {/* Student Info */}
-              <div className="grid grid-cols-2 gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100 text-sm">
-                <div>
-                  <label className="font-medium text-gray-700">Matric Number</label>
-                  <p className="text-gray-900">{user?.matricNumber}</p>
-                </div>
-                <div>
-                  <label className="font-medium text-gray-700">Hostel</label>
-                  <p className="text-gray-900">{user?.hostelName}</p>
-                </div>
-                <div>
-                  <label className="font-medium text-gray-700">Room Number</label>
-                  <p className="text-gray-900">{user?.roomNumber}</p>
-                </div>
-                <div>
-                  <label className="font-medium text-gray-700">Name</label>
-                  <p className="text-gray-900">{user?.name}</p>
-                </div>
-              </div>
-
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Student Info */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-100 text-sm">
+    <div>
+    <label className="font-medium text-gray-800">Student Name</label>
+    <p className="text-gray-500">{user?.name}</p>
+  </div>
+  <div>
+    <label className="font-medium text-gray-800">Matric Number</label>
+    <p className="text-gray-500">{user?.matricNumber}</p>
+  </div>
+  <div>
+    <label className="font-medium text-gray-800">Hostel</label>
+    <p className="text-gray-500">{user?.hostelName}</p>
+  </div>
+  <div>
+    <label className="font-medium text-gray-800">Room Number</label>
+    <p className="text-gray-500">{user?.roomNumber}</p>
+  </div>
+</div>
+
                   <FormField
                     control={form.control}
                     name="facilityType"
@@ -170,7 +204,7 @@ const MyComplaints = () => {
                         <FormControl>
                           <Textarea
                             placeholder="Describe the issue in detail..."
-                            className="min-h-24 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                            className="min-h-32 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                             {...field}
                           />
                         </FormControl>
@@ -179,7 +213,44 @@ const MyComplaints = () => {
                     )}
                   />
 
-                  <div className="flex gap-3 pt-2">
+                  {/* Photo Upload (Optional) */}
+                  <FormField
+                    control={form.control}
+                    name="photo"
+                    render={({ field: { value, onChange, ...fieldProps } }) => (
+                      <FormItem>
+                        <FormLabel className="text-black">Upload Photo (Optional)</FormLabel>
+                        <FormControl>
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
+                            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => onChange(e.target.files?.[0])}
+                              className="hidden"
+                              id="photo-upload"
+                              {...fieldProps}
+                            />
+                            <label htmlFor="photo-upload" className="cursor-pointer">
+                              <span className="text-purple-600 hover:underline font-semibold">Choose a file</span>
+                              <span className="text-gray-500"> or drag and drop</span>
+                            </label>
+                            {value && (
+                              <p className="text-sm text-green-600 mt-2">
+                                ✓ {value.name}
+                              </p>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Upload a photo to help us better understand the issue
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex gap-4 pt-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -201,44 +272,6 @@ const MyComplaints = () => {
           </Dialog>
         </div>
       </div>
-
-      {/* Filters */}
-      <Card className="border border-gray-200 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-black">Filters</CardTitle>
-          <CardDescription className="text-gray-600">Search and filter your complaints</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-              <Input 
-                placeholder="Search by facility, issue, or hostel..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="pl-10 border-gray-300 focus:border-purple-500 focus:ring-purple-500" 
-              />
-            </div>
-
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Resolved">Resolved</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <div className="flex items-center justify-center bg-purple-50 rounded-md px-3 text-sm text-purple-700 font-medium border border-purple-100">
-              Showing {filteredComplaints.length} of {studentComplaints.length}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Complaints List */}
       {filteredComplaints.length === 0 ? (
@@ -262,36 +295,35 @@ const MyComplaints = () => {
                     Submit Your First Complaint
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
-                    <DialogDescription className="text-gray-600">
-                      Report an issue with your hostel facility
-                    </DialogDescription>
-                  </DialogHeader>
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+  <DialogHeader>
+    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
+    <DialogDescription className="text-gray-600">
+      Report an issue with your hostel facility
+    </DialogDescription>
+  </DialogHeader>
                   
-                  {/* Student Info */}
-                  <div className="grid grid-cols-2 gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100 text-sm">
-                    <div>
-                      <label className="font-medium text-gray-700">Matric Number</label>
-                      <p className="text-gray-900">{user?.matricNumber}</p>
-                    </div>
-                    <div>
-                      <label className="font-medium text-gray-700">Hostel</label>
-                      <p className="text-gray-900">{user?.hostelName}</p>
-                    </div>
-                    <div>
-                      <label className="font-medium text-gray-700">Room Number</label>
-                      <p className="text-gray-900">{user?.roomNumber}</p>
-                    </div>
-                    <div>
-                      <label className="font-medium text-gray-700">Name</label>
-                      <p className="text-gray-900">{user?.name}</p>
-                    </div>
-                  </div>
-
                   <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-100 text-sm">
+                        <div>
+                          <label className="font-medium text-gray-700">Matric Number</label>
+                          <p className="text-gray-900">{user?.matricNumber}</p>
+                        </div>
+                        <div>
+                          <label className="font-medium text-gray-700">Hostel</label>
+                          <p className="text-gray-900">{user?.hostelName}</p>
+                        </div>
+                        <div>
+                          <label className="font-medium text-gray-700">Room Number</label>
+                          <p className="text-gray-900">{user?.roomNumber}</p>
+                        </div>
+                        <div>
+                          <label className="font-medium text-gray-700">Name</label>
+                          <p className="text-gray-900">{user?.name}</p>
+                        </div>
+                      </div>
+
                       <FormField
                         control={form.control}
                         name="facilityType"
@@ -326,7 +358,7 @@ const MyComplaints = () => {
                             <FormControl>
                               <Textarea
                                 placeholder="Describe the issue in detail..."
-                                className="min-h-24 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                                className="min-h-32 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                                 {...field}
                               />
                             </FormControl>
@@ -335,7 +367,43 @@ const MyComplaints = () => {
                         )}
                       />
 
-                      <div className="flex gap-3 pt-2">
+                      <FormField
+                        control={form.control}
+                        name="photo"
+                        render={({ field: { value, onChange, ...fieldProps } }) => (
+                          <FormItem>
+                            <FormLabel className="text-black">Upload Photo (Optional)</FormLabel>
+                            <FormControl>
+                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
+                                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                                <Input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => onChange(e.target.files?.[0])}
+                                  className="hidden"
+                                  id="photo-upload-2"
+                                  {...fieldProps}
+                                />
+                                <label htmlFor="photo-upload-2" className="cursor-pointer">
+                                  <span className="text-purple-600 hover:underline font-semibold">Choose a file</span>
+                                  <span className="text-gray-500"> or drag and drop</span>
+                                </label>
+                                {value && (
+                                  <p className="text-sm text-green-600 mt-2">
+                                    ✓ {value.name}
+                                  </p>
+                                )}
+                              </div>
+                            </FormControl>
+                            <FormDescription>
+                              Upload a photo to help us better understand the issue
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex gap-4 pt-2">
                         <Button
                           type="button"
                           variant="outline"
@@ -387,18 +455,14 @@ const MyComplaints = () => {
 
                     <p className="text-gray-600 mb-4">{complaint.issueDescription}</p>
 
-                    {complaint.adminRemarks && (
-                      <Alert className="mb-4 bg-blue-50 border-blue-200">
-                        <AlertDescription className="text-blue-800">
-                          <p className="font-semibold mb-1">Admin Remarks:</p>
-                          <p className="text-sm">{complaint.adminRemarks}</p>
-                        </AlertDescription>
-                      </Alert>
+                    {complaint.adminRemarks ? (
+                      <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
+                        <p className="font-semibold mb-1 text-gray-800">Admin Remarks:</p>
+                        <p className="text-sm text-gray-700">{complaint.adminRemarks}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">No remarks</p>
                     )}
-                  </div>
-
-                  <div className="flex flex-col items-start lg:items-end gap-2">
-                    <p className="text-xs text-gray-500">ID: #{complaint.id}</p>
                   </div>
                 </div>
               </CardContent>

@@ -12,7 +12,6 @@ import SignUp from './pages/public/SignUp';
 
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
-import SubmitComplaint from './pages/student/SubmitComplaint';
 import MyComplaints from './pages/student/MyComplaints';
 import Feedback from './pages/student/Feedback';
 
@@ -51,14 +50,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <StudentDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/submit-complaint" 
-            element={
-              <ProtectedRoute>
-                <SubmitComplaint />
               </ProtectedRoute>
             } 
           />

@@ -141,7 +141,7 @@ const SignUp = () => {
                       <FormLabel className="text-gray-700">USM Student Email</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="john@student.usm.my" 
+                          placeholder="test@student.usm.my" 
                           {...field} 
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
