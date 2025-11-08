@@ -27,23 +27,62 @@ const AdminDashboard = () => {
     resolved: mockComplaints.filter(c => c.status === 'Resolved').length,
   };
 
-  const generateTimeSeriesData = () => {
-    const data = [];
-    const today = new Date();
-    const days = timeRange === "7d" ? 7 : 30;
+const generateTimeSeriesData = () => {
+  // Get all complaint dates
+  const complaintDates = mockComplaints.map(c => c.submittedDate);
+  
+  if (complaintDates.length === 0) {
+    return [];
+  }
+  
+  // Find the earliest and latest dates from actual data
+  const sortedDates = complaintDates.sort();
+  const earliestDate = new Date(sortedDates[0]);
+  const latestDate = new Date(sortedDates[sortedDates.length - 1]);
+  
+  // Determine date range based on timeRange filter
+  let startDate;
+  if (timeRange === "7d") {
+    startDate = new Date(latestDate);
+    startDate.setDate(startDate.getDate() - 6); // Last 7 days from latest complaint
+  } else {
+    startDate = new Date(latestDate);
+    startDate.setDate(startDate.getDate() - 29); // Last 30 days from latest complaint
+  }
+  
+  // Make sure don't go before the earliest complaint
+  if (startDate < earliestDate) {
+    startDate = earliestDate;
+  }
+  
+  const data = [];
+  const currentDate = new Date(startDate);
+  
+  // Loop through EVERY day - filling gaps with 0
+  while (currentDate <= latestDate) {
+    const dateString = currentDate.toISOString().split('T')[0];
     
-    for (let i = days - 1; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      data.push({
-        date: date.toISOString().split('T')[0],
-        complaints: Math.floor(Math.random() * 12) + 3,
-      });
-    }
-    return data;
-  };
+    // Count complaints for this specific date (0 if none)
+    const count = mockComplaints.filter(complaint => 
+      complaint.submittedDate === dateString
+    ).length;
+    
+    data.push({
+      date: dateString,
+      complaints: count,
+    });
+    
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return data;
+};
 
-  const timeSeriesData = useMemo(() => generateTimeSeriesData(), [timeRange]);
+const timeSeriesData = useMemo(() => {
+  const data = generateTimeSeriesData();
+  console.log("Chart data:", data);
+  return data;
+}, [timeRange]);
 
   const facilityData = [...new Set(mockComplaints.map(c => c.facilityType))].map(type => ({
     name: type,

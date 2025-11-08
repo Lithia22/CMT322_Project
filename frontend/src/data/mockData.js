@@ -31,7 +31,7 @@ export const mockComplaints = [
     facilityType: "Air Conditioner",
     issueDescription: "AC not cooling properly, making loud noise",
     status: "In Progress",
-    submittedDate: "2024-10-28",
+    submittedDate: "2025-10-16",
     photo: null,
     adminRemarks: "Technician assigned, will fix by tomorrow"
   },
@@ -44,7 +44,7 @@ export const mockComplaints = [
     facilityType: "Bathroom",
     issueDescription: "Water heater not working, no hot water",
     status: "Pending",
-    submittedDate: "2024-10-29",
+    submittedDate: "2025-10-16",
     photo: null,
     adminRemarks: ""
   },
@@ -57,7 +57,7 @@ export const mockComplaints = [
     facilityType: "Furniture",
     issueDescription: "Study table broken, drawer not opening",
     status: "Resolved",
-    submittedDate: "2024-10-25",
+    submittedDate: "2025-10-16",
     photo: null,
     adminRemarks: "Replaced with new table on 30th Oct"
   },
@@ -70,7 +70,7 @@ export const mockComplaints = [
     facilityType: "Electrical",
     issueDescription: "Power socket not working in bedroom",
     status: "Resolved",
-    submittedDate: "2024-10-20",
+    submittedDate: "2025-10-17",
     photo: null,
     adminRemarks: "Fixed by electrician"
   },
@@ -83,7 +83,7 @@ export const mockComplaints = [
     facilityType: "Plumbing",
     issueDescription: "Toilet clogged, water overflowing",
     status: "In Progress",
-    submittedDate: "2024-10-30",
+    submittedDate: "2025-10-15",
     photo: null,
     adminRemarks: "Plumber on the way"
   },
@@ -96,7 +96,7 @@ export const mockComplaints = [
     facilityType: "Door/Window",
     issueDescription: "Door lock jammed, cannot lock properly",
     status: "Pending",
-    submittedDate: "2024-10-31",
+    submittedDate: "2025-10-18",
     photo: null,
     adminRemarks: ""
   },
@@ -109,7 +109,7 @@ export const mockComplaints = [
     facilityType: "Lighting",
     issueDescription: "Ceiling light flickering and dim",
     status: "Resolved",
-    submittedDate: "2024-10-18",
+    submittedDate: "2025-10-18",
     photo: null,
     adminRemarks: "Replaced bulb"
   },
@@ -122,7 +122,7 @@ export const mockComplaints = [
     facilityType: "Air Conditioner",
     issueDescription: "AC remote control missing",
     status: "Pending",
-    submittedDate: "2024-11-01",
+    submittedDate: "2025-11-01",
     photo: null,
     adminRemarks: ""
   },
@@ -135,7 +135,7 @@ export const mockComplaints = [
     facilityType: "Bathroom",
     issueDescription: "Shower head leaking",
     status: "Pending",
-    submittedDate: "2024-11-02",
+    submittedDate: "2025-11-02",
     photo: null,
     adminRemarks: ""
   },
@@ -148,7 +148,7 @@ export const mockComplaints = [
     facilityType: "Electrical",
     issueDescription: "Ceiling fan not working",
     status: "In Progress",
-    submittedDate: "2024-11-01",
+    submittedDate: "2025-11-01",
     photo: null,
     adminRemarks: "Electrician scheduled for tomorrow"
   },
@@ -161,7 +161,7 @@ export const mockComplaints = [
     facilityType: "Plumbing",
     issueDescription: "Sink is leaking water continuously",
     status: "Resolved",
-    submittedDate: "2024-10-15",
+    submittedDate: "2025-10-15",
     photo: null,
     adminRemarks: "Plumber fixed the leak, replaced old pipes"
   },
@@ -174,12 +174,10 @@ export const mockComplaints = [
     facilityType: "Lighting",
     issueDescription: "Bathroom light not working",
     status: "Resolved",
-    submittedDate: "2024-10-22",
+    submittedDate: "2025-10-22",
     photo: null,
     adminRemarks: "Electrician replaced the bulb and fixed wiring"
   },
-  // Add these new complaints to your existing mockComplaints array:
-
 {
   id: 13,
   matricNumber: "164418",
@@ -189,7 +187,7 @@ export const mockComplaints = [
   facilityType: "Air Conditioner",
   issueDescription: "AC not turning on, no power",
   status: "Pending",
-  submittedDate: "2024-11-03",
+  submittedDate: "2025-11-03",
   photo: null,
   adminRemarks: ""
 },
@@ -202,7 +200,7 @@ export const mockComplaints = [
   facilityType: "Bathroom",
   issueDescription: "Toilet flush not working properly",
   status: "In Progress",
-  submittedDate: "2024-11-02",
+  submittedDate: "2025-11-02",
   photo: null,
   adminRemarks: "Maintenance team assigned"
 },
@@ -215,7 +213,7 @@ export const mockComplaints = [
   facilityType: "Furniture",
   issueDescription: "Bed frame making creaking noise",
   status: "Pending",
-  submittedDate: "2024-11-04",
+  submittedDate: "2025-11-04",
   photo: null,
   adminRemarks: ""
 },
@@ -228,7 +226,7 @@ export const mockComplaints = [
   facilityType: "Electrical",
   issueDescription: "Multiple power sockets not working",
   status: "In Progress",
-  submittedDate: "2024-11-01",
+  submittedDate: "2025-11-01",
   photo: null,
   adminRemarks: "Electrician will check tomorrow"
 },
@@ -241,7 +239,7 @@ export const mockComplaints = [
   facilityType: "Plumbing",
   issueDescription: "Water pressure very low in shower",
   status: "Pending",
-  submittedDate: "2024-11-03",
+  submittedDate: "2025-11-03",
   photo: null,
   adminRemarks: ""
 },
@@ -254,7 +252,7 @@ export const mockComplaints = [
   facilityType: "Door/Window",
   issueDescription: "Window cannot close properly",
   status: "Resolved",
-  submittedDate: "2024-10-28",
+  submittedDate: "2025-10-28",
   photo: null,
   adminRemarks: "Window hinge replaced"
 },
@@ -267,7 +265,7 @@ export const mockComplaints = [
   facilityType: "Lighting",
   issueDescription: "Corridor light flickering",
   status: "Pending",
-  submittedDate: "2024-11-04",
+  submittedDate: "2025-11-04",
   photo: null,
   adminRemarks: ""
 },
@@ -280,7 +278,7 @@ export const mockComplaints = [
   facilityType: "Air Conditioner",
   issueDescription: "AC leaking water",
   status: "In Progress",
-  submittedDate: "2024-11-02",
+  submittedDate: "2025-11-02",
   photo: null,
   adminRemarks: "AC technician scheduled"
 },
@@ -293,7 +291,7 @@ export const mockComplaints = [
   facilityType: "Bathroom",
   issueDescription: "Bathroom drain clogged",
   status: "Resolved",
-  submittedDate: "2024-10-29",
+  submittedDate: "2025-10-20",
   photo: null,
   adminRemarks: "Drain cleared and cleaned"
 },
@@ -306,7 +304,7 @@ export const mockComplaints = [
   facilityType: "Furniture",
   issueDescription: "Wardrobe door broken",
   status: "Pending",
-  submittedDate: "2024-11-05",
+  submittedDate: "2025-11-05",
   photo: null,
   adminRemarks: ""
 },
@@ -319,7 +317,7 @@ export const mockComplaints = [
   facilityType: "Electrical",
   issueDescription: "Study lamp not working",
   status: "Resolved",
-  submittedDate: "2024-10-27",
+  submittedDate: "2025-10-27",
   photo: null,
   adminRemarks: "Lamp replaced"
 },
@@ -332,7 +330,7 @@ export const mockComplaints = [
   facilityType: "Plumbing",
   issueDescription: "Hot water not consistent",
   status: "In Progress",
-  submittedDate: "2024-11-03",
+  submittedDate: "2025-11-03",
   photo: null,
   adminRemarks: "Checking water heater system"
 },
@@ -345,7 +343,7 @@ export const mockComplaints = [
   facilityType: "Door/Window",
   issueDescription: "Room door lock malfunctioning",
   status: "Pending",
-  submittedDate: "2024-11-04",
+  submittedDate: "2025-11-04",
   photo: null,
   adminRemarks: ""
 },
@@ -358,7 +356,7 @@ export const mockComplaints = [
   facilityType: "Lighting",
   issueDescription: "Room lights too dim",
   status: "Resolved",
-  submittedDate: "2024-10-30",
+  submittedDate: "2025-10-30",
   photo: null,
   adminRemarks: "Upgraded to brighter bulbs"
 },
@@ -371,7 +369,7 @@ export const mockComplaints = [
   facilityType: "Air Conditioner",
   issueDescription: "AC remote not working",
   status: "Pending",
-  submittedDate: "2024-11-05",
+  submittedDate: "2025-11-05",
   photo: null,
   adminRemarks: ""
 },
@@ -384,7 +382,7 @@ export const mockComplaints = [
   facilityType: "Bathroom",
   issueDescription: "Shower drainage slow",
   status: "In Progress",
-  submittedDate: "2024-11-04",
+  submittedDate: "2025-11-04",
   photo: null,
   adminRemarks: "Plumbing maintenance scheduled"
 },
@@ -397,7 +395,7 @@ export const mockComplaints = [
   facilityType: "Furniture",
   issueDescription: "Chair leg broken",
   status: "Resolved",
-  submittedDate: "2024-10-26",
+  submittedDate: "2025-10-26",
   photo: null,
   adminRemarks: "Chair replaced"
 },
@@ -410,7 +408,7 @@ export const mockComplaints = [
   facilityType: "Electrical",
   issueDescription: "Extension cord not working",
   status: "Pending",
-  submittedDate: "2024-11-05",
+  submittedDate: "2025-11-05",
   photo: null,
   adminRemarks: ""
 }
@@ -424,7 +422,7 @@ export const mockFeedbacks = [
     studentName: "Test",
     rating: 5,
     comment: "Very quick response! Table was replaced within 2 days. Thank you!",
-    submittedDate: "2024-10-31"
+    submittedDate: "2025-10-31"
   },
   {
     id: 2,
@@ -433,7 +431,7 @@ export const mockFeedbacks = [
     studentName: "Lee Chen Wei",
     rating: 4,
     comment: "Good service, electrician was professional",
-    submittedDate: "2024-10-22"
+    submittedDate: "2025-10-22"
   },
   {
     id: 3,
@@ -442,7 +440,7 @@ export const mockFeedbacks = [
     studentName: "David Tan",
     rating: 3,
     comment: "Took a while but eventually fixed",
-    submittedDate: "2024-10-19"
+    submittedDate: "2025-10-19"
   }
 ];
 

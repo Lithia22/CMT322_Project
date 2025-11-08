@@ -88,7 +88,7 @@ export function ComplaintsTrendChart({ data, timeRange, onTimeRangeChange }) {
             />
             <Area
               dataKey="complaints"
-              type="natural"
+              type="monotone"
               fill="url(#fillComplaints)"
               stroke="hsl(270, 76%, 53%)" 
               strokeWidth={2}
