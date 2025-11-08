@@ -82,12 +82,16 @@ const hostelData = [...new Set(mockComplaints.map(c => c.hostelName))].map(hoste
     </div>
   );
 
-  const ChartSkeleton = () => (
-    <div className="space-y-6">
-      <Skeleton className="h-10 w-48 bg-gray-200" />
-      <Skeleton className="h-80 w-full bg-gray-200" />
-    </div>
-  );
+const ChartSkeleton = () => (
+  <Card>
+    <CardContent className="pt-6">
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-48 bg-gray-200" />
+        <Skeleton className="h-80 w-full bg-gray-200" />
+      </div>
+    </CardContent>
+  </Card>
+);
 
   const RecentActivitySkeleton = () => (
     <div className="space-y-4">
@@ -107,38 +111,38 @@ const hostelData = [...new Set(mockComplaints.map(c => c.hostelName))].map(hoste
     </div>
   );
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-          <Skeleton className="h-4 w-96 bg-gray-200" />
-        </div>
-        
-        <StatsSkeleton />
-        <ChartSkeleton />
-        
-        <div className="grid gap-6 lg:grid-cols-2">
-          <ChartSkeleton />
-          <ChartSkeleton />
-        </div>
-
-        <Tabs defaultValue="complaints" className="space-y-4">
-          <TabsList>
-            <Skeleton className="h-10 w-32 bg-gray-200" />
-            <Skeleton className="h-10 w-32 bg-gray-200" />
-          </TabsList>
-          <TabsContent value="complaints">
-            <Card>
-              <CardContent className="pt-6">
-                <RecentActivitySkeleton />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+if (isLoading) {
+  return (
+    <div className="space-y-6">
+      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-96 bg-gray-200" />
       </div>
-    );
-  }
+      
+      <StatsSkeleton />
+      <ChartSkeleton />
+      
+      <div className="grid gap-6 lg:grid-cols-2">
+        <ChartSkeleton />
+        <ChartSkeleton />
+      </div>
+
+      <Tabs defaultValue="complaints" className="space-y-4">
+        <TabsList>
+          <Skeleton className="h-10 w-32 bg-gray-200" />
+          <Skeleton className="h-10 w-32 bg-gray-200" />
+        </TabsList>
+        <TabsContent value="complaints">
+          <Card>
+            <CardContent className="pt-6">
+              <RecentActivitySkeleton />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
 
   return (
     <div className="space-y-6">

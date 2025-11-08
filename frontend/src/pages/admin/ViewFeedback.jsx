@@ -116,42 +116,12 @@ const ViewFeedback = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div>
-          <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-          <Skeleton className="h-4 w-96 bg-gray-200" />
-        </div>
+      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-96 bg-gray-200" />
+      </div>
 
 <StatsSkeleton />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <Skeleton className="h-5 w-32 bg-gray-200" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24 bg-gray-200" />
-                  <Skeleton className="h-4 w-8 bg-gray-200" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <Skeleton className="h-5 w-32 bg-gray-200" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-20 bg-gray-200" />
-                  <Skeleton className="h-4 w-8 bg-gray-200" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
         <div className="flex flex-col sm:flex-row gap-3 items-center">
           <Skeleton className="h-9 flex-1 bg-gray-200" />
           <Skeleton className="h-9 w-[180px] bg-gray-200" />

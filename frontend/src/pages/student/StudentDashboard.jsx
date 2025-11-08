@@ -52,10 +52,10 @@ const StudentDashboard = () => {
 
   // Skeleton components
   const HeaderSkeleton = () => (
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-64 bg-gray-200" />
-      <Skeleton className="h-4 w-96 bg-gray-200" />
-    </div>
+      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-96 bg-gray-200" />
+      </div>
   );
 
   const StatsSkeleton = () => (

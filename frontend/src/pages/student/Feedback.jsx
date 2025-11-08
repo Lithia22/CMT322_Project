@@ -99,10 +99,10 @@ const Feedback = () => {
 
   // Skeleton components
   const HeaderSkeleton = () => (
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-64 bg-gray-200" />
-      <Skeleton className="h-4 w-96 bg-gray-200" />
-    </div>
+      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-96 bg-gray-200" />
+      </div>
   );
 
   const TabsSkeleton = () => (
@@ -129,16 +129,6 @@ const Feedback = () => {
         ))}
       </div>
     </div>
-  );
-
-  const EmptyStateSkeleton = () => (
-    <Card>
-      <CardContent className="py-12 text-center">
-        <Skeleton className="h-12 w-12 mx-auto mb-4 bg-gray-200 rounded-full" />
-        <Skeleton className="h-6 w-48 mx-auto mb-2 bg-gray-200" />
-        <Skeleton className="h-4 w-64 mx-auto bg-gray-200" />
-      </CardContent>
-    </Card>
   );
 
   if (isLoading) {
