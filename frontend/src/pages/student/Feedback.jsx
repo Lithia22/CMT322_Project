@@ -4,13 +4,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Star, Send } from 'lucide-react';
+import { Star} from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -300,7 +300,6 @@ const Feedback = () => {
                   name="rating"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-black">Rate Our Service</FormLabel>
                       <FormControl>
                         <div className="flex space-x-2 justify-center">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -324,15 +323,6 @@ const Feedback = () => {
                           ))}
                         </div>
                       </FormControl>
-                      {rating > 0 && (
-                        <FormDescription>
-                          {rating === 5 && '⭐ Excellent!'}
-                          {rating === 4 && '⭐ Very Good!'}
-                          {rating === 3 && '⭐ Good'}
-                          {rating === 2 && '⭐ Fair'}
-                          {rating === 1 && '⭐ Poor'}
-                        </FormDescription>
-                      )}
                       <FormMessage />
                     </FormItem>
                   )}
@@ -370,7 +360,6 @@ const Feedback = () => {
                     type="submit"
                     className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
                   >
-                    <Send className="mr-2 h-4 w-4" />
                     Submit Feedback
                   </Button>
                 </div>
