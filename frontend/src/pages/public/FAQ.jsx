@@ -6,11 +6,11 @@ const FAQ = () => {
   const faqData = [
     {
       question: "What types of issues can I report through this system?",
-      answer: "Plumbing, electrical, furniture, cleaning, Wi-Fi, security, and maintenance issues."
+      answer: "Air conditioner, Bathroom, Furniture, Electrical, Plumbing, Door/Window, Lighting and other issues."
     },
     {
       question: "How do I create an account to report issues?",
-      answer: "Use your USM student ID and university email to register."
+      answer: "Use your USM matric number and university email to register."
     },
     {
       question: "Is there a mobile app available for reporting issues?",
@@ -18,7 +18,7 @@ const FAQ = () => {
     },
     {
       question: "What information should I include when submitting a complaint?",
-      answer: "Clear description, photos, and urgency level."
+      answer: "Clear description and upload a photo of the issue."
     },
     {
       question: "How can I check the status of my submitted complaint?",
