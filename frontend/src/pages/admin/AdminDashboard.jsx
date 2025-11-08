@@ -50,10 +50,10 @@ const AdminDashboard = () => {
     value: mockComplaints.filter(c => c.facilityType === type).length,
   }));
 
-  const hostelData = [...new Set(mockComplaints.map(c => c.hostelName))].map(hostel => ({
-    hostel: hostel.replace('Desasiswa ', ''),
-    count: mockComplaints.filter(c => c.hostelName === hostel).length,
-  }));
+const hostelData = [...new Set(mockComplaints.map(c => c.hostelName))].map(hostel => ({
+  hostel: hostel, 
+  count: mockComplaints.filter(c => c.hostelName === hostel).length,
+}));
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -84,8 +84,8 @@ const AdminDashboard = () => {
 
   const ChartSkeleton = () => (
     <div className="space-y-6">
-      <Skeleton className="h-10 w-48 bg-muted" />
-      <Skeleton className="h-80 w-full bg-muted" />
+      <Skeleton className="h-10 w-48 bg-gray-200" />
+      <Skeleton className="h-80 w-full bg-gray-200" />
     </div>
   );
 
@@ -94,13 +94,13 @@ const AdminDashboard = () => {
       {[...Array(5)].map((_, i) => (
         <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
           <div className="space-y-2 flex-1">
-            <Skeleton className="h-4 w-32 bg-muted" />
-            <Skeleton className="h-3 w-48 bg-muted" />
-            <Skeleton className="h-3 w-64 bg-muted" />
+            <Skeleton className="h-4 w-32 bg-gray-200" />
+            <Skeleton className="h-3 w-48 bg-gray-200" />
+            <Skeleton className="h-3 w-64 bg-gray-200" />
           </div>
           <div className="flex items-center gap-2 ml-4">
-            <Skeleton className="h-6 w-20 rounded-full bg-muted" />
-            <Skeleton className="h-6 w-24 rounded-full bg-muted" />
+            <Skeleton className="h-6 w-20 rounded-full bg-gray-200" />
+            <Skeleton className="h-6 w-24 rounded-full bg-gray-200" />
           </div>
         </div>
       ))}
@@ -111,8 +111,8 @@ const AdminDashboard = () => {
     return (
       <div className="space-y-6">
         <div>
-          <Skeleton className="h-8 w-64 mb-2 bg-muted" />
-          <Skeleton className="h-4 w-96 bg-muted" />
+          <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+          <Skeleton className="h-4 w-96 bg-gray-200" />
         </div>
         
         <StatsSkeleton />
@@ -125,8 +125,8 @@ const AdminDashboard = () => {
 
         <Tabs defaultValue="complaints" className="space-y-4">
           <TabsList>
-            <Skeleton className="h-10 w-32 bg-muted" />
-            <Skeleton className="h-10 w-32 bg-muted" />
+            <Skeleton className="h-10 w-32 bg-gray-200" />
+            <Skeleton className="h-10 w-32 bg-gray-200" />
           </TabsList>
           <TabsContent value="complaints">
             <Card>
@@ -160,7 +160,8 @@ const AdminDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Total Complaints</CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-<FileText className="h-4 w-4 text-black" />            </div>
+              <FileText className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-black">{stats.totalComplaints}</div>
@@ -173,7 +174,8 @@ const AdminDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Pending</CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-<Clock className="h-4 w-4 text-black" />            </div>
+              <Clock className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-black">{stats.pending}</div>
@@ -186,7 +188,8 @@ const AdminDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">In Progress</CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-<AlertTriangle className="h-4 w-4 text-black" />            </div>
+              <AlertTriangle className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-black">{stats.inProgress}</div>
@@ -199,7 +202,8 @@ const AdminDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-black">Resolved</CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-<CheckCircle className="h-4 w-4 text-black" />            </div>
+              <CheckCircle className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-black">{stats.resolved}</div>
@@ -220,22 +224,22 @@ const AdminDashboard = () => {
         <FacilityPieChart data={facilityData} total={stats.totalComplaints} />
       </div>
 
-{/* Recent Activity Tabs */}
-<Tabs defaultValue="complaints" className="space-y-4">
-  <TabsList>
-    <TabsTrigger 
-      value="complaints"
-      className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
-    >
-      Recent Complaints
-    </TabsTrigger>
-    <TabsTrigger 
-      value="feedback"
-      className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
-    >
-      Recent Feedback
-    </TabsTrigger>
-  </TabsList>
+      {/* Recent Activity Tabs */}
+      <Tabs defaultValue="complaints" className="space-y-4">
+        <TabsList>
+          <TabsTrigger 
+            value="complaints"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Recent Complaints
+          </TabsTrigger>
+          <TabsTrigger 
+            value="feedback"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Recent Feedback
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="complaints">
           <Card>
@@ -246,7 +250,7 @@ const AdminDashboard = () => {
                     <div className="space-y-1 flex-1">
                       <p className="font-medium text-black">{complaint.facilityType}</p>
                       <p className="text-sm text-gray-600">
-                        {complaint.studentName} • {complaint.hostelName}
+                        {complaint.studentName} • {complaint.matricNumber} • {complaint.hostelName}
                       </p>
                       <p className="text-xs text-gray-500">{complaint.issueDescription}</p>
                     </div>
@@ -271,17 +275,18 @@ const AdminDashboard = () => {
                     <div className="flex items-start justify-between">
                       <div className="space-y-1 flex-1">
                         <p className="font-medium text-black">{feedback.studentName}</p>
+                        <p className="text-sm text-gray-600">{feedback.matricNumber}</p>
                         <p className="text-sm text-gray-600 mt-2">{feedback.comment}</p>
                       </div>
-<div className="flex items-center gap-1 ml-4">
-  {[1, 2, 3, 4, 5].map((star) => (
-    <Star
-      key={star}
-      size={20}
-      className={star <= feedback.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
-    />
-  ))}
-</div>
+                      <div className="flex items-center gap-1 ml-4">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            size={20}
+                            className={star <= feedback.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}

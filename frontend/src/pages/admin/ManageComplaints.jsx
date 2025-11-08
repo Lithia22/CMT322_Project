@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 const ManageComplaints = () => {
   const [complaints, setComplaints] = useState(mockComplaints);
   const [searchQuery, setSearchQuery] = useState('');
-  const [urgencyTab, setUrgencyTab] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [editingComplaint, setEditingComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
@@ -47,9 +47,9 @@ const ManageComplaints = () => {
   });
 
   const totalComplaints = complaints.length;
-  const highPriorityCount = complaints.filter(c => c.urgencyLevel === 'High').length;
-  const mediumPriorityCount = complaints.filter(c => c.urgencyLevel === 'Medium').length;
-  const lowPriorityCount = complaints.filter(c => c.urgencyLevel === 'Low').length;
+  const pendingCount = complaints.filter(c => c.status === 'Pending').length;
+  const inProgressCount = complaints.filter(c => c.status === 'In Progress').length;
+  const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
 
   const handleSort = (key) => {
     let direction = 'asc';
@@ -65,11 +65,12 @@ const ManageComplaints = () => {
         complaint.studentName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         complaint.facilityType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         complaint.issueDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        complaint.hostelName?.toLowerCase().includes(searchQuery.toLowerCase());
+        complaint.hostelName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        complaint.matricNumber?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesUrgency = urgencyTab === 'all' || complaint.urgencyLevel === urgencyTab;
+      const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter;
 
-      return matchesSearch && matchesUrgency;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       if (!sortConfig.key) return 0;
@@ -110,15 +111,6 @@ const ManageComplaints = () => {
     }
   };
 
-  const getUrgencyColor = (urgency) => {
-    switch (urgency) {
-      case 'High': return 'bg-red-500 hover:bg-red-500';
-      case 'Medium': return 'bg-amber-500 hover:bg-amber-500';
-      case 'Low': return 'bg-green-500 hover:bg-green-500';
-      default: return 'bg-gray-500 hover:bg-gray-500';
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'Resolved': return 'bg-green-50 text-green-700 hover:bg-green-50';
@@ -131,19 +123,19 @@ const ManageComplaints = () => {
   // Skeleton components
   const HeaderSkeleton = () => (
     <div className="space-y-2">
-      <Skeleton className="h-8 w-64 bg-muted" />
-      <Skeleton className="h-4 w-96 bg-muted" />
+      <Skeleton className="h-8 w-64 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
     </div>
   );
 
   const SearchSkeleton = () => (
-    <Skeleton className="h-10 w-full max-w-md bg-muted" />
+    <Skeleton className="h-10 w-full max-w-md bg-gray-200" />
   );
 
   const TabsSkeleton = () => (
     <div className="flex gap-2">
       {[...Array(4)].map((_, i) => (
-        <Skeleton key={i} className="h-10 w-32 bg-muted" />
+        <Skeleton key={i} className="h-10 w-32 bg-gray-200" />
       ))}
     </div>
   );
@@ -153,18 +145,18 @@ const ManageComplaints = () => {
       <CardContent className="p-6">
         <div className="space-y-4">
           <div className="flex gap-4 border-b pb-4">
-            {[...Array(7)].map((_, i) => (
-              <Skeleton key={i} className="h-4 flex-1 bg-muted" />
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-4 flex-1 bg-gray-200" />
             ))}
           </div>
           
           {[...Array(5)].map((_, rowIndex) => (
             <div key={rowIndex} className="flex items-center gap-4 border-b pb-4 last:border-0 last:pb-0">
-              {[...Array(7)].map((_, cellIndex) => (
+              {[...Array(6)].map((_, cellIndex) => (
                 <div key={cellIndex} className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-full bg-muted" />
+                  <Skeleton className="h-4 w-full bg-gray-200" />
                   {cellIndex === 1 || cellIndex === 2 || cellIndex === 3 ? (
-                    <Skeleton className="h-3 w-3/4 bg-muted" />
+                    <Skeleton className="h-3 w-3/4 bg-gray-200" />
                   ) : null}
                 </div>
               ))}
@@ -178,7 +170,7 @@ const ManageComplaints = () => {
   const PaginationSkeleton = () => (
     <div className="flex justify-end gap-2">
       {[...Array(6)].map((_, i) => (
-        <Skeleton key={i} className="h-10 w-10 bg-muted" />
+        <Skeleton key={i} className="h-10 w-10 bg-gray-200" />
       ))}
     </div>
   );
@@ -212,15 +204,15 @@ const ManageComplaints = () => {
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
         <Input
-          placeholder="Search by facility, issue, student, or hostel"
+          placeholder="Search by facility, issue, student, matric, or hostel"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
         />
       </div>
 
-      {/* Urgency Tabs */}
-      <Tabs value={urgencyTab} onValueChange={setUrgencyTab}>
+      {/* Status Tabs */}
+      <Tabs value={statusFilter} onValueChange={setStatusFilter}>
         <TabsList>
           <TabsTrigger 
             value="all"
@@ -229,22 +221,22 @@ const ManageComplaints = () => {
             All <span className="ml-1.5 text-xs">({totalComplaints})</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="High"
+            value="Pending"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
-            High <span className="ml-1.5 text-xs">({highPriorityCount})</span>
+            Pending <span className="ml-1.5 text-xs">({pendingCount})</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="Medium"
+            value="In Progress"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
-            Medium <span className="ml-1.5 text-xs">({mediumPriorityCount})</span>
+            In Progress <span className="ml-1.5 text-xs">({inProgressCount})</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="Low"
+            value="Resolved"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
-            Low <span className="ml-1.5 text-xs">({lowPriorityCount})</span>
+            Resolved <span className="ml-1.5 text-xs">({resolvedCount})</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -290,15 +282,6 @@ const ManageComplaints = () => {
                   Issue <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
                 </Button>
               </TableHead>
-              <TableHead className="w-24">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('urgencyLevel')}
-                  className="h-auto p-0 font-medium hover:bg-transparent text-black"
-                >
-                  Priority <ArrowUpDown className="ml-1 h-3.5 w-3.5" />
-                </Button>
-              </TableHead>
               <TableHead className="w-28">
                 <Button
                   variant="ghost"
@@ -325,7 +308,7 @@ const ManageComplaints = () => {
                   <TableCell>
                     <div>
                       <div className="font-medium text-sm text-black">{complaint.studentName}</div>
-                      <div className="text-xs text-gray-600">{complaint.studentId}</div>
+                      <div className="text-xs text-gray-600">{complaint.matricNumber}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -341,11 +324,6 @@ const ManageComplaints = () => {
                         {complaint.issueDescription}
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={`${getUrgencyColor(complaint.urgencyLevel)} text-white text-xs`}>
-                      {complaint.urgencyLevel}
-                    </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge className={`${getStatusColor(complaint.status)} text-xs border`}>
@@ -396,7 +374,7 @@ const ManageComplaints = () => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-sm text-gray-600">
+                <TableCell colSpan={6} className="h-32 text-center text-sm text-gray-600">
                   No complaints found
                 </TableCell>
               </TableRow>

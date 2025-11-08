@@ -17,16 +17,28 @@ export const AuthProvider = ({ children }) => {
 
   const register = (userData) => {
     const existingUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-    const existingUser = existingUsers.find(u => u.email === userData.email);
     
-    if (existingUser) {
-      return { success: false, error: 'User already exists with this email' };
+    // Check if email already exists
+    const existingUserByEmail = existingUsers.find(u => u.email === userData.email);
+    if (existingUserByEmail) {
+      return { success: false, error: 'An account with this email already exists. Please login instead.' };
+    }
+
+    // Check if matric number already exists (for student accounts)
+    if (userData.email.includes('@student.usm.my')) {
+      const existingUserByMatric = existingUsers.find(u => u.matricNumber === userData.matricNumber);
+      if (existingUserByMatric) {
+        return { 
+          success: false, 
+          error: 'This matric number is already registered. Please use your existing account or contact support if you need help.' 
+        };
+      }
     }
 
     const newUser = {
       id: Date.now(),
       ...userData,
-      role: 'student'
+      role: userData.email.includes('@student.usm.my') ? 'student' : 'admin'
     };
 
     existingUsers.push(newUser);

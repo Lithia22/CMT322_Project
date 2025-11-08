@@ -2,17 +2,20 @@
 export const mockUsers = [
   {
     id: 1,
-    email: "student@usm.my",
+    email: "john@student.usm.my",
     password: "password",
-    name: "Ahmad Student",
+    name: "John",
     role: "student",
-    studentId: "STU001"
+    matricNumber: "163850",
+    hostelName: "Desasiswa Bakti Permai",
+    roomNumber: "101"
   },
   {
     id: 2,
     email: "admin@usm.my", 
     password: "password",
     name: "Admin User",
+    username: "admin",
     role: "admin"
   }
 ];
@@ -21,13 +24,12 @@ export const mockUsers = [
 export const mockComplaints = [
   {
     id: 1,
-    studentId: "STU001",
-    studentName: "Ahmad Student",
+    matricNumber: "163850",
+    studentName: "John",
     hostelName: "Desasiswa Bakti Permai",
-    roomNumber: "A-101",
+    roomNumber: "101",
     facilityType: "Air Conditioner",
     issueDescription: "AC not cooling properly, making loud noise",
-    urgencyLevel: "High",
     status: "In Progress",
     submittedDate: "2024-10-28",
     photo: null,
@@ -35,13 +37,12 @@ export const mockComplaints = [
   },
   {
     id: 2,
-    studentId: "STU002",
-    studentName: "Siti Student",
+    matricNumber: "163429",
+    studentName: "Siti Nurhaliza",
     hostelName: "Desasiswa Indah Kembara",
-    roomNumber: "B-205",
+    roomNumber: "205",
     facilityType: "Bathroom",
     issueDescription: "Water heater not working, no hot water",
-    urgencyLevel: "Medium",
     status: "Pending",
     submittedDate: "2024-10-29",
     photo: null,
@@ -49,13 +50,12 @@ export const mockComplaints = [
   },
   {
     id: 3,
-    studentId: "STU001",
-    studentName: "Ahmad Student",
+    matricNumber: "163850",
+    studentName: "Ahmad bin Ismail",
     hostelName: "Desasiswa Aman Damai",
-    roomNumber: "C-310",
+    roomNumber: "310",
     facilityType: "Furniture",
     issueDescription: "Study table broken, drawer not opening",
-    urgencyLevel: "Low",
     status: "Resolved",
     submittedDate: "2024-10-25",
     photo: null,
@@ -63,13 +63,12 @@ export const mockComplaints = [
   },
   {
     id: 4,
-    studentId: "STU003",
-    studentName: "Lee Student",
+    matricNumber: "164201",
+    studentName: "Lee Chen Wei",
     hostelName: "Desasiswa Restu",
-    roomNumber: "D-402",
+    roomNumber: "402",
     facilityType: "Electrical",
     issueDescription: "Power socket not working in bedroom",
-    urgencyLevel: "High",
     status: "Resolved",
     submittedDate: "2024-10-20",
     photo: null,
@@ -77,13 +76,12 @@ export const mockComplaints = [
   },
   {
     id: 5,
-    studentId: "STU004",
-    studentName: "Kumar Student",
+    matricNumber: "163912",
+    studentName: "Kumar Rajesh",
     hostelName: "Desasiswa Tekun",
-    roomNumber: "E-105",
+    roomNumber: "105",
     facilityType: "Plumbing",
     issueDescription: "Toilet clogged, water overflowing",
-    urgencyLevel: "High",
     status: "In Progress",
     submittedDate: "2024-10-30",
     photo: null,
@@ -91,13 +89,12 @@ export const mockComplaints = [
   },
   {
     id: 6,
-    studentId: "STU005",
-    studentName: "Fatimah Student",
+    matricNumber: "164305",
+    studentName: "Fatimah binti Abdullah",
     hostelName: "Desasiswa Bakti Permai",
-    roomNumber: "A-203",
+    roomNumber: "203",
     facilityType: "Door/Window",
     issueDescription: "Door lock jammed, cannot lock properly",
-    urgencyLevel: "Medium",
     status: "Pending",
     submittedDate: "2024-10-31",
     photo: null,
@@ -105,13 +102,12 @@ export const mockComplaints = [
   },
   {
     id: 7,
-    studentId: "STU006",
-    studentName: "David Student",
+    matricNumber: "163788",
+    studentName: "David Tan",
     hostelName: "Desasiswa Indah Kembara",
-    roomNumber: "B-108",
+    roomNumber: "108",
     facilityType: "Lighting",
     issueDescription: "Ceiling light flickering and dim",
-    urgencyLevel: "Low",
     status: "Resolved",
     submittedDate: "2024-10-18",
     photo: null,
@@ -119,17 +115,42 @@ export const mockComplaints = [
   },
   {
     id: 8,
-    studentId: "STU007",
-    studentName: "Nurul Student",
+    matricNumber: "164112",
+    studentName: "Nurul Huda",
     hostelName: "Desasiswa Aman Damai",
-    roomNumber: "C-501",
+    roomNumber: "501",
     facilityType: "Air Conditioner",
     issueDescription: "AC remote control missing",
-    urgencyLevel: "Low",
     status: "Pending",
     submittedDate: "2024-11-01",
     photo: null,
     adminRemarks: ""
+  },
+  {
+    id: 9,
+    matricNumber: "163645",
+    studentName: "Megan Lim",
+    hostelName: "Desasiswa Fajar Harapan",
+    roomNumber: "306",
+    facilityType: "Bathroom",
+    issueDescription: "Shower head leaking",
+    status: "Pending",
+    submittedDate: "2024-11-02",
+    photo: null,
+    adminRemarks: ""
+  },
+  {
+    id: 10,
+    matricNumber: "164223",
+    studentName: "Ramesh Kumar",
+    hostelName: "Desasiswa Cahaya Gemilang",
+    roomNumber: "409",
+    facilityType: "Electrical",
+    issueDescription: "Ceiling fan not working",
+    status: "In Progress",
+    submittedDate: "2024-11-01",
+    photo: null,
+    adminRemarks: "Electrician scheduled for tomorrow"
   }
 ];
 
@@ -137,8 +158,8 @@ export const mockFeedbacks = [
   {
     id: 1,
     complaintId: 3,
-    studentId: "STU001",
-    studentName: "Ahmad Student",
+    matricNumber: "163850",
+    studentName: "Ahmad bin Ismail",
     rating: 5,
     comment: "Very quick response! Table was replaced within 2 days. Thank you!",
     submittedDate: "2024-10-31"
@@ -146,8 +167,8 @@ export const mockFeedbacks = [
   {
     id: 2,
     complaintId: 4,
-    studentId: "STU003",
-    studentName: "Lee Student",
+    matricNumber: "164201",
+    studentName: "Lee Chen Wei",
     rating: 4,
     comment: "Good service, electrician was professional",
     submittedDate: "2024-10-22"
@@ -155,8 +176,8 @@ export const mockFeedbacks = [
   {
     id: 3,
     complaintId: 7,
-    studentId: "STU006",
-    studentName: "David Student",
+    matricNumber: "163788",
+    studentName: "David Tan",
     rating: 3,
     comment: "Took a while but eventually fixed",
     submittedDate: "2024-10-19"
@@ -164,10 +185,13 @@ export const mockFeedbacks = [
 ];
 
 export const hostelOptions = [
-  "Desasiswa Bakti Permai",
-  "Desasiswa Indah Kembara", 
   "Desasiswa Aman Damai",
+  "Desasiswa Fajar Harapan",
+  "Desasiswa Bakti Permai",
+  "Desasiswa Cahaya Gemilang",
+  "Desasiswa Indah Kembara",
   "Desasiswa Restu",
+  "Desasiswa Saujana",
   "Desasiswa Tekun"
 ];
 
@@ -182,17 +206,15 @@ export const facilityTypes = [
   "Others"
 ];
 
-export const urgencyLevels = ["Low", "Medium", "High"];
-
 // FAQ data
 export const faqData = [
   {
     question: "How do I submit a complaint?",
-    answer: "Login to your account, go to 'Submit Complaint', fill out the form with details about the issue, and submit. You'll receive a complaint ID for tracking."
+    answer: "Login to your account, go to 'My Complaints', click on the 'New Complaint' button and fill out the form with details about the issue, and submit. You'll receive a complaint ID for tracking."
   },
   {
     question: "How long does it take to resolve complaints?",
-    answer: "Urgent issues (High priority) are addressed within 24 hours. Medium priority within 3 days, and Low priority within 7 days."
+    answer: "Complaints are processed using FIFO (First-In-First-Out) method. The first person to submit gets priority regardless of issue type."
   },
   {
     question: "Can I track my complaint status?",

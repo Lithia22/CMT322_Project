@@ -1,177 +1,152 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Eye, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { FileText, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { mockComplaints } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
+  const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
+  const allComplaints = storedComplaints.length > 0 ? storedComplaints : mockComplaints;
   
-  const studentComplaints = mockComplaints.filter(
-    complaint => complaint.studentId === user?.studentId
+  const studentComplaints = allComplaints.filter(
+    complaint => complaint.matricNumber === user?.matricNumber
   );
 
-  const stats = [
-    { 
-      label: 'Total Complaints', 
-      value: studentComplaints.length, 
-      icon: TrendingUp,
-      description: 'All your complaints'
-    },
-    { 
-      label: 'Pending', 
-      value: studentComplaints.filter(c => c.status === 'Pending').length, 
-      icon: Clock,
-      description: 'Awaiting review'
-    },
-    { 
-      label: 'In Progress', 
-      value: studentComplaints.filter(c => c.status === 'In Progress').length, 
-      icon: AlertCircle,
-      description: 'Being resolved'
-    },
-    { 
-      label: 'Resolved', 
-      value: studentComplaints.filter(c => c.status === 'Resolved').length, 
-      icon: CheckCircle,
-      description: 'Completed'
-    },
-  ];
+  const stats = {
+    total: studentComplaints.length,
+    pending: studentComplaints.filter(c => c.status === 'Pending').length,
+    inProgress: studentComplaints.filter(c => c.status === 'In Progress').length,
+    resolved: studentComplaints.filter(c => c.status === 'Resolved').length,
+  };
 
-  const quickActions = [
-    {
-      icon: FileText,
-      label: 'Submit Complaint',
-      description: 'Report a new facility issue',
-      path: '/submit-complaint',
-      variant: 'default'
-    },
-    {
-      icon: Eye,
-      label: 'View Complaints', 
-      description: 'Check your complaint status',
-      path: '/my-complaints',
-      variant: 'outline'
-    },
-    {
-      icon: MessageSquare,
-      label: 'Give Feedback',
-      description: 'Rate resolved complaints',
-      path: '/feedback',
-      variant: 'outline'
-    }
-  ];
-
-  const recentComplaints = studentComplaints.slice(0, 3);
-
-  const getStatusVariant = (status) => {
+  const getStatusIcon = (status) => {
     switch (status) {
-      case 'Resolved': return 'default';
-      case 'In Progress': return 'secondary';
-      case 'Pending': return 'outline';
-      default: return 'outline';
+      case 'Pending': return <Clock className="h-4 w-4" />;
+      case 'In Progress': return <AlertCircle className="h-4 w-4" />;
+      case 'Resolved': return <CheckCircle className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Resolved': return 'bg-green-50 text-green-700 border-green-200';
+      case 'In Progress': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Pending': return 'bg-amber-50 text-amber-700 border-amber-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Welcome Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name}!</h1>
-        <p className="text-muted-foreground">
-          Here's an overview of your complaints and quick actions.
-        </p>
+      {/* Header */}
+      <div 
+        className="rounded-xl p-6 text-white shadow-lg"
+        style={{
+          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+        }}
+      >
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+          <p className="text-white/90">Welcome back, {user?.name}</p>
+        </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks you can perform</CardDescription>
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Total Complaints</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <FileText className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
-          <CardContent className="grid gap-4">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <Button
-                  key={index}
-                  variant={action.variant}
-                  className="h-auto p-4 justify-start"
-                  asChild
-                >
-                  <Link to={action.path}>
-                    <Icon className="mr-3 h-5 w-5" />
-                    <div className="text-left">
-                      <div className="font-semibold">{action.label}</div>
-                      <div className="text-sm text-muted-foreground">{action.description}</div>
-                    </div>
-                  </Link>
-                </Button>
-              );
-            })}
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{stats.total}</div>
+            <p className="text-xs text-gray-600 mt-1">All submissions</p>
           </CardContent>
         </Card>
 
-        {/* Recent Complaints */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Complaints</CardTitle>
-            <CardDescription>Your most recent submissions</CardDescription>
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Pending</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <Clock className="h-4 w-4 text-black" />
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {recentComplaints.length === 0 ? (
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No complaints yet</p>
-                <Button asChild variant="link" className="mt-2">
-                  <Link to="/submit-complaint">Submit your first complaint</Link>
-                </Button>
-              </div>
-            ) : (
-              <>
-                {recentComplaints.map((complaint) => (
-                  <div key={complaint.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                    <div className="space-y-1">
-                      <p className="font-medium">{complaint.facilityType}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {complaint.hostelName} • {complaint.roomNumber}
-                      </p>
-                    </div>
-                    <Badge variant={getStatusVariant(complaint.status)}>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{stats.pending}</div>
+            <p className="text-xs text-gray-600 mt-1">Awaiting action</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">In Progress</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <AlertCircle className="h-4 w-4 text-black" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{stats.inProgress}</div>
+            <p className="text-xs text-gray-600 mt-1">Being resolved</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Resolved</CardTitle>
+            <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-4 w-4 text-black" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{stats.resolved}</div>
+            <p className="text-xs text-gray-600 mt-1">Completed</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Complaints */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">Recent Complaints</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-black">Facility</TableHead>
+                <TableHead className="text-black">Issue</TableHead>
+                <TableHead className="text-black">Date</TableHead>
+                <TableHead className="text-black">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {studentComplaints.slice(0, 5).map((complaint) => (
+                <TableRow key={complaint.id}>
+                  <TableCell className="font-medium text-black">{complaint.facilityType}</TableCell>
+                  <TableCell className="text-gray-600">{complaint.issueDescription}</TableCell>
+                  <TableCell className="text-gray-600">{complaint.submittedDate}</TableCell>
+                  <TableCell>
+                    <Badge className={`${getStatusColor(complaint.status)} flex items-center gap-1 w-fit text-xs border`}>
+                      {getStatusIcon(complaint.status)}
                       {complaint.status}
                     </Badge>
-                  </div>
-                ))}
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/my-complaints">View All Complaints</Link>
-                </Button>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {studentComplaints.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No complaints submitted yet. Go to "My Complaints" to submit your first complaint.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

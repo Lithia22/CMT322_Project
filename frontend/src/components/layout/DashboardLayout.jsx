@@ -128,7 +128,6 @@ const DashboardLayout = ({ children }) => {
 
   const studentNavItems = [
     { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/submit-complaint', label: 'Submit Complaint', icon: FileText },
     { path: '/my-complaints', label: 'My Complaints', icon: Eye },
     { path: '/feedback', label: 'Feedback', icon: MessageSquare },
   ];

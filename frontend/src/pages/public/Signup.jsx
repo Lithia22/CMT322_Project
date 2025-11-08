@@ -14,11 +14,18 @@ import PublicLayout from '@/components/layout/PublicLayout';
 
 const signUpSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  studentId: z.string().min(1, 'Student ID is required'),
+  email: z.string()
+    .email('Invalid email address')
+    .refine((email) => email.endsWith('@student.usm.my'), {
+      message: 'Only @student.usm.my emails are allowed for registration',
+    }),
+  matricNumber: z.string()
+    .min(5, 'Matric number must be at least 5 characters')
+    .regex(/^\d+$/, 'Matric number must contain only numbers'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
   hostelName: z.string().min(1, 'Please select your hostel'),
+  roomNumber: z.string().min(1, 'Room number is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -26,45 +33,27 @@ const signUpSchema = z.object({
 
 const SignUp = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   const form = useForm({
     resolver: zodResolver(signUpSchema),
     defaultValues: { 
       name: '', 
       email: '', 
-      studentId: '', 
+      matricNumber: '', 
       password: '', 
       confirmPassword: '',
-      hostelName: '' 
+      hostelName: '',
+      roomNumber: ''
     },
   });
 
   const onSubmit = (data) => {
-    // For demo purposes, we'll auto-login after signup
-    const { confirmPassword, ...userData } = data;
-    const newUser = {
-      id: Date.now(), // Generate unique ID
-      ...userData,
-      role: 'student'
-    };
-    
-    // In a real app, you would send this to your backend
-    // For now, we'll simulate successful registration and auto-login
-    const result = login(data.email, data.password);
+    const result = register(data);
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/login');
     } else {
-      // If user doesn't exist in mock data, create and login
-      const mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-      mockUsers.push({ ...newUser, password: data.password });
-      localStorage.setItem('mockUsers', JSON.stringify(mockUsers));
-      
-      // Auto login the new user
-      const loginResult = login(data.email, data.password);
-      if (loginResult.success) {
-        navigate('/dashboard');
-      }
+      form.setError('root', { message: result.error });
     }
   };
 
@@ -128,13 +117,13 @@ const SignUp = () => {
 
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="matricNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">Matric Number</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="your.email@usm.my" 
+                          placeholder="Enter your matric number" 
                           {...field} 
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
@@ -146,18 +135,21 @@ const SignUp = () => {
 
                 <FormField
                   control={form.control}
-                  name="studentId"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Student ID</FormLabel>
+                      <FormLabel className="text-gray-700">USM Student Email</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Enter your student ID" 
+                          placeholder="john@student.usm.my" 
                           {...field} 
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
                       </FormControl>
                       <FormMessage />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Must be your @student.usm.my email
+                      </p>
                     </FormItem>
                   )}
                 />
@@ -182,6 +174,24 @@ const SignUp = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="roomNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">Room Number</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your room number" 
+                          {...field} 
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

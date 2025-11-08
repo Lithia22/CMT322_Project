@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 // Validation schema 
 const profileSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  username: z.string().min(2, 'Username must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
 });
 
@@ -35,7 +35,7 @@ const EditProfile = () => {
   const form = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user?.name || '',
+      username: user?.username || '',
       email: user?.email || '',
     },
   });
@@ -120,7 +120,7 @@ const EditProfile = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-gray-900">Edit Profile</h1>
-        <p className="text-gray-600">Update your personal information</p>
+        <p className="text-gray-600">Update your profile information</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -153,7 +153,7 @@ const EditProfile = () => {
           <CardHeader>
             <CardTitle className="text-gray-900">Profile Information</CardTitle>
             <CardDescription className="text-gray-600">
-              Update your name and email address
+              Update your profile details
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -161,14 +161,14 @@ const EditProfile = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Full Name</FormLabel>
+                      <FormLabel className="text-gray-700">Username</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="Enter your full name" 
-                          {...field} 
+                          placeholder="Enter your username" 
+                          {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
                       </FormControl>
