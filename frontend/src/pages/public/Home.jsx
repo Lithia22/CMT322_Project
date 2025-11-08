@@ -1,32 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { FileText, Eye, MessageSquare, TrendingUp, Clock, CheckCircle, AlertCircle, Search, ShieldCheck, ArrowRight, Star, Users, Zap, X } from 'lucide-react';
-import { mockComplaints } from '@/data/mockData';
-import { useAuth } from '@/contexts/AuthContext';
+import { ArrowRight} from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
     setIsVisible(true);
   }, []);
-  
-  const totalComplaints = mockComplaints.length;
-  const pendingComplaints = mockComplaints.filter(c => c.status === 'Pending').length;
-  const inProgressComplaints = mockComplaints.filter(c => c.status === 'In Progress').length;
-  const resolvedComplaints = mockComplaints.filter(c => c.status === 'Resolved').length;
-
-  const filteredComplaints = mockComplaints.filter(complaint =>
-    complaint.facilityType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    complaint.issueDescription.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 3);
 
   return (
     <PublicLayout>
