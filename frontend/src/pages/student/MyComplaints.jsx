@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Filter, MapPin, Calendar, AlertCircle, Plus, Upload } from 'lucide-react';
 import { mockComplaints, facilityTypes } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,6 +27,14 @@ const MyComplaints = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate API loading
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
 
   // Get stored complaints and merge with mock data
   const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
@@ -85,6 +94,70 @@ const MyComplaints = () => {
     }
   };
 
+  // Skeleton components
+  const HeaderSkeleton = () => (
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-64 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
+    </div>
+  );
+
+  const SearchSkeleton = () => (
+    <div className="flex flex-col sm:flex-row gap-3 items-center">
+      <Skeleton className="h-9 flex-1 max-w-lg bg-gray-200" />
+      <div className="flex gap-3 items-center w-full sm:w-auto justify-between sm:justify-start">
+        <Skeleton className="h-9 w-[180px] bg-gray-200" />
+        <Skeleton className="h-7 w-24 bg-gray-200" />
+      </div>
+      <Skeleton className="h-9 w-32 bg-gray-200" />
+    </div>
+  );
+
+  const ComplaintCardSkeleton = () => (
+    <Card className="border border-gray-200 shadow-sm">
+      <CardContent className="pt-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-start justify-between mb-3">
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-32 bg-gray-200" />
+                <Skeleton className="h-4 w-48 bg-gray-200" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-full bg-gray-200" />
+            </div>
+            <Skeleton className="h-4 w-full mb-4 bg-gray-200" />
+            <Skeleton className="h-4 w-3/4 bg-gray-200" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const EmptyStateSkeleton = () => (
+    <Card>
+      <CardContent className="py-12 text-center">
+        <Skeleton className="h-12 w-12 mx-auto mb-4 bg-gray-200 rounded-full" />
+        <Skeleton className="h-6 w-48 mx-auto mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-64 mx-auto mb-4 bg-gray-200" />
+        <Skeleton className="h-10 w-48 mx-auto bg-gray-200" />
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <HeaderSkeleton />
+        <SearchSkeleton />
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <ComplaintCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -140,34 +213,34 @@ const MyComplaints = () => {
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-  <DialogHeader>
-    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
-    <DialogDescription className="text-gray-600">
-      Report an issue with your hostel facility
-    </DialogDescription>
-  </DialogHeader>
+              <DialogHeader>
+                <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
+                <DialogDescription className="text-gray-600">
+                  Report an issue with your hostel facility
+                </DialogDescription>
+              </DialogHeader>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   {/* Student Info */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-100 text-sm">
-    <div>
-    <label className="font-medium text-gray-800">Student Name</label>
-    <p className="text-gray-500">{user?.name}</p>
-  </div>
-  <div>
-    <label className="font-medium text-gray-800">Matric Number</label>
-    <p className="text-gray-500">{user?.matricNumber}</p>
-  </div>
-  <div>
-    <label className="font-medium text-gray-800">Hostel</label>
-    <p className="text-gray-500">{user?.hostelName}</p>
-  </div>
-  <div>
-    <label className="font-medium text-gray-800">Room Number</label>
-    <p className="text-gray-500">{user?.roomNumber}</p>
-  </div>
-</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-100 text-sm">
+                    <div>
+                      <label className="font-medium text-gray-800">Student Name</label>
+                      <p className="text-gray-500">{user?.name}</p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-800">Matric Number</label>
+                      <p className="text-gray-500">{user?.matricNumber}</p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-800">Hostel</label>
+                      <p className="text-gray-500">{user?.hostelName}</p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-800">Room Number</label>
+                      <p className="text-gray-500">{user?.roomNumber}</p>
+                    </div>
+                  </div>
 
                   <FormField
                     control={form.control}
@@ -295,12 +368,12 @@ const MyComplaints = () => {
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-  <DialogHeader>
-    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
-    <DialogDescription className="text-gray-600">
-      Report an issue with your hostel facility
-    </DialogDescription>
-  </DialogHeader>
+                  <DialogHeader>
+                    <DialogTitle className="text-black">Submit New Complaint</DialogTitle>
+                    <DialogDescription className="text-gray-600">
+                      Report an issue with your hostel facility
+                    </DialogDescription>
+                  </DialogHeader>
                   
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

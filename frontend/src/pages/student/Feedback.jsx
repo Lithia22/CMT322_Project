@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Star, Send } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +24,14 @@ const Feedback = () => {
   const { user } = useAuth();
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate API loading
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
 
   // Get stored complaints and merge with mock data
   const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
@@ -88,6 +97,59 @@ const Feedback = () => {
     form.reset({ rating: 0, comment: '' });
   };
 
+  // Skeleton components
+  const HeaderSkeleton = () => (
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-64 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
+    </div>
+  );
+
+  const TabsSkeleton = () => (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-32 bg-gray-200" />
+        <Skeleton className="h-10 w-32 bg-gray-200" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="border border-gray-200">
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Skeleton className="h-5 w-24 bg-gray-200" />
+                  <Skeleton className="h-6 w-16 rounded-full bg-gray-200" />
+                </div>
+                <Skeleton className="h-4 w-full bg-gray-200" />
+                <Skeleton className="h-4 w-3/4 bg-gray-200" />
+                <Skeleton className="h-8 w-full bg-gray-200" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
+  const EmptyStateSkeleton = () => (
+    <Card>
+      <CardContent className="py-12 text-center">
+        <Skeleton className="h-12 w-12 mx-auto mb-4 bg-gray-200 rounded-full" />
+        <Skeleton className="h-6 w-48 mx-auto mb-2 bg-gray-200" />
+        <Skeleton className="h-4 w-64 mx-auto bg-gray-200" />
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <HeaderSkeleton />
+        <TabsSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -146,22 +208,22 @@ const Feedback = () => {
                     <p className="text-sm text-gray-600 line-clamp-2 mb-3">{complaint.issueDescription}</p>
                     
                     {complaint.adminRemarks ? (
-<div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-  <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
-  <p className="text-xs text-gray-700 line-clamp-2">{complaint.adminRemarks}</p>
-</div>
+                      <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
+                        <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
+                        <p className="text-xs text-gray-700 line-clamp-2">{complaint.adminRemarks}</p>
+                      </div>
                     ) : (
                       <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
                     )}
-<div className="flex items-center justify-end">
-  <Button 
-    size="sm"
-    onClick={() => openFeedbackDialog(complaint)}
-    className="bg-purple-600 hover:bg-purple-700 text-white h-8"
-  >
-    Give Feedback
-  </Button>
-</div>
+                    <div className="flex items-center justify-end">
+                      <Button 
+                        size="sm"
+                        onClick={() => openFeedbackDialog(complaint)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white h-8"
+                      >
+                        Give Feedback
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -204,14 +266,14 @@ const Feedback = () => {
                     
                     <p className="text-sm text-gray-600 mb-3">{feedbackItem.comment}</p>
                     
-{feedbackItem.complaint?.adminRemarks ? (
-  <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-    <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
-    <p className="text-xs text-gray-700 line-clamp-2">{feedbackItem.complaint.adminRemarks}</p>
-  </div>
-) : (
-  <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
-)}
+                    {feedbackItem.complaint?.adminRemarks ? (
+                      <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
+                        <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
+                        <p className="text-xs text-gray-700 line-clamp-2">{feedbackItem.complaint.adminRemarks}</p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -222,7 +284,7 @@ const Feedback = () => {
 
       {/* Feedback Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-md">
           <DialogHeader>
             <DialogTitle className="text-black">Provide Feedback</DialogTitle>
             <DialogDescription className="text-gray-600">

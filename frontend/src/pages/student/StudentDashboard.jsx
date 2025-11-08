@@ -1,12 +1,22 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, Clock, CheckCircle, AlertCircle, Star } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulate API loading
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
   
   // Get stored complaints and merge with mock data
   const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
@@ -40,6 +50,66 @@ const StudentDashboard = () => {
     }
   };
 
+  // Skeleton components
+  const HeaderSkeleton = () => (
+    <div className="space-y-2">
+      <Skeleton className="h-8 w-64 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
+    </div>
+  );
+
+  const StatsSkeleton = () => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i} className="border-2 border-gray-100">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Skeleton className="h-4 w-20 bg-gray-200" />
+            <Skeleton className="h-4 w-4 rounded-full bg-gray-200" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-12 mb-2 bg-gray-200" />
+            <Skeleton className="h-3 w-24 bg-gray-200" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const TabsSkeleton = () => (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Skeleton className="h-10 w-32 bg-gray-200" />
+        <Skeleton className="h-10 w-32 bg-gray-200" />
+      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-32 bg-gray-200" />
+                  <Skeleton className="h-3 w-48 bg-gray-200" />
+                  <Skeleton className="h-3 w-64 bg-gray-200" />
+                </div>
+                <Skeleton className="h-6 w-20 rounded-full bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <HeaderSkeleton />
+        <StatsSkeleton />
+        <TabsSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -51,9 +121,10 @@ const StudentDashboard = () => {
       >
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
-<p className="text-white/90">
-  Welcome back, {user?.name}. Let's make {user?.hostelName} the best it can be!
-</p>        </div>
+          <p className="text-white/90">
+            Welcome back, {user?.name}. Let's make {user?.hostelName} the best it can be!
+          </p>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -145,13 +216,13 @@ const StudentDashboard = () => {
                           {complaint.hostelName} • Room {complaint.roomNumber}
                         </p>
                         <p className="text-xs text-gray-500">{complaint.issueDescription}</p>
-{complaint.adminRemarks ? (
-  <p className="text-xs text-purple-700 mt-1">
-    <span className="font-semibold">Remarks:</span> {complaint.adminRemarks}
-  </p>
-) : (
-  <p className="text-xs text-gray-400 mt-1">No remarks</p>
-)}
+                        {complaint.adminRemarks ? (
+                          <p className="text-xs text-purple-700 mt-1">
+                            <span className="font-semibold">Remarks:</span> {complaint.adminRemarks}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-400 mt-1">No remarks</p>
+                        )}
                       </div>
                       <div className="flex items-center justify-start w-24">
                         <Badge className={`${getStatusColor(complaint.status)} text-xs`}>
