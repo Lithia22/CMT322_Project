@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   Sidebar, 
   SidebarContent, 
@@ -12,7 +11,6 @@ import {
   SidebarTrigger,
   useSidebar
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -30,17 +28,13 @@ import {
   FileText, 
   Eye, 
   MessageSquare, 
-  BarChart3, 
   LogOut,
-  ShieldCheck,
   User,
-  Settings,
-  Bell,
-  CreditCard,
   ChevronsUpDown
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 // Profile Dropdown Component
 function NavUser() {
@@ -222,6 +216,9 @@ const DashboardLayout = ({ children }) => {
                 Admin
               </Badge>
             )}
+          </div>
+          <div className="ml-auto">
+            <ThemeToggle />
           </div>
         </header>
         

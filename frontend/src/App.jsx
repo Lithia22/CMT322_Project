@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './components/theme/ThemeProvider';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -34,79 +35,81 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/signup" element={<SignUp />} />
+    <ThemeProvider defaultTheme="light">
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/signup" element={<SignUp />} />
 
-          {/* Protected Student Routes */}
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <StudentDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/my-complaints" 
-            element={
-              <ProtectedRoute>
-                <MyComplaints />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/feedback" 
-            element={
-              <ProtectedRoute>
-                <Feedback />
-              </ProtectedRoute>
-            } 
-          />
-          
-          {/* Protected Admin Routes */}
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/manage-complaints" 
-            element={
-              <ProtectedRoute>
-                <ManageComplaints />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/view-feedback" 
-            element={
-              <ProtectedRoute>
-                <ViewFeedback />
-              </ProtectedRoute>
-            } 
-          />
-\          <Route 
-            path="/edit-profile" 
-            element={
-              <ProtectedRoute>
-                <EditProfile />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-        <Toaster />
-      </Router>
-    </AuthProvider>
+            {/* Protected Student Routes */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-complaints" 
+              element={
+                <ProtectedRoute>
+                  <MyComplaints />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/feedback" 
+              element={
+                <ProtectedRoute>
+                  <Feedback />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Protected Admin Routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/manage-complaints" 
+              element={
+                <ProtectedRoute>
+                  <ManageComplaints />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/view-feedback" 
+              element={
+                <ProtectedRoute>
+                  <ViewFeedback />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/edit-profile" 
+              element={
+                <ProtectedRoute>
+                  <EditProfile />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+          <Toaster />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

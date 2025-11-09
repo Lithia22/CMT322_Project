@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Phone, Mail, MapPin, ChevronUp } from 'lucide-react';
+import { Menu, X, Phone, MapPin, ChevronUp } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 const PublicLayout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,15 +67,15 @@ const PublicLayout = ({ children }) => {
               {navItems.map((item) => {
                 return (
                   <div key={item.path} className="relative">
-<Link 
-  to={item.path}
-  onClick={() => window.scrollTo(0, 0)}
-  className={`font-semibold text-lg transition-all duration-300 group ${
-    isActive(item.path) 
-      ? 'text-purple-600' 
-      : 'text-gray-700 hover:text-purple-600'
-  }`}
->
+                    <Link 
+                      to={item.path}
+                      onClick={() => window.scrollTo(0, 0)}
+                      className={`font-semibold text-lg transition-all duration-300 group ${
+                        isActive(item.path) 
+                          ? 'text-purple-600' 
+                          : 'text-gray-700 hover:text-purple-600'
+                      }`}
+                    >
                       <div className="flex items-center space-x-2 px-2 py-1">
                         <span>{item.label}</span>
                       </div>
@@ -82,6 +83,7 @@ const PublicLayout = ({ children }) => {
                   </div>
                 );
               })}
+              <ThemeToggle />
             </div>
 
             {/* Mobile Menu Button */}
@@ -100,23 +102,27 @@ const PublicLayout = ({ children }) => {
             <div className="md:hidden py-6 space-y-4 border-t border-gray-200">
               {navItems.map((item) => {
                 return (
-<Link 
-  key={item.path} 
-  to={item.path}
-  onClick={() => {
-    window.scrollTo(0, 0);
-    setMobileMenuOpen(false);
-  }}
-  className={`flex items-center space-x-3 w-full py-3 px-4 rounded-lg transition-all duration-200 ${
-    isActive(item.path) 
-      ? 'bg-purple-50 text-purple-600 border border-purple-100' 
-      : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
-  }`}
->
+                  <Link 
+                    key={item.path} 
+                    to={item.path}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center space-x-3 w-full py-3 px-4 rounded-lg transition-all duration-200 ${
+                      isActive(item.path) 
+                        ? 'bg-purple-50 text-purple-600 border border-purple-100' 
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
+                    }`}
+                  >
                     <span className="font-semibold text-lg">{item.label}</span>
                   </Link>
                 );
               })}
+                  <div className="px-4 pt-2 flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">Theme:</span>
+                <ThemeToggle />
+              </div>
             </div>
           )}
         </div>
@@ -150,10 +156,10 @@ const PublicLayout = ({ children }) => {
             <div>
               <h3 className="font-bold text-lg mb-4 text-yellow-400">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-<li><Link to="/" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Home</Link></li>
-<li><Link to="/contact" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Contact Us</Link></li>
-<li><Link to="/faq" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">FAQ</Link></li>
-<li><Link to="/login" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Login</Link></li>
+                <li><Link to="/" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Home</Link></li>
+                <li><Link to="/contact" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Contact Us</Link></li>
+                <li><Link to="/faq" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">FAQ</Link></li>
+                <li><Link to="/login" onClick={() => window.scrollTo(0, 0)} className="text-purple-100 hover:text-yellow-400 transition-colors duration-200">Login</Link></li>
               </ul>
             </div>
 
