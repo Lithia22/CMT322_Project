@@ -2,23 +2,32 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Filter, Star, Calendar, User, MessageSquare, Building } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Star,
+  Calendar,
+  User,
+  MessageSquare,
+  Building,
+} from 'lucide-react';
 import { mockFeedbacks, mockComplaints, hostelOptions } from '@/data/mockData';
 
 const ViewFeedback = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [ratingFilter, setRatingFilter] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
 
   // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  });
+  const [isLoading] = useState(false);
 
   const feedbackWithDetails = mockFeedbacks.map(feedback => {
     const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
@@ -26,26 +35,33 @@ const ViewFeedback = () => {
   });
 
   const filteredFeedbacks = feedbackWithDetails.filter(feedback => {
-    const matchesSearch = 
+    const matchesSearch =
       feedback.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       feedback.comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
       feedback.matricNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (feedback.complaintDetails?.facilityType.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesRating = ratingFilter === 'all' || feedback.rating.toString() === ratingFilter;
+      feedback.complaintDetails?.facilityType
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesRating =
+      ratingFilter === 'all' || feedback.rating.toString() === ratingFilter;
     return matchesSearch && matchesRating;
   });
 
   const totalFeedbacks = mockFeedbacks.length;
-  const averageRating = mockFeedbacks.length > 0 
-    ? (mockFeedbacks.reduce((sum, f) => sum + f.rating, 0) / mockFeedbacks.length).toFixed(1)
-    : 0;
+  const averageRating =
+    mockFeedbacks.length > 0
+      ? (
+          mockFeedbacks.reduce((sum, f) => sum + f.rating, 0) /
+          mockFeedbacks.length
+        ).toFixed(1)
+      : 0;
 
   const ratingDistribution = {
     5: mockFeedbacks.filter(f => f.rating === 5).length,
     4: mockFeedbacks.filter(f => f.rating === 4).length,
     3: mockFeedbacks.filter(f => f.rating === 3).length,
     2: mockFeedbacks.filter(f => f.rating === 2).length,
-    1: mockFeedbacks.filter(f => f.rating === 1).length
+    1: mockFeedbacks.filter(f => f.rating === 1).length,
   };
 
   // Get all hostels with feedback counts (including 0)
@@ -54,7 +70,7 @@ const ViewFeedback = () => {
     count: mockFeedbacks.filter(feedback => {
       const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
       return complaint?.hostelName === hostel;
-    }).length
+    }).length,
   }));
 
   const midIndex = Math.ceil(feedbackByHostel.length / 2);
@@ -116,12 +132,12 @@ const ViewFeedback = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
-        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-        <Skeleton className="h-4 w-96 bg-gray-200" />
-      </div>
+        <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+          <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+          <Skeleton className="h-4 w-96 bg-gray-200" />
+        </div>
 
-<StatsSkeleton />
+        <StatsSkeleton />
         <div className="flex flex-col sm:flex-row gap-3 items-center">
           <Skeleton className="h-9 flex-1 bg-gray-200" />
           <Skeleton className="h-9 w-[180px] bg-gray-200" />
@@ -140,10 +156,11 @@ const ViewFeedback = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div 
+      <div
         className="rounded-xl p-6 text-white shadow-lg"
         style={{
-          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+          background:
+            'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))',
         }}
       >
         <h1 className="text-3xl font-bold tracking-tight">Student Feedback</h1>
@@ -162,19 +179,29 @@ const ViewFeedback = () => {
             <div className="grid grid-cols-2 gap-4">
               {/* First Column */}
               <div className="space-y-3">
-                {firstColumnHostels.map(({name, count}) => (
-                  <div key={name} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground text-xs">{name.replace('Desasiswa ', '')}</span>
+                {firstColumnHostels.map(({ name, count }) => (
+                  <div
+                    key={name}
+                    className="flex justify-between items-center text-sm"
+                  >
+                    <span className="text-muted-foreground text-xs">
+                      {name.replace('Desasiswa ', '')}
+                    </span>
                     <span className="font-semibold">{count}</span>
                   </div>
                 ))}
               </div>
-              
+
               {/* Second Column */}
               <div className="space-y-3">
-                {secondColumnHostels.map(({name, count}) => (
-                  <div key={name} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground text-xs">{name.replace('Desasiswa ', '')}</span>
+                {secondColumnHostels.map(({ name, count }) => (
+                  <div
+                    key={name}
+                    className="flex justify-between items-center text-sm"
+                  >
+                    <span className="text-muted-foreground text-xs">
+                      {name.replace('Desasiswa ', '')}
+                    </span>
                     <span className="font-semibold">{count}</span>
                   </div>
                 ))}
@@ -190,21 +217,30 @@ const ViewFeedback = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {[5, 4, 3, 2, 1].map((rating) => (
-              <div key={rating} className="flex justify-between items-center text-sm">
+            {[5, 4, 3, 2, 1].map(rating => (
+              <div
+                key={rating}
+                className="flex justify-between items-center text-sm"
+              >
                 <div className="flex items-center gap-2">
                   <span className="text-muted-foreground w-4">{rating}</span>
                   <div className="flex space-x-0.5">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                    {[1, 2, 3, 4, 5].map(star => (
                       <Star
                         key={star}
                         size={16}
-                        className={star <= rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+                        className={
+                          star <= rating
+                            ? 'fill-purple-600 text-yellow-400'
+                            : 'text-gray-300'
+                        }
                       />
                     ))}
                   </div>
                 </div>
-                <span className="font-semibold">{ratingDistribution[rating]}</span>
+                <span className="font-semibold">
+                  {ratingDistribution[rating]}
+                </span>
               </div>
             ))}
           </CardContent>
@@ -214,12 +250,15 @@ const ViewFeedback = () => {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 items-center">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-          <Input 
-            placeholder="Search by student, matric, comment, or facility..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-            className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500" 
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+            size={16}
+          />
+          <Input
+            placeholder="Search by student, matric, comment, or facility..."
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
           />
         </div>
 
@@ -249,12 +288,14 @@ const ViewFeedback = () => {
           <CardContent className="py-12 text-center">
             <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Feedback Found</h3>
-            <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+            <p className="text-muted-foreground">
+              Try adjusting your filters or search terms
+            </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredFeedbacks.map((feedback) => (
+          {filteredFeedbacks.map(feedback => (
             <Card key={feedback.id}>
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
@@ -263,12 +304,14 @@ const ViewFeedback = () => {
                       <User size={16} />
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-4">
                         <div>
-                          <h3 className="font-semibold text-sm">{feedback.studentName}</h3>
+                          <h3 className="font-semibold text-sm">
+                            {feedback.studentName}
+                          </h3>
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
                             <span>Matric: {feedback.matricNumber}</span>
                             <Calendar size={10} />
@@ -277,24 +320,31 @@ const ViewFeedback = () => {
                         </div>
                       </div>
                       <div className="flex items-center space-x-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                           <Star
                             key={star}
                             size={20}
-                            className={star <= feedback.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+                            className={
+                              star <= feedback.rating
+                                ? 'fill-purple-600 text-yellow-400'
+                                : 'text-gray-300'
+                            }
                           />
                         ))}
                         <span className="text-sm font-semibold ml-1"></span>
                       </div>
                     </div>
 
-                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{feedback.comment}</p>
+                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+                      {feedback.comment}
+                    </p>
 
                     {feedback.complaintDetails && (
                       <div className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-1">
                           <div>
-                            <span className="font-medium">Facility:</span> {feedback.complaintDetails.facilityType}
+                            <span className="font-medium">Facility:</span>{' '}
+                            {feedback.complaintDetails.facilityType}
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium">Hostel:</span>
@@ -305,7 +355,9 @@ const ViewFeedback = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="font-medium">Issue:</span>
-                            <span>{feedback.complaintDetails.issueDescription}</span>
+                            <span>
+                              {feedback.complaintDetails.issueDescription}
+                            </span>
                           </div>
                           <div className="flex items-center gap-1">
                             <span className="font-medium">Status:</span>

@@ -4,13 +4,26 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Star} from 'lucide-react';
+import { Star } from 'lucide-react';
 import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -24,25 +37,26 @@ const Feedback = () => {
   const { user } = useAuth();
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  });
+  const [isLoading] = useState(false);
 
   // Get stored complaints and merge with mock data
-  const storedComplaints = JSON.parse(localStorage.getItem('mockComplaints') || '[]');
+  const storedComplaints = JSON.parse(
+    localStorage.getItem('mockComplaints') || '[]'
+  );
   const allComplaints = [...mockComplaints, ...storedComplaints];
 
   const resolvedComplaints = allComplaints.filter(
-    complaint => complaint.status === 'Resolved' && complaint.matricNumber === user?.matricNumber
+    complaint =>
+      complaint.status === 'Resolved' &&
+      complaint.matricNumber === user?.matricNumber
   );
 
   // Get stored feedbacks and merge with mock data
-  const storedFeedbacks = JSON.parse(localStorage.getItem('mockFeedbacks') || '[]');
+  const storedFeedbacks = JSON.parse(
+    localStorage.getItem('mockFeedbacks') || '[]'
+  );
   const allFeedbacks = [...mockFeedbacks, ...storedFeedbacks];
 
   const studentFeedbacks = allFeedbacks.filter(
@@ -50,8 +64,9 @@ const Feedback = () => {
   );
 
   // Complaints without feedback (for Give Feedback tab)
-  const complaintsWithoutFeedback = resolvedComplaints.filter(complaint => 
-    !studentFeedbacks.some(feedback => feedback.complaintId === complaint.id)
+  const complaintsWithoutFeedback = resolvedComplaints.filter(
+    complaint =>
+      !studentFeedbacks.some(feedback => feedback.complaintId === complaint.id)
   );
 
   // Complaints with feedback (for Feedback Done tab)
@@ -68,7 +83,7 @@ const Feedback = () => {
   const rating = form.watch('rating');
   const [hoverRating, setHoverRating] = useState(0);
 
-  const onSubmit = (data) => {
+  const onSubmit = data => {
     if (!selectedComplaint) return;
 
     const newFeedback = {
@@ -77,10 +92,12 @@ const Feedback = () => {
       matricNumber: user.matricNumber,
       studentName: user.name,
       ...data,
-      submittedDate: new Date().toISOString().split('T')[0]
+      submittedDate: new Date().toISOString().split('T')[0],
     };
 
-    const existingFeedbacks = JSON.parse(localStorage.getItem('mockFeedbacks') || '[]');
+    const existingFeedbacks = JSON.parse(
+      localStorage.getItem('mockFeedbacks') || '[]'
+    );
     existingFeedbacks.push(newFeedback);
     localStorage.setItem('mockFeedbacks', JSON.stringify(existingFeedbacks));
 
@@ -91,7 +108,7 @@ const Feedback = () => {
     window.location.reload();
   };
 
-  const openFeedbackDialog = (complaint) => {
+  const openFeedbackDialog = complaint => {
     setSelectedComplaint(complaint);
     setDialogOpen(true);
     form.reset({ rating: 0, comment: '' });
@@ -99,10 +116,10 @@ const Feedback = () => {
 
   // Skeleton components
   const HeaderSkeleton = () => (
-      <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
-        <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-        <Skeleton className="h-4 w-96 bg-gray-200" />
-      </div>
+    <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
+      <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
+      <Skeleton className="h-4 w-96 bg-gray-200" />
+    </div>
   );
 
   const TabsSkeleton = () => (
@@ -143,26 +160,29 @@ const Feedback = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div 
+      <div
         className="rounded-xl p-6 text-white shadow-lg"
         style={{
-          background: 'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))'
+          background:
+            'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))',
         }}
       >
         <h2 className="text-3xl font-bold tracking-tight">Feedback & Rating</h2>
-        <p className="text-white/90">Share your experience with our complaint resolution service</p>
+        <p className="text-white/90">
+          Share your experience with our complaint resolution service
+        </p>
       </div>
 
       {/* Tabs for Give Feedback and Feedback Done */}
       <Tabs defaultValue="give-feedback" className="space-y-4">
         <TabsList>
-          <TabsTrigger 
+          <TabsTrigger
             value="give-feedback"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
             Give Feedback
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="feedback-done"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
@@ -175,38 +195,54 @@ const Feedback = () => {
           {complaintsWithoutFeedback.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-semibold mb-2 text-black">No Resolved Issues Yet</h3>
+                <h3 className="text-lg font-semibold mb-2 text-black">
+                  No Resolved Issues Yet
+                </h3>
                 <p className="text-gray-600">
-                  You can only provide feedback for complaints marked as Resolved.
+                  You can only provide feedback for complaints marked as
+                  Resolved.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {complaintsWithoutFeedback.map((complaint) => (
-                <Card key={complaint.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+              {complaintsWithoutFeedback.map(complaint => (
+                <Card
+                  key={complaint.id}
+                  className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h4 className="font-semibold text-black mb-1">{complaint.facilityType}</h4>
+                        <h4 className="font-semibold text-black mb-1">
+                          {complaint.facilityType}
+                        </h4>
                       </div>
                       <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">
                         Resolved
                       </Badge>
                     </div>
-                    
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">{complaint.issueDescription}</p>
-                    
+
+                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                      {complaint.issueDescription}
+                    </p>
+
                     {complaint.adminRemarks ? (
                       <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-                        <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
-                        <p className="text-xs text-gray-700 line-clamp-2">{complaint.adminRemarks}</p>
+                        <p className="text-xs font-medium text-gray-800 mb-1">
+                          Admin Remarks:
+                        </p>
+                        <p className="text-xs text-gray-700 line-clamp-2">
+                          {complaint.adminRemarks}
+                        </p>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
+                      <p className="text-xs text-gray-400 italic mb-3">
+                        No remarks
+                      </p>
                     )}
                     <div className="flex items-center justify-end">
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => openFeedbackDialog(complaint)}
                         className="bg-purple-600 hover:bg-purple-700 text-white h-8"
@@ -226,43 +262,62 @@ const Feedback = () => {
           {complaintsWithFeedback.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-semibold mb-2 text-black">No Feedback Submitted Yet</h3>
+                <h3 className="text-lg font-semibold mb-2 text-black">
+                  No Feedback Submitted Yet
+                </h3>
                 <p className="text-gray-600">
-                  You haven't provided any feedback yet. Once you submit feedback for resolved complaints, they will appear here.
+                  You haven't provided any feedback yet. Once you submit
+                  feedback for resolved complaints, they will appear here.
                 </p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {complaintsWithFeedback.map((feedbackItem) => (
-                <Card key={feedbackItem.id} className="border border-gray-200 shadow-sm">
+              {complaintsWithFeedback.map(feedbackItem => (
+                <Card
+                  key={feedbackItem.id}
+                  className="border border-gray-200 shadow-sm"
+                >
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h4 className="font-semibold text-black mb-1">
-                          {feedbackItem.complaint?.facilityType || 'Unknown Facility'}
+                          {feedbackItem.complaint?.facilityType ||
+                            'Unknown Facility'}
                         </h4>
                       </div>
                       <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[1, 2, 3, 4, 5].map(star => (
                           <Star
                             key={star}
                             size={16}
-                            className={star <= feedbackItem.rating ? 'fill-purple-600 text-yellow-400' : 'text-gray-300'}
+                            className={
+                              star <= feedbackItem.rating
+                                ? 'fill-purple-600 text-yellow-400'
+                                : 'text-gray-300'
+                            }
                           />
                         ))}
                       </div>
                     </div>
-                    
-                    <p className="text-sm text-gray-600 mb-3">{feedbackItem.comment}</p>
-                    
+
+                    <p className="text-sm text-gray-600 mb-3">
+                      {feedbackItem.comment}
+                    </p>
+
                     {feedbackItem.complaint?.adminRemarks ? (
                       <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-                        <p className="text-xs font-medium text-gray-800 mb-1">Admin Remarks:</p>
-                        <p className="text-xs text-gray-700 line-clamp-2">{feedbackItem.complaint.adminRemarks}</p>
+                        <p className="text-xs font-medium text-gray-800 mb-1">
+                          Admin Remarks:
+                        </p>
+                        <p className="text-xs text-gray-700 line-clamp-2">
+                          {feedbackItem.complaint.adminRemarks}
+                        </p>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 italic mb-3">No remarks</p>
+                      <p className="text-xs text-gray-400 italic mb-3">
+                        No remarks
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -281,10 +336,13 @@ const Feedback = () => {
               Share your experience for: {selectedComplaint?.facilityType}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedComplaint && (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="rating"
@@ -292,7 +350,7 @@ const Feedback = () => {
                     <FormItem>
                       <FormControl>
                         <div className="flex space-x-2 justify-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
+                          {[1, 2, 3, 4, 5].map(star => (
                             <button
                               key={star}
                               type="button"
@@ -323,13 +381,15 @@ const Feedback = () => {
                   name="comment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-black">Your Comments</FormLabel>
+                      <FormLabel className="text-black">
+                        Your Comments
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Tell us about your experience with this complaint resolution..."
                           rows={4}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -346,7 +406,7 @@ const Feedback = () => {
                   >
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     type="submit"
                     className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
                   >
