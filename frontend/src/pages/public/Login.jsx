@@ -28,7 +28,13 @@ const Login = () => {
   const onSubmit = (data) => {
     const result = login(data.email, data.password);
     if (result.success) {
-      navigate(result.user.role === 'admin' ? '/admin' : '/dashboard');
+      if (result.user.role === "admin") {
+        navigate("/admin");
+      } else if (result.user.role === "technician") {
+        navigate("/technician");
+      } else {
+        navigate("/dashboard"); // student
+      }
     } else {
       form.setError('root', { message: result.error });
     }
@@ -41,9 +47,9 @@ const Login = () => {
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="flex items-center justify-center rounded-lg">
-                <img 
-                  src="/USM.svg" 
-                  alt="USM Logo" 
+                <img
+                  src="/USM.svg"
+                  alt="USM Logo"
                   className="h-16 w-16"
                 />
               </div>
@@ -70,9 +76,9 @@ const Login = () => {
                     <FormItem>
                       <FormLabel className="text-gray-700">Email Address</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="your.email@usm.my" 
-                          {...field} 
+                        <Input
+                          placeholder="your.email@usm.my"
+                          {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
                       </FormControl>
@@ -88,9 +94,9 @@ const Login = () => {
                     <FormItem>
                       <FormLabel className="text-gray-700">Password</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Enter your password" 
+                        <Input
+                          type="password"
+                          placeholder="Enter your password"
                           {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
@@ -100,8 +106,8 @@ const Login = () => {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5"
                 >
                   Login
