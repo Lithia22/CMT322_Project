@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { ThemeProvider } from './components/theme/ThemeProvider';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { Toaster } from '@/components/ui/sonner';
 
@@ -22,6 +21,11 @@ import ManageComplaints from './pages/admin/ManageComplaints';
 import ViewFeedback from './pages/admin/ViewFeedback';
 import EditProfile from './pages/admin/EditProfile';
 
+// Technician pages  
+import TechnicianDashboard from './pages/technician/TechnicianDashboard';
+import TechnicianComplaints from './pages/technician/TechnicianComplaints';
+
+
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -35,81 +39,97 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light">
-      <AuthProvider>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/signup" element={<SignUp />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/signup" element={<SignUp />} />
 
-            {/* Protected Student Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <StudentDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/my-complaints" 
-              element={
-                <ProtectedRoute>
-                  <MyComplaints />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/feedback" 
-              element={
-                <ProtectedRoute>
-                  <Feedback />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Protected Admin Routes */}
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/manage-complaints" 
-              element={
-                <ProtectedRoute>
-                  <ManageComplaints />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/view-feedback" 
-              element={
-                <ProtectedRoute>
-                  <ViewFeedback />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/edit-profile" 
-              element={
-                <ProtectedRoute>
-                  <EditProfile />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
-          <Toaster />
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+          {/* Protected Student Routes */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-complaints" 
+            element={
+              <ProtectedRoute>
+                <MyComplaints />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/feedback" 
+            element={
+              <ProtectedRoute>
+                <Feedback />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Protected Admin Routes */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/manage-complaints" 
+            element={
+              <ProtectedRoute>
+                <ManageComplaints />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/view-feedback" 
+            element={
+              <ProtectedRoute>
+                <ViewFeedback />
+              </ProtectedRoute>
+            } 
+          />
+\          <Route 
+            path="/edit-profile" 
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Protected Technician Routes */}
+          <Route 
+            path="/technician" 
+            element={
+              <ProtectedRoute>
+                <TechnicianDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/technician-complaints" 
+            element={
+              <ProtectedRoute>
+                <TechnicianComplaints />
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+        <Toaster />
+      </Router>
+    </AuthProvider>
   );
 }
 

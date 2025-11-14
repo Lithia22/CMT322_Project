@@ -17,6 +17,111 @@ export const mockUsers = [
     name: "Admin User",
     username: "admin",
     role: "admin"
+  },
+  {
+    id: 3,
+    email: "ahmad@usm.my", 
+    password: "password",
+    name: "Ahmad bin Ismail",
+    username: "ahmad_tech",
+    role: "technician",
+    specialty: "Electrical",
+    phone: "+6012-3456789",
+    status: "Active",
+    joinDate: "2024-01-15"
+  },
+  {
+    id: 4,
+    email: "siti@usm.my", 
+    password: "password",
+    name: "Siti Nurhaliza",
+    username: "siti_tech",
+    role: "technician",
+    specialty: "Plumbing",
+    phone: "+6013-4567890",
+    status: "Active",
+    joinDate: "2024-02-20"
+  },
+  {
+    id: 5,
+    email: "ravi@usm.my", 
+    password: "password",
+    name: "Ravi Kumar",
+    username: "ravi_tech",
+    role: "technician",
+    specialty: "General Maintenance",
+    phone: "+6014-5678901",
+    status: "Active",
+    joinDate: "2024-03-10"
+  }
+];
+
+// Mock technicians data
+export const mockTechnicians = [
+  {
+    id: "3",
+    name: "Ahmad bin Ismail",
+    email: "ahmad@usm.my",
+    phone: "+6012-3456789",
+    specialty: "Electrical",
+    status: "Active",
+    joinDate: "2024-01-15",
+    assignedComplaints: [5, 6, 7, 8, 9, 10, 11, 12, 13, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    completedComplaints: [7, 11, 12, 23, 26, 29],
+    performance: {
+      avgResolutionTime: "1.2 days",
+      satisfactionRate: "4.8/5.0",
+      totalResolved: 45
+    }
+  },
+  {
+    id: "4",
+    name: "Siti Nurhaliza",
+    email: "siti@usm.my",
+    phone: "+6013-4567890",
+    specialty: "Plumbing",
+    status: "Active",
+    joinDate: "2024-02-20",
+    assignedComplaints: [2, 17, 21, 24, 28],
+    completedComplaints: [21],
+    performance: {
+      avgResolutionTime: "2.1 days",
+      satisfactionRate: "4.5/5.0",
+      totalResolved: 32
+    }
+  },
+  {
+    id: "5",
+    name: "Ravi Kumar",
+    email: "ravi@usm.my",
+    phone: "+6014-5678901",
+    specialty: "General Maintenance",
+    status: "Active",
+    joinDate: "2024-03-10",
+    assignedComplaints: [14, 15, 16, 18, 19, 20],
+    completedComplaints: [18],
+    performance: {
+      avgResolutionTime: "3.5 days",
+      satisfactionRate: "4.2/5.0",
+      totalResolved: 28
+    }
+  },
+  {
+    id: "6",
+    name: "Lim Wei Jie",
+    email: "lim@usm.my",
+    password: "password",
+    phone: "+6015-6789012",
+    specialty: "HVAC",
+    status: "Active",
+    joinDate: "2024-04-05",
+    assignedComplaints: [1, 13, 20, 27],
+    completedComplaints: [],
+    performance: {
+      avgResolutionTime: "2.8 days",
+      satisfactionRate: "4.6/5.0",
+      totalResolved: 38
+    }
   }
 ];
 
@@ -33,7 +138,10 @@ export const mockComplaints = [
     status: "In Progress",
     submittedDate: "2025-10-16",
     photo: null,
-    adminRemarks: "Technician assigned, will fix by tomorrow"
+    adminRemarks: "Technician assigned, will fix by tomorrow",
+    assignedTechnician: "6",
+    technicianRemarks: "Compressor issue detected, parts ordered",
+    resolutionDate: null
   },
   {
     id: 2,
@@ -46,7 +154,10 @@ export const mockComplaints = [
     status: "Pending",
     submittedDate: "2025-10-16",
     photo: null,
-    adminRemarks: ""
+    adminRemarks: "",
+    assignedTechnician: "4",
+    technicianRemarks: "",
+    resolutionDate: null
   },
   {
     id: 3,
@@ -59,7 +170,10 @@ export const mockComplaints = [
     status: "Resolved",
     submittedDate: "2025-10-16",
     photo: null,
-    adminRemarks: "Replaced with new table on 30th Oct"
+    adminRemarks: "Replaced with new table on 30th Oct",
+    assignedTechnician: "5",
+    technicianRemarks: "Table replaced with new unit, old one disposed",
+    resolutionDate: "2025-10-30"
   },
   {
     id: 4,
@@ -72,7 +186,10 @@ export const mockComplaints = [
     status: "Resolved",
     submittedDate: "2025-10-17",
     photo: null,
-    adminRemarks: "Fixed by electrician"
+    adminRemarks: "Fixed by electrician",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced faulty socket, tested working",
+    resolutionDate: "2025-10-18"
   },
   {
     id: 5,
@@ -85,7 +202,10 @@ export const mockComplaints = [
     status: "In Progress",
     submittedDate: "2025-10-15",
     photo: null,
-    adminRemarks: "Plumber on the way"
+    adminRemarks: "Plumber on the way",
+    assignedTechnician: "3",
+    technicianRemarks: "Severe clogging, need special equipment",
+    resolutionDate: null
   },
   {
     id: 6,
@@ -98,7 +218,10 @@ export const mockComplaints = [
     status: "Pending",
     submittedDate: "2025-10-18",
     photo: null,
-    adminRemarks: ""
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
   },
   {
     id: 7,
@@ -111,7 +234,10 @@ export const mockComplaints = [
     status: "Resolved",
     submittedDate: "2025-10-18",
     photo: null,
-    adminRemarks: "Replaced bulb"
+    adminRemarks: "Replaced bulb",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced LED bulb and fixed loose wiring",
+    resolutionDate: "2025-10-19"
   },
   {
     id: 8,
@@ -124,7 +250,10 @@ export const mockComplaints = [
     status: "Pending",
     submittedDate: "2025-11-01",
     photo: null,
-    adminRemarks: ""
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
   },
   {
     id: 9,
@@ -137,7 +266,10 @@ export const mockComplaints = [
     status: "Pending",
     submittedDate: "2025-11-02",
     photo: null,
-    adminRemarks: ""
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
   },
   {
     id: 10,
@@ -150,7 +282,10 @@ export const mockComplaints = [
     status: "In Progress",
     submittedDate: "2025-11-01",
     photo: null,
-    adminRemarks: "Electrician scheduled for tomorrow"
+    adminRemarks: "Electrician scheduled for tomorrow",
+    assignedTechnician: "3",
+    technicianRemarks: "Motor issue, waiting for replacement parts",
+    resolutionDate: null
   },
   {
     id: 11,
@@ -163,7 +298,10 @@ export const mockComplaints = [
     status: "Resolved",
     submittedDate: "2025-10-15",
     photo: null,
-    adminRemarks: "Plumber fixed the leak, replaced old pipes"
+    adminRemarks: "Plumber fixed the leak, replaced old pipes",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced worn-out washer and pipe section",
+    resolutionDate: "2025-10-16"
   },
   {
     id: 12,
@@ -176,242 +314,299 @@ export const mockComplaints = [
     status: "Resolved",
     submittedDate: "2025-10-22",
     photo: null,
-    adminRemarks: "Electrician replaced the bulb and fixed wiring"
+    adminRemarks: "Electrician replaced the bulb and fixed wiring",
+    assignedTechnician: "3",
+    technicianRemarks: "Fixed loose connection in switch box",
+    resolutionDate: "2025-10-23"
   },
-{
-  id: 13,
-  matricNumber: "164418",
-  studentName: "Aisha Rahman",
-  hostelName: "Desasiswa Aman Damai",
-  roomNumber: "215",
-  facilityType: "Air Conditioner",
-  issueDescription: "AC not turning on, no power",
-  status: "Pending",
-  submittedDate: "2025-11-03",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 14,
-  matricNumber: "163721",
-  studentName: "Wei Jie Lim",
-  hostelName: "Desasiswa Fajar Harapan",
-  roomNumber: "312",
-  facilityType: "Bathroom",
-  issueDescription: "Toilet flush not working properly",
-  status: "In Progress",
-  submittedDate: "2025-11-02",
-  photo: null,
-  adminRemarks: "Maintenance team assigned"
-},
-{
-  id: 15,
-  matricNumber: "164509",
-  studentName: "Priya Sharma",
-  hostelName: "Desasiswa Cahaya Gemilang",
-  roomNumber: "118",
-  facilityType: "Furniture",
-  issueDescription: "Bed frame making creaking noise",
-  status: "Pending",
-  submittedDate: "2025-11-04",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 16,
-  matricNumber: "163834",
-  studentName: "Ahmad Firdaus",
-  hostelName: "Desasiswa Indah Kembara",
-  roomNumber: "407",
-  facilityType: "Electrical",
-  issueDescription: "Multiple power sockets not working",
-  status: "In Progress",
-  submittedDate: "2025-11-01",
-  photo: null,
-  adminRemarks: "Electrician will check tomorrow"
-},
-{
-  id: 17,
-  matricNumber: "164267",
-  studentName: "Sarah Johnson",
-  hostelName: "Desasiswa Restu",
-  roomNumber: "224",
-  facilityType: "Plumbing",
-  issueDescription: "Water pressure very low in shower",
-  status: "Pending",
-  submittedDate: "2025-11-03",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 18,
-  matricNumber: "163956",
-  studentName: "Raj Patel",
-  hostelName: "Desasiswa Saujana",
-  roomNumber: "109",
-  facilityType: "Door/Window",
-  issueDescription: "Window cannot close properly",
-  status: "Resolved",
-  submittedDate: "2025-10-28",
-  photo: null,
-  adminRemarks: "Window hinge replaced"
-},
-{
-  id: 19,
-  matricNumber: "164388",
-  studentName: "Nurul Ain",
-  hostelName: "Desasiswa Tekun",
-  roomNumber: "503",
-  facilityType: "Lighting",
-  issueDescription: "Corridor light flickering",
-  status: "Pending",
-  submittedDate: "2025-11-04",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 20,
-  matricNumber: "163672",
-  studentName: "James Wong",
-  hostelName: "Desasiswa Aman Damai",
-  roomNumber: "318",
-  facilityType: "Air Conditioner",
-  issueDescription: "AC leaking water",
-  status: "In Progress",
-  submittedDate: "2025-11-02",
-  photo: null,
-  adminRemarks: "AC technician scheduled"
-},
-{
-  id: 21,
-  matricNumber: "164445",
-  studentName: "Mei Ling",
-  hostelName: "Desasiswa Fajar Harapan",
-  roomNumber: "206",
-  facilityType: "Bathroom",
-  issueDescription: "Bathroom drain clogged",
-  status: "Resolved",
-  submittedDate: "2025-10-20",
-  photo: null,
-  adminRemarks: "Drain cleared and cleaned"
-},
-{
-  id: 22,
-  matricNumber: "163789",
-  studentName: "Ali Hassan",
-  hostelName: "Desasiswa Bakti Permai",
-  roomNumber: "415",
-  facilityType: "Furniture",
-  issueDescription: "Wardrobe door broken",
-  status: "Pending",
-  submittedDate: "2025-11-05",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 23,
-  matricNumber: "164332",
-  studentName: "Emma Davis",
-  hostelName: "Desasiswa Cahaya Gemilang",
-  roomNumber: "321",
-  facilityType: "Electrical",
-  issueDescription: "Study lamp not working",
-  status: "Resolved",
-  submittedDate: "2025-10-27",
-  photo: null,
-  adminRemarks: "Lamp replaced"
-},
-{
-  id: 24,
-  matricNumber: "163901",
-  studentName: "Khalid Ibrahim",
-  hostelName: "Desasiswa Indah Kembara",
-  roomNumber: "112",
-  facilityType: "Plumbing",
-  issueDescription: "Hot water not consistent",
-  status: "In Progress",
-  submittedDate: "2025-11-03",
-  photo: null,
-  adminRemarks: "Checking water heater system"
-},
-{
-  id: 25,
-  matricNumber: "164476",
-  studentName: "Sophia Tan",
-  hostelName: "Desasiswa Restu",
-  roomNumber: "508",
-  facilityType: "Door/Window",
-  issueDescription: "Room door lock malfunctioning",
-  status: "Pending",
-  submittedDate: "2025-11-04",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 26,
-  matricNumber: "163745",
-  studentName: "Deepak Kumar",
-  hostelName: "Desasiswa Saujana",
-  roomNumber: "217",
-  facilityType: "Lighting",
-  issueDescription: "Room lights too dim",
-  status: "Resolved",
-  submittedDate: "2025-10-30",
-  photo: null,
-  adminRemarks: "Upgraded to brighter bulbs"
-},
-{
-  id: 27,
-  matricNumber: "164523",
-  studentName: "Nadia Ali",
-  hostelName: "Desasiswa Tekun",
-  roomNumber: "404",
-  facilityType: "Air Conditioner",
-  issueDescription: "AC remote not working",
-  status: "Pending",
-  submittedDate: "2025-11-05",
-  photo: null,
-  adminRemarks: ""
-},
-{
-  id: 28,
-  matricNumber: "163812",
-  studentName: "Brian Chen",
-  hostelName: "Desasiswa Aman Damai",
-  roomNumber: "129",
-  facilityType: "Bathroom",
-  issueDescription: "Shower drainage slow",
-  status: "In Progress",
-  submittedDate: "2025-11-04",
-  photo: null,
-  adminRemarks: "Plumbing maintenance scheduled"
-},
-{
-  id: 29,
-  matricNumber: "164567",
-  studentName: "Amirah Yusof",
-  hostelName: "Desasiswa Fajar Harapan",
-  roomNumber: "335",
-  facilityType: "Furniture",
-  issueDescription: "Chair leg broken",
-  status: "Resolved",
-  submittedDate: "2025-10-26",
-  photo: null,
-  adminRemarks: "Chair replaced"
-},
-{
-  id: 30,
-  matricNumber: "163699",
-  studentName: "Daniel Lee",
-  hostelName: "Desasiswa Bakti Permai",
-  roomNumber: "228",
-  facilityType: "Electrical",
-  issueDescription: "Extension cord not working",
-  status: "Pending",
-  submittedDate: "2025-11-05",
-  photo: null,
-  adminRemarks: ""
-}
+  {
+    id: 13,
+    matricNumber: "164418",
+    studentName: "Aisha Rahman",
+    hostelName: "Desasiswa Aman Damai",
+    roomNumber: "215",
+    facilityType: "Air Conditioner",
+    issueDescription: "AC not turning on, no power",
+    status: "Pending",
+    submittedDate: "2025-11-03",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "6",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 14,
+    matricNumber: "163721",
+    studentName: "Wei Jie Lim",
+    hostelName: "Desasiswa Fajar Harapan",
+    roomNumber: "312",
+    facilityType: "Bathroom",
+    issueDescription: "Toilet flush not working properly",
+    status: "In Progress",
+    submittedDate: "2025-11-02",
+    photo: null,
+    adminRemarks: "Maintenance team assigned",
+    assignedTechnician: "5",
+    technicianRemarks: "Flush mechanism needs replacement",
+    resolutionDate: null
+  },
+  {
+    id: 15,
+    matricNumber: "164509",
+    studentName: "Priya Sharma",
+    hostelName: "Desasiswa Cahaya Gemilang",
+    roomNumber: "118",
+    facilityType: "Furniture",
+    issueDescription: "Bed frame making creaking noise",
+    status: "Pending",
+    submittedDate: "2025-11-04",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "5",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 16,
+    matricNumber: "163834",
+    studentName: "Ahmad Firdaus",
+    hostelName: "Desasiswa Indah Kembara",
+    roomNumber: "407",
+    facilityType: "Electrical",
+    issueDescription: "Multiple power sockets not working",
+    status: "In Progress",
+    submittedDate: "2025-11-01",
+    photo: null,
+    adminRemarks: "Electrician will check tomorrow",
+    assignedTechnician: "5",
+    technicianRemarks: "Tripped circuit breaker, investigating cause",
+    resolutionDate: null
+  },
+  {
+    id: 17,
+    matricNumber: "164267",
+    studentName: "Sarah Johnson",
+    hostelName: "Desasiswa Restu",
+    roomNumber: "224",
+    facilityType: "Plumbing",
+    issueDescription: "Water pressure very low in shower",
+    status: "Pending",
+    submittedDate: "2025-11-03",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "4",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 18,
+    matricNumber: "163956",
+    studentName: "Raj Patel",
+    hostelName: "Desasiswa Saujana",
+    roomNumber: "109",
+    facilityType: "Door/Window",
+    issueDescription: "Window cannot close properly",
+    status: "Resolved",
+    submittedDate: "2025-10-28",
+    photo: null,
+    adminRemarks: "Window hinge replaced",
+    assignedTechnician: "5",
+    technicianRemarks: "Replaced broken hinge, window closes smoothly now",
+    resolutionDate: "2025-10-29"
+  },
+  {
+    id: 19,
+    matricNumber: "164388",
+    studentName: "Nurul Ain",
+    hostelName: "Desasiswa Tekun",
+    roomNumber: "503",
+    facilityType: "Lighting",
+    issueDescription: "Corridor light flickering",
+    status: "Pending",
+    submittedDate: "2025-11-04",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "5",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 20,
+    matricNumber: "163672",
+    studentName: "James Wong",
+    hostelName: "Desasiswa Aman Damai",
+    roomNumber: "318",
+    facilityType: "Air Conditioner",
+    issueDescription: "AC leaking water",
+    status: "In Progress",
+    submittedDate: "2025-11-02",
+    photo: null,
+    adminRemarks: "AC technician scheduled",
+    assignedTechnician: "6",
+    technicianRemarks: "Clogged drain pipe, cleaning in progress",
+    resolutionDate: null
+  },
+  {
+    id: 21,
+    matricNumber: "164445",
+    studentName: "Mei Ling",
+    hostelName: "Desasiswa Fajar Harapan",
+    roomNumber: "206",
+    facilityType: "Bathroom",
+    issueDescription: "Bathroom drain clogged",
+    status: "Resolved",
+    submittedDate: "2025-10-20",
+    photo: null,
+    adminRemarks: "Drain cleared and cleaned",
+    assignedTechnician: "4",
+    technicianRemarks: "Used drain snake to clear hair and debris",
+    resolutionDate: "2025-10-21"
+  },
+  {
+    id: 22,
+    matricNumber: "163789",
+    studentName: "Ali Hassan",
+    hostelName: "Desasiswa Bakti Permai",
+    roomNumber: "415",
+    facilityType: "Furniture",
+    issueDescription: "Wardrobe door broken",
+    status: "Pending",
+    submittedDate: "2025-11-05",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 23,
+    matricNumber: "164332",
+    studentName: "Emma Davis",
+    hostelName: "Desasiswa Cahaya Gemilang",
+    roomNumber: "321",
+    facilityType: "Electrical",
+    issueDescription: "Study lamp not working",
+    status: "Resolved",
+    submittedDate: "2025-10-27",
+    photo: null,
+    adminRemarks: "Lamp replaced",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced faulty lamp with new LED model",
+    resolutionDate: "2025-10-28"
+  },
+  {
+    id: 24,
+    matricNumber: "163901",
+    studentName: "Khalid Ibrahim",
+    hostelName: "Desasiswa Indah Kembara",
+    roomNumber: "112",
+    facilityType: "Plumbing",
+    issueDescription: "Hot water not consistent",
+    status: "In Progress",
+    submittedDate: "2025-11-03",
+    photo: null,
+    adminRemarks: "Checking water heater system",
+    assignedTechnician: "4",
+    technicianRemarks: "Heater element faulty, ordering replacement",
+    resolutionDate: null
+  },
+  {
+    id: 25,
+    matricNumber: "164476",
+    studentName: "Sophia Tan",
+    hostelName: "Desasiswa Restu",
+    roomNumber: "508",
+    facilityType: "Door/Window",
+    issueDescription: "Room door lock malfunctioning",
+    status: "Pending",
+    submittedDate: "2025-11-04",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 26,
+    matricNumber: "163745",
+    studentName: "Deepak Kumar",
+    hostelName: "Desasiswa Saujana",
+    roomNumber: "217",
+    facilityType: "Lighting",
+    issueDescription: "Room lights too dim",
+    status: "Resolved",
+    submittedDate: "2025-10-30",
+    photo: null,
+    adminRemarks: "Upgraded to brighter bulbs",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced with higher wattage LED bulbs",
+    resolutionDate: "2025-10-31"
+  },
+  {
+    id: 27,
+    matricNumber: "164523",
+    studentName: "Nadia Ali",
+    hostelName: "Desasiswa Tekun",
+    roomNumber: "404",
+    facilityType: "Air Conditioner",
+    issueDescription: "AC remote not working",
+    status: "Pending",
+    submittedDate: "2025-11-05",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "6",
+    technicianRemarks: "",
+    resolutionDate: null
+  },
+  {
+    id: 28,
+    matricNumber: "163812",
+    studentName: "Brian Chen",
+    hostelName: "Desasiswa Aman Damai",
+    roomNumber: "129",
+    facilityType: "Bathroom",
+    issueDescription: "Shower drainage slow",
+    status: "In Progress",
+    submittedDate: "2025-11-04",
+    photo: null,
+    adminRemarks: "Plumbing maintenance scheduled",
+    assignedTechnician: "4",
+    technicianRemarks: "Partial blockage detected, clearing in progress",
+    resolutionDate: null
+  },
+  {
+    id: 29,
+    matricNumber: "164567",
+    studentName: "Amirah Yusof",
+    hostelName: "Desasiswa Fajar Harapan",
+    roomNumber: "335",
+    facilityType: "Furniture",
+    issueDescription: "Chair leg broken",
+    status: "Resolved",
+    submittedDate: "2025-10-26",
+    photo: null,
+    adminRemarks: "Chair replaced",
+    assignedTechnician: "3",
+    technicianRemarks: "Replaced broken chair with new one",
+    resolutionDate: "2025-10-27"
+  },
+  {
+    id: 30,
+    matricNumber: "163699",
+    studentName: "Daniel Lee",
+    hostelName: "Desasiswa Bakti Permai",
+    roomNumber: "228",
+    facilityType: "Electrical",
+    issueDescription: "Extension cord not working",
+    status: "Pending",
+    submittedDate: "2025-11-05",
+    photo: null,
+    adminRemarks: "",
+    assignedTechnician: "3",
+    technicianRemarks: "",
+    resolutionDate: null
+  }
 ];
 
 export const mockFeedbacks = [
@@ -422,7 +617,8 @@ export const mockFeedbacks = [
     studentName: "Test",
     rating: 5,
     comment: "Very quick response! Table was replaced within 2 days. Thank you!",
-    submittedDate: "2025-10-31"
+    submittedDate: "2025-10-31",
+    technicianId: "5"
   },
   {
     id: 2,
@@ -431,7 +627,8 @@ export const mockFeedbacks = [
     studentName: "Lee Chen Wei",
     rating: 4,
     comment: "Good service, electrician was professional",
-    submittedDate: "2025-10-22"
+    submittedDate: "2025-10-22",
+    technicianId: "3"
   },
   {
     id: 3,
@@ -440,7 +637,28 @@ export const mockFeedbacks = [
     studentName: "David Tan",
     rating: 3,
     comment: "Took a while but eventually fixed",
-    submittedDate: "2025-10-19"
+    submittedDate: "2025-10-19",
+    technicianId: "3"
+  },
+  {
+    id: 4,
+    complaintId: 11,
+    matricNumber: "163850",
+    studentName: "Test",
+    rating: 5,
+    comment: "Excellent work! The plumber fixed everything perfectly.",
+    submittedDate: "2025-10-17",
+    technicianId: "3"
+  },
+  {
+    id: 5,
+    complaintId: 21,
+    matricNumber: "164445",
+    studentName: "Mei Ling",
+    rating: 4,
+    comment: "Quick service, drain is working well now",
+    submittedDate: "2025-10-22",
+    technicianId: "4"
   }
 ];
 
