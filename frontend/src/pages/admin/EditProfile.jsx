@@ -4,16 +4,29 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
-// Validation schema 
+// Validation schema
 const profileSchema = z.object({
   username: z.string().min(2, 'Username must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
@@ -40,7 +53,7 @@ const EditProfile = () => {
     },
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -53,8 +66,14 @@ const EditProfile = () => {
     }
   };
 
-  const getInitials = (name) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'A';
+  const getInitials = name => {
+    return (
+      name
+        ?.split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase() || 'A'
+    );
   };
 
   // Skeleton components with gray background
@@ -119,7 +138,9 @@ const EditProfile = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Edit Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+          Edit Profile
+        </h1>
         <p className="text-gray-600">Update your profile information</p>
       </div>
 
@@ -128,15 +149,17 @@ const EditProfile = () => {
         <Card className="lg:col-span-1 border border-gray-200 shadow-sm">
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="h-24 w-24 border-2 border-gray-300">
+              <Avatar className="h-24 w-24 border-2 border-gray-300 dark:border-purple-400">
                 <AvatarImage src={user?.profileImage} alt={user?.name} />
-                <AvatarFallback className="text-lg bg-gray-100 text-gray-600">
+                <AvatarFallback className="text-lg bg-gray-100 dark:bg-purple-900 text-gray-600 dark:text-purple-200">
                   {getInitials(user?.name)}
                 </AvatarFallback>
               </Avatar>
 
               <div className="text-center space-y-2">
-                <h3 className="font-semibold text-lg text-gray-900">{user?.name}</h3>
+                <h3 className="font-semibold text-lg text-gray-900">
+                  {user?.name}
+                </h3>
                 <p className="text-sm text-gray-600">{user?.email}</p>
                 <div className="pt-2">
                   <Badge className="bg-purple-100 text-purple-800 border-purple-200">
@@ -158,7 +181,10 @@ const EditProfile = () => {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="username"
@@ -166,8 +192,8 @@ const EditProfile = () => {
                     <FormItem>
                       <FormLabel className="text-gray-700">Username</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter your username" 
+                        <Input
+                          placeholder="Enter your username"
                           {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
@@ -182,11 +208,13 @@ const EditProfile = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">
+                        Email Address
+                      </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="Enter your email" 
+                        <Input
+                          type="email"
+                          placeholder="Enter your email"
                           {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
@@ -206,8 +234,8 @@ const EditProfile = () => {
                   >
                     Cancel
                   </Button>
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     disabled={isLoading}
                     className="bg-purple-600 hover:bg-purple-700 text-white"
                   >
@@ -217,9 +245,7 @@ const EditProfile = () => {
                         Saving
                       </>
                     ) : (
-                      <>
-                        Save Changes
-                      </>
+                      <>Save Changes</>
                     )}
                   </Button>
                 </div>
