@@ -37,9 +37,14 @@ const Feedback = () => {
   const { user } = useAuth();
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Simulate API loading
-  const [isLoading] = useState(false);
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
 
   // Get stored complaints and merge with mock data
   const storedComplaints = JSON.parse(
@@ -116,33 +121,37 @@ const Feedback = () => {
 
   // Skeleton components
   const HeaderSkeleton = () => (
-    <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
-      <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-      <Skeleton className="h-4 w-96 bg-gray-200" />
+    <div className="rounded-xl p-6 bg-white border-2 border-gray-100 dark:bg-slate-800 dark:border-gray-700">
+      <Skeleton className="h-8 w-64 mb-2 bg-gray-200 dark:bg-gray-700" />
+      <Skeleton className="h-4 w-96 bg-gray-200 dark:bg-gray-700" />
     </div>
+  );
+
+  const ComplaintCardSkeleton = () => (
+    <Card className="border border-gray-200 dark:border-gray-700">
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <Skeleton className="h-5 w-24 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-6 w-16 rounded-full bg-gray-200 dark:bg-gray-700" />
+          </div>
+          <Skeleton className="h-4 w-full bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-8 w-full bg-gray-200 dark:bg-gray-700 rounded" />
+        </div>
+      </CardContent>
+    </Card>
   );
 
   const TabsSkeleton = () => (
     <div className="space-y-4">
       <div className="flex gap-2">
-        <Skeleton className="h-10 w-32 bg-gray-200" />
-        <Skeleton className="h-10 w-32 bg-gray-200" />
+        <Skeleton className="h-10 w-32 bg-gray-200 dark:bg-gray-700" />
+        <Skeleton className="h-10 w-32 bg-gray-200 dark:bg-gray-700" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i} className="border border-gray-200">
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <Skeleton className="h-5 w-24 bg-gray-200" />
-                  <Skeleton className="h-6 w-16 rounded-full bg-gray-200" />
-                </div>
-                <Skeleton className="h-4 w-full bg-gray-200" />
-                <Skeleton className="h-4 w-3/4 bg-gray-200" />
-                <Skeleton className="h-8 w-full bg-gray-200" />
-              </div>
-            </CardContent>
-          </Card>
+        {[...Array(3)].map((_, i) => (
+          <ComplaintCardSkeleton key={i} />
         ))}
       </div>
     </div>
@@ -157,6 +166,7 @@ const Feedback = () => {
     );
   }
 
+  // Rest of your existing JSX remains exactly the same...
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -195,10 +205,10 @@ const Feedback = () => {
           {complaintsWithoutFeedback.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-semibold mb-2 text-black">
+                <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
                   No Resolved Issues Yet
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   You can only provide feedback for complaints marked as
                   Resolved.
                 </p>
@@ -214,7 +224,7 @@ const Feedback = () => {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h4 className="font-semibold text-black mb-1">
+                        <h4 className="font-semibold text-black dark:text-white mb-1">
                           {complaint.facilityType}
                         </h4>
                       </div>
@@ -223,22 +233,22 @@ const Feedback = () => {
                       </Badge>
                     </div>
 
-                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
                       {complaint.issueDescription}
                     </p>
 
-                    {complaint.adminRemarks ? (
+                    {complaint.maintenanceRemarks ? (
                       <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-                        <p className="text-xs font-medium text-gray-800 mb-1">
-                          Admin Remarks:
+                        <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mb-1">
+                          Remarks:
                         </p>
-                        <p className="text-xs text-gray-700 line-clamp-2">
-                          {complaint.adminRemarks}
+                        <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
+                          {complaint.maintenanceRemarks}
                         </p>
                       </div>
                     ) : (
                       <p className="text-xs text-gray-400 italic mb-3">
-                        No remarks
+                        No remarks from maintenance staff
                       </p>
                     )}
                     <div className="flex items-center justify-end">
@@ -262,10 +272,10 @@ const Feedback = () => {
           {complaintsWithFeedback.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <h3 className="text-lg font-semibold mb-2 text-black">
+                <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
                   No Feedback Submitted Yet
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   You haven't provided any feedback yet. Once you submit
                   feedback for resolved complaints, they will appear here.
                 </p>
@@ -281,7 +291,7 @@ const Feedback = () => {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h4 className="font-semibold text-black mb-1">
+                        <h4 className="font-semibold text-black dark:text-white mb-1">
                           {feedbackItem.complaint?.facilityType ||
                             'Unknown Facility'}
                         </h4>
@@ -301,17 +311,17 @@ const Feedback = () => {
                       </div>
                     </div>
 
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
                       {feedbackItem.comment}
                     </p>
 
-                    {feedbackItem.complaint?.adminRemarks ? (
+                    {feedbackItem.complaint?.maintenanceRemarks ? (
                       <div className="bg-gray-50 border border-gray-200 rounded p-2 mb-3">
-                        <p className="text-xs font-medium text-gray-800 mb-1">
-                          Admin Remarks:
+                        <p className="text-xs font-medium text-gray-800 dark:text-gray-200 mb-1">
+                          Remarks:
                         </p>
-                        <p className="text-xs text-gray-700 line-clamp-2">
-                          {feedbackItem.complaint.adminRemarks}
+                        <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">
+                          {feedbackItem.complaint.maintenanceRemarks}
                         </p>
                       </div>
                     ) : (
@@ -331,8 +341,10 @@ const Feedback = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-md">
           <DialogHeader>
-            <DialogTitle className="text-black">Provide Feedback</DialogTitle>
-            <DialogDescription className="text-gray-600">
+            <DialogTitle className="text-black dark:text-white">
+              Provide Feedback
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 dark:text-gray-400">
               Share your experience for: {selectedComplaint?.facilityType}
             </DialogDescription>
           </DialogHeader>
@@ -381,7 +393,7 @@ const Feedback = () => {
                   name="comment"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-black">
+                      <FormLabel className="text-black dark:text-white">
                         Your Comments
                       </FormLabel>
                       <FormControl>

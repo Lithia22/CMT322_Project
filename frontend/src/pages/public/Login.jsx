@@ -3,8 +3,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -25,15 +38,16 @@ const Login = () => {
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = data => {
     const result = login(data.email, data.password);
     if (result.success) {
-      if (result.user.role === "admin") {
-        navigate("/admin");
-      } else if (result.user.role === "technician") {
-        navigate("/technician");
+      // Handle navigation based on role
+      if (result.role === 'admin') {
+        navigate('/admin');
+      } else if (result.role === 'maintenance') {
+        navigate('/maintenance');
       } else {
-        navigate("/dashboard"); // student
+        navigate('/dashboard');
       }
     } else {
       form.setError('root', { message: result.error });
@@ -47,25 +61,33 @@ const Login = () => {
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="flex items-center justify-center rounded-lg">
-                <img
-                  src="/USM.svg"
-                  alt="USM Logo"
-                  className="h-16 w-16"
-                />
+                <img src="/USM.svg" alt="USM Logo" className="h-16 w-16" />
               </div>
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
-              <CardDescription className="text-gray-600">Login to DesaFix System</CardDescription>
+              <CardTitle className="text-2xl font-bold text-gray-900">
+                Welcome Back
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Login to DesaFix System
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 {form.formState.errors.root && (
-                  <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-800">
+                  <Alert
+                    variant="destructive"
+                    className="bg-red-50 border-red-200 text-red-800"
+                  >
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+                    <AlertDescription>
+                      {form.formState.errors.root.message}
+                    </AlertDescription>
                   </Alert>
                 )}
 
@@ -74,7 +96,9 @@ const Login = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email Address</FormLabel>
+                      <FormLabel className="text-gray-700">
+                        Email Address
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="your.email@usm.my"
@@ -115,7 +139,10 @@ const Login = () => {
                 <div className="text-center mt-4">
                   <p className="text-sm text-gray-600">
                     Don't have an account?{' '}
-                    <Link to="/signup" className="text-purple-600 hover:text-purple-700 font-semibold">
+                    <Link
+                      to="/signup"
+                      className="text-purple-600 hover:text-purple-700 font-semibold"
+                    >
                       Sign up here
                     </Link>
                   </p>

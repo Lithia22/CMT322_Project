@@ -76,6 +76,21 @@ const EditProfile = () => {
     );
   };
 
+  const getRoleDisplayName = role => {
+    switch (role) {
+      case 'admin':
+        return 'Administrator';
+      case 'maintenance':
+        return 'Maintenance Staff';
+      default:
+        return 'Student';
+    }
+  };
+
+  const getRoleBadgeColor = role => {
+    return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700';
+  };
+
   // Skeleton components with gray background
   const HeaderSkeleton = () => (
     <div className="space-y-2">
@@ -138,15 +153,17 @@ const EditProfile = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
           Edit Profile
         </h1>
-        <p className="text-gray-600">Update your profile information</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          Update your profile information
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Info - Big avatar with text below */}
-        <Card className="lg:col-span-1 border border-gray-200 shadow-sm">
+        <Card className="lg:col-span-1 border border-gray-200 dark:border-gray-700 shadow-sm">
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="h-24 w-24 border-2 border-gray-300 dark:border-purple-400">
@@ -155,15 +172,16 @@ const EditProfile = () => {
                   {getInitials(user?.name)}
                 </AvatarFallback>
               </Avatar>
-
               <div className="text-center space-y-2">
-                <h3 className="font-semibold text-lg text-gray-900">
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
                   {user?.name}
                 </h3>
-                <p className="text-sm text-gray-600">{user?.email}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {user?.email}
+                </p>
                 <div className="pt-2">
-                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                    {user?.role === 'admin' ? 'Administrator' : 'User'}
+                  <Badge className={getRoleBadgeColor(user?.role)}>
+                    {getRoleDisplayName(user?.role)}
                   </Badge>
                 </div>
               </div>

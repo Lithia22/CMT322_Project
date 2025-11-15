@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarHeader, 
-  SidebarProvider, 
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarProvider,
   SidebarInset,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarGroup,
   SidebarTrigger,
-  useSidebar
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,23 +25,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Home, 
-  FileText, 
-  Eye, 
-  MessageSquare, 
-  BarChart3, 
+import {
+  Home,
+  Eye,
+  MessageSquare,
   LogOut,
-  ShieldCheck,
   User,
-  Settings,
-  Bell,
-  CreditCard,
   ChevronsUpDown,
-  Wrench // Add this import for technician
+  Wrench,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 // Profile Dropdown Component
 function NavUser() {
@@ -54,8 +50,14 @@ function NavUser() {
     navigate('/');
   };
 
-  const getInitials = (name) => {
-    return name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
+  const getInitials = name => {
+    return (
+      name
+        ?.split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase() || 'U'
+    );
   };
 
   return (
@@ -84,7 +86,7 @@ function NavUser() {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -111,7 +113,10 @@ function NavUser() {
                 <span>Profile</span>
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="text-destructive focus:text-destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Log out</span>
             </DropdownMenuItem>
@@ -135,19 +140,21 @@ const DashboardLayout = ({ children }) => {
 
   const adminNavItems = [
     { path: '/admin', label: 'Dashboard', icon: Home },
-    { path: '/manage-complaints', label: 'Manage Complaints', icon: FileText },
-    { path: '/view-feedback', label: 'View Feedback', icon: MessageSquare },
+    { path: '/staff-management', label: 'Staff Management', icon: Users },
   ];
 
-  const technicianNavItems = [ // Fixed typo from "techiniciansNavItems"
-    { path: '/technician', label: 'Dashboard', icon: Home },
-    { path: '/technician-complaints', label: 'Technician Complaints', icon: Wrench }, // Use Wrench icon
+  const maintenanceNavItems = [
+    { path: '/maintenance', label: 'Dashboard', icon: Home },
+    {
+      path: '/maintenance-feedback',
+      label: 'My Feedback',
+      icon: MessageSquare,
+    },
   ];
 
-  // Fixed: Include technician nav items in the logic
   const getNavItems = () => {
     if (user?.role === 'admin') return adminNavItems;
-    if (user?.role === 'technician') return technicianNavItems;
+    if (user?.role === 'maintenance') return maintenanceNavItems;
     return studentNavItems;
   };
 
@@ -155,20 +162,35 @@ const DashboardLayout = ({ children }) => {
 
   const getPortalTitle = () => {
     switch (user?.role) {
-      case 'admin': return 'Admin Portal';
-      case 'technician': return 'Technician Portal';
-      default: return 'Student Portal';
+      case 'admin':
+        return 'Admin Portal';
+      case 'maintenance':
+        return 'Maintenance Portal';
+      default:
+        return 'Student Portal';
     }
   };
 
   const getRoleBadge = () => {
     switch (user?.role) {
-      case 'admin': 
-        return <Badge variant="secondary" className="ml-2 bg-purple-100 text-purple-700 hover:bg-purple-200">Admin</Badge>;
-      case 'technician':
-        return <Badge variant="secondary" className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200">Technician</Badge>;
+      case 'admin':
+        return (
+          <Badge className="ml-2 bg-purple-100 text-purple-700 hover:bg-purple-200">
+            Admin
+          </Badge>
+        );
+      case 'maintenance':
+        return (
+          <Badge className="ml-2 bg-purple-100 text-purple-700 hover:bg-purple-200">
+            Maintenance Staff
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary" className="ml-2 bg-green-100 text-green-700 hover:bg-green-200">Student</Badge>;
+        return (
+          <Badge className="ml-2 bg-purple-100 text-purple-700 hover:bg-purple-200">
+            Student
+          </Badge>
+        );
     }
   };
 
@@ -179,11 +201,7 @@ const DashboardLayout = ({ children }) => {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="pl-2 pr-0">
               <div className="flex items-center space-x-3">
-                  <img 
-                    src="/USM.svg" 
-                    alt="USM Logo" 
-                    className="h-10 w-10"
-                  />
+                <img src="/USM.svg" alt="USM Logo" className="h-10 w-10" />
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold">DesaFix</span>
                   <span className="text-xs text-muted-foreground">
@@ -195,18 +213,18 @@ const DashboardLayout = ({ children }) => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarMenu className="gap-1">
-            {navItems.map((item) => {
+            {navItems.map(item => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
-              
+
               return (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={isActive}
                     onClick={() => navigate(item.path)}
                     className="data-[active=true]:bg-purple-50 data-[active=true]:text-purple-700 data-[active=true]:border data-[active=true]:border-purple-200"
@@ -234,7 +252,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <SidebarProvider
       style={{
-        "--sidebar-width": "16rem",
+        '--sidebar-width': '16rem',
       }}
     >
       <AppSidebar />
@@ -247,15 +265,19 @@ const DashboardLayout = ({ children }) => {
           />
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-semibold">
-              {navItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+              {location.pathname === '/edit-profile'
+                ? 'Profile'
+                : navItems.find(item => item.path === location.pathname)
+                    ?.label || 'Dashboard'}
             </h1>
             {getRoleBadge()}
           </div>
+          <div className="ml-auto">
+            <ThemeToggle />
+          </div>
         </header>
-        
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+
+        <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

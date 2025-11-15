@@ -252,10 +252,10 @@ const StudentDashboard = () => {
                         <p className="text-xs text-gray-500">
                           {complaint.issueDescription}
                         </p>
-                        {complaint.adminRemarks ? (
+                        {complaint.maintenanceRemarks ? (
                           <p className="text-xs text-purple-700 mt-1">
                             <span className="font-semibold">Remarks:</span>{' '}
-                            {complaint.adminRemarks}
+                            {complaint.maintenanceRemarks}
                           </p>
                         ) : (
                           <p className="text-xs text-gray-400 mt-1">
@@ -265,7 +265,7 @@ const StudentDashboard = () => {
                       </div>
                       <div className="flex items-center justify-start w-24">
                         <Badge
-                          className={`${getStatusColor(complaint.status)} text-xs`}
+                          className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
                         >
                           {complaint.status}
                         </Badge>

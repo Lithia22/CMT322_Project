@@ -1,3 +1,62 @@
+/* Cross-platform consistency fixes */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px; /* Explicit base size for Windows */
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-size: 1rem; /* Consistent base size */
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Ensure consistent font rendering across platforms */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix for Windows high DPI displays */
+@media (-webkit-device-pixel-ratio: 1.25) {
+  :root {
+    font-size: 0.95em;
+  }
+}
+
+@media (-webkit-device-pixel-ratio: 1.5) {
+  :root {
+    font-size: 0.9em;
+  }
+}
+
+/* Prevent text size adjustment on orientation change */
+@media (orientation: landscape) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+/* Consistent form elements */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

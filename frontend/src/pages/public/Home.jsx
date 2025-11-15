@@ -181,11 +181,11 @@ const Home = () => {
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-4 mb-4">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide">
-                    SUBMIT REPORT
+                    STUDENT REPORTS
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-justify">
-                  Fill out a simple form describing your hostel facility issue
+                  Students fill out a simple form describing their hostel facility issue
                   with photos and details
                 </p>
               </div>
@@ -196,12 +196,11 @@ const Home = () => {
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-4 mb-4">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide">
-                    ADMIN REVIEW
+                    ADMIN ASSIGNS
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-justify">
-                  Admin reviews your complaint and updates the status as they
-                  work on resolving it
+                  Admins review complaints and assign them to maintenance staff based on expertise, workload, and issue type
                 </p>
               </div>
             </div>
@@ -211,12 +210,12 @@ const Home = () => {
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-4 mb-4">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-wide">
-                    CHECK STATUS
+                    STAFF RESOLVES
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-justify">
-                  Check your complaint status and provide feedback once the
-                  issue has been resolved
+                  Maintenance staff update complaint status, provides remarks,
+                  and mark issues as resolved once fixed
                 </p>
               </div>
             </div>

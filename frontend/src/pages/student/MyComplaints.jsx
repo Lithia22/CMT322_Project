@@ -108,7 +108,7 @@ const MyComplaints = () => {
       status: 'Pending',
       submittedDate: new Date().toISOString().split('T')[0],
       photo: data.photo ? data.photo.name : null,
-      adminRemarks: '',
+      maintenanceRemarks: '',
     };
 
     const existingComplaints = JSON.parse(
@@ -440,12 +440,6 @@ const MyComplaints = () => {
             </p>
             {studentComplaints.length === 0 && (
               <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Submit Your First Complaint
-                  </Button>
-                </DialogTrigger>
                 <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-black">
@@ -638,7 +632,7 @@ const MyComplaints = () => {
                         </div>
                       </div>
                       <Badge
-                        className={`${getStatusColor(complaint.status)} text-xs border`}
+                        className={`${getStatusColor(complaint.status)} pointer-events-none text-xs border`}
                       >
                         {complaint.status}
                       </Badge>
@@ -648,13 +642,13 @@ const MyComplaints = () => {
                       {complaint.issueDescription}
                     </p>
 
-                    {complaint.adminRemarks ? (
+                    {complaint.maintenanceRemarks ? (
                       <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
                         <p className="font-semibold mb-1 text-gray-800">
-                          Admin Remarks:
+                          Remarks:
                         </p>
                         <p className="text-sm text-gray-700">
-                          {complaint.adminRemarks}
+                          {complaint.maintenanceRemarks}
                         </p>
                       </div>
                     ) : (

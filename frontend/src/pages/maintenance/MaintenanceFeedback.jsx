@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -18,18 +18,38 @@ import {
   Calendar,
   User,
   MessageSquare,
-  Building,
 } from 'lucide-react';
-import { mockFeedbacks, mockComplaints, hostelOptions } from '@/data/mockData';
+import {
+  mockFeedbacks,
+  mockComplaints,
+  mockMaintenanceStaff,
+} from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 
-const ViewFeedback = () => {
+const MaintenanceFeedback = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [ratingFilter, setRatingFilter] = useState('all');
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Simulate API loading
-  const [isLoading] = useState(false);
+  useState(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+  });
 
-  const feedbackWithDetails = mockFeedbacks.map(feedback => {
+  // Get current maintenance staff
+  const currentStaff = mockMaintenanceStaff.find(
+    staff => staff.id === user?.id || staff.id === user?.id?.toString()
+  );
+
+  // Get feedback for current maintenance staff
+  const staffFeedbacks = mockFeedbacks.filter(
+    feedback => feedback.maintenanceId === currentStaff?.id
+  );
+
+  const feedbackWithDetails = staffFeedbacks.map(feedback => {
     const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
     return { ...feedback, complaintDetails: complaint };
   });
@@ -47,82 +67,87 @@ const ViewFeedback = () => {
     return matchesSearch && matchesRating;
   });
 
-  const totalFeedbacks = mockFeedbacks.length;
+  const totalFeedbacks = staffFeedbacks.length;
   const averageRating =
-    mockFeedbacks.length > 0
+    totalFeedbacks > 0
       ? (
-          mockFeedbacks.reduce((sum, f) => sum + f.rating, 0) /
-          mockFeedbacks.length
+          staffFeedbacks.reduce((sum, f) => sum + f.rating, 0) / totalFeedbacks
         ).toFixed(1)
       : 0;
 
   const ratingDistribution = {
-    5: mockFeedbacks.filter(f => f.rating === 5).length,
-    4: mockFeedbacks.filter(f => f.rating === 4).length,
-    3: mockFeedbacks.filter(f => f.rating === 3).length,
-    2: mockFeedbacks.filter(f => f.rating === 2).length,
-    1: mockFeedbacks.filter(f => f.rating === 1).length,
+    5: staffFeedbacks.filter(f => f.rating === 5).length,
+    4: staffFeedbacks.filter(f => f.rating === 4).length,
+    3: staffFeedbacks.filter(f => f.rating === 3).length,
+    2: staffFeedbacks.filter(f => f.rating === 2).length,
+    1: staffFeedbacks.filter(f => f.rating === 1).length,
   };
 
-  // Get all hostels with feedback counts (including 0)
-  const feedbackByHostel = hostelOptions.map(hostel => ({
-    name: hostel,
-    count: mockFeedbacks.filter(feedback => {
-      const complaint = mockComplaints.find(c => c.id === feedback.complaintId);
-      return complaint?.hostelName === hostel;
-    }).length,
-  }));
-
-  const midIndex = Math.ceil(feedbackByHostel.length / 2);
-  const firstColumnHostels = feedbackByHostel.slice(0, midIndex);
-  const secondColumnHostels = feedbackByHostel.slice(midIndex);
-
   // Skeleton components
-  const StatsSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32 bg-gray-200" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex justify-between items-center">
-              <Skeleton className="h-4 w-24 bg-gray-200" />
-              <Skeleton className="h-4 w-8 bg-gray-200" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32 bg-gray-200" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex justify-between items-center">
-              <Skeleton className="h-4 w-20 bg-gray-200" />
-              <Skeleton className="h-4 w-8 bg-gray-200" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+  const HeaderSkeleton = () => (
+    <div className="rounded-xl p-6 bg-white border-2 border-gray-100 dark:bg-slate-800 dark:border-gray-700">
+      <Skeleton className="h-8 w-64 mb-2 bg-gray-200 dark:bg-gray-700" />
+      <Skeleton className="h-4 w-96 bg-gray-200 dark:bg-gray-700" />
     </div>
+  );
+
+  const StatsCardSkeleton = () => (
+    <Card className="h-full">
+      <CardHeader className="pb-3">
+        <Skeleton className="h-5 w-32 bg-gray-200 dark:bg-gray-700" />
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 bg-gray-200 dark:bg-gray-700" />
+              <Skeleton className="h-4 w-24 bg-gray-200 dark:bg-gray-700" />
+            </div>
+            <Skeleton className="h-4 w-8 bg-gray-200 dark:bg-gray-700" />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+
+  const AverageRatingSkeleton = () => (
+    <Card className="h-full">
+      <CardContent className="flex flex-col items-center justify-center h-full p-6">
+        <Skeleton className="h-12 w-24 mb-4 bg-gray-200 dark:bg-gray-700" />
+        <div className="flex space-x-1 mb-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton
+              key={i}
+              className="h-6 w-6 rounded bg-gray-200 dark:bg-gray-700"
+            />
+          ))}
+        </div>
+        <Skeleton className="h-4 w-32 bg-gray-200 dark:bg-gray-700" />
+      </CardContent>
+    </Card>
   );
 
   const FeedbackCardSkeleton = () => (
     <Card>
       <CardContent className="p-4">
         <div className="flex items-start space-x-3">
-          <Skeleton className="h-10 w-10 rounded-full bg-gray-200" />
+          <Skeleton className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700" />
           <div className="flex-1 space-y-2">
             <div className="flex justify-between">
-              <Skeleton className="h-4 w-32 bg-gray-200" />
-              <Skeleton className="h-5 w-16 bg-gray-200" />
+              <Skeleton className="h-4 w-32 bg-gray-200 dark:bg-gray-700" />
+              <div className="flex space-x-1">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    className="h-4 w-4 rounded bg-gray-200 dark:bg-gray-700"
+                  />
+                ))}
+              </div>
             </div>
-            <Skeleton className="h-3 w-24 bg-gray-200" />
-            <Skeleton className="h-4 w-full bg-gray-200" />
-            <Skeleton className="h-4 w-3/4 bg-gray-200" />
+            <Skeleton className="h-3 w-24 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-full bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700" />
+            <Skeleton className="h-16 w-full bg-gray-200 dark:bg-gray-700 rounded" />
           </div>
         </div>
       </CardContent>
@@ -132,19 +157,23 @@ const ViewFeedback = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
-          <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
-          <Skeleton className="h-4 w-96 bg-gray-200" />
+        <HeaderSkeleton />
+
+        {/* Performance Overview Skeletons */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StatsCardSkeleton />
+          <AverageRatingSkeleton />
         </div>
 
-        <StatsSkeleton />
+        {/* Filters Skeletons */}
         <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <Skeleton className="h-9 flex-1 bg-gray-200" />
-          <Skeleton className="h-9 w-[180px] bg-gray-200" />
-          <Skeleton className="h-6 w-24 bg-gray-200" />
+          <Skeleton className="h-9 flex-1 max-w-md bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-9 w-[180px] bg-gray-200 dark:bg-gray-700" />
+          <Skeleton className="h-7 w-24 rounded-full bg-gray-200 dark:bg-gray-700" />
         </div>
 
-        <div className="space-y-3">
+        {/* Feedback List Skeletons */}
+        <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <FeedbackCardSkeleton key={i} />
           ))}
@@ -163,54 +192,16 @@ const ViewFeedback = () => {
             'linear-gradient(90deg, hsl(270, 76%, 53%), hsl(45, 93%, 47%))',
         }}
       >
-        <h1 className="text-3xl font-bold tracking-tight">Student Feedback</h1>
-        <p className="text-white/90">View ratings and comments from students</p>
+        <h1 className="text-3xl font-bold tracking-tight">View Feedback</h1>
+        <p className="text-white/90">
+          View ratings and comments from students for your work
+        </p>
       </div>
 
-      {/* Additional Insights */}
+      {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              Feedback by Hostel
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              {/* First Column */}
-              <div className="space-y-3">
-                {firstColumnHostels.map(({ name, count }) => (
-                  <div
-                    key={name}
-                    className="flex justify-between items-center text-sm"
-                  >
-                    <span className="text-muted-foreground text-xs">
-                      {name.replace('Desasiswa ', '')}
-                    </span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Second Column */}
-              <div className="space-y-3">
-                {secondColumnHostels.map(({ name, count }) => (
-                  <div
-                    key={name}
-                    className="flex justify-between items-center text-sm"
-                  >
-                    <span className="text-muted-foreground text-xs">
-                      {name.replace('Desasiswa ', '')}
-                    </span>
-                    <span className="font-semibold">{count}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
+        {/* Rating Distribution Card */}
+        <Card className="h-full border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               Rating Distribution
@@ -245,41 +236,75 @@ const ViewFeedback = () => {
             ))}
           </CardContent>
         </Card>
+
+        {/* Average Rating Card - Improved responsive alignment */}
+        <Card className="h-full border-2 border-purple-100 bg-gradient-to-br from-white to-purple-50 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="flex flex-col items-center justify-center h-full py-8">
+            <div className="text-center space-y-4">
+              <div className="text-4xl font-bold text-purple-600">
+                {averageRating}/5.0
+              </div>
+              <div className="flex justify-center space-x-0.5">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Star
+                    key={star}
+                    size={24}
+                    className={
+                      star <= Math.round(averageRating)
+                        ? 'fill-purple-600 text-yellow-400'
+                        : 'text-gray-300'
+                    }
+                  />
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">
+                Based on {totalFeedbacks} reviews
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center">
-        <div className="relative flex-1 max-w-md">
+      {/* Filters - Improved responsive layout */}
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+        {/* Search Bar */}
+        <div className="relative flex-1">
           <Search
             className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
             size={16}
           />
           <Input
-            placeholder="Search by student, matric, comment, or facility..."
+            placeholder="Search by student, comment, or facility..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+            className="pl-9 h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500 w-full"
           />
         </div>
 
-        <Select value={ratingFilter} onValueChange={setRatingFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-            <Filter className="mr-2 h-4 w-4" />
-            <SelectValue placeholder="Filter by rating" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Ratings</SelectItem>
-            <SelectItem value="5">5 Stars</SelectItem>
-            <SelectItem value="4">4 Stars</SelectItem>
-            <SelectItem value="3">3 Stars</SelectItem>
-            <SelectItem value="2">2 Stars</SelectItem>
-            <SelectItem value="1">1 Star</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Rating Filter and Count - Stack on mobile, row on larger screens */}
+        <div className="flex flex-col xs:flex-row gap-3 items-stretch xs:items-center">
+          <Select value={ratingFilter} onValueChange={setRatingFilter}>
+            <SelectTrigger className="w-full xs:w-[180px] h-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+              <Filter className="mr-2 h-4 w-4" />
+              <SelectValue placeholder="All Ratings" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ratings</SelectItem>
+              <SelectItem value="5">5 Stars</SelectItem>
+              <SelectItem value="4">4 Stars</SelectItem>
+              <SelectItem value="3">3 Stars</SelectItem>
+              <SelectItem value="2">2 Stars</SelectItem>
+              <SelectItem value="1">1 Star</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Badge variant="secondary" className="h-7">
-          {filteredFeedbacks.length} of {mockFeedbacks.length}
-        </Badge>
+          <Badge
+            variant="secondary"
+            className="h-7 flex items-center justify-center min-w-[80px]"
+          >
+            {filteredFeedbacks.length} of {totalFeedbacks}
+          </Badge>
+        </div>
       </div>
 
       {/* Feedback List */}
@@ -306,7 +331,7 @@ const ViewFeedback = () => {
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
                       <div className="flex items-center space-x-4">
                         <div>
                           <h3 className="font-semibold text-sm">
@@ -331,7 +356,6 @@ const ViewFeedback = () => {
                             }
                           />
                         ))}
-                        <span className="text-sm font-semibold ml-1"></span>
                       </div>
                     </div>
 
@@ -379,4 +403,4 @@ const ViewFeedback = () => {
   );
 };
 
-export default ViewFeedback;
+export default MaintenanceFeedback;

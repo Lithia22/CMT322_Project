@@ -15,22 +15,31 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const register = (userData) => {
+  const register = userData => {
     const existingUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-    
+
     // Check if email already exists
-    const existingUserByEmail = existingUsers.find(u => u.email === userData.email);
+    const existingUserByEmail = existingUsers.find(
+      u => u.email === userData.email
+    );
     if (existingUserByEmail) {
-      return { success: false, error: 'An account with this email already exists. Please login instead.' };
+      return {
+        success: false,
+        error:
+          'An account with this email already exists. Please login instead.',
+      };
     }
 
     // Check if matric number already exists (for student accounts)
     if (userData.email.includes('@student.usm.my')) {
-      const existingUserByMatric = existingUsers.find(u => u.matricNumber === userData.matricNumber);
+      const existingUserByMatric = existingUsers.find(
+        u => u.matricNumber === userData.matricNumber
+      );
       if (existingUserByMatric) {
-        return { 
-          success: false, 
-          error: 'This matric number is already registered. Please use your existing account or contact support if you need help.' 
+        return {
+          success: false,
+          error:
+            'This matric number is already registered. Please use your existing account or contact support if you need help.',
         };
       }
     }
@@ -38,23 +47,29 @@ export const AuthProvider = ({ children }) => {
     const newUser = {
       id: Date.now(),
       ...userData,
-      role: userData.email.includes('@student.usm.my') ? 'student' : 'admin'
+      role: userData.email.includes('@student.usm.my') ? 'student' : 'admin',
     };
 
     existingUsers.push(newUser);
     localStorage.setItem('mockUsers', JSON.stringify(existingUsers));
-    
+
     return { success: true, user: newUser };
   };
 
   const login = (email, password) => {
     // Check mock users first
-    let foundUser = mockUsers.find(u => u.email === email && u.password === password);
-    
+    let foundUser = mockUsers.find(
+      u => u.email === email && u.password === password
+    );
+
     // Then check localStorage for registered users
     if (!foundUser) {
-      const registeredUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-      foundUser = registeredUsers.find(u => u.email === email && u.password === password);
+      const registeredUsers = JSON.parse(
+        localStorage.getItem('mockUsers') || '[]'
+      );
+      foundUser = registeredUsers.find(
+        u => u.email === email && u.password === password
+      );
     }
 
     if (foundUser) {
@@ -62,7 +77,13 @@ export const AuthProvider = ({ children }) => {
       delete userWithoutPassword.password;
       setUser(userWithoutPassword);
       localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-      return { success: true, user: userWithoutPassword };
+
+      return {
+        success: true,
+        user: userWithoutPassword,
+        // Return the role so the component can handle navigation
+        role: foundUser.role,
+      };
     }
 
     return { success: false, error: 'Invalid email or password' };
@@ -73,8 +94,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('currentUser');
   };
 
-  const updateProfile = async (profileData) => {
-    return new Promise((resolve) => {
+  const updateProfile = async profileData => {
+    return new Promise(resolve => {
       setTimeout(() => {
         const updatedUser = { ...user, ...profileData };
         setUser(updatedUser);
@@ -94,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
     isStudent: user?.role === 'student',
-    isTechnician: user?.role === 'technician' // Add this line
+    isMaintenance: user?.role === 'maintenance',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
