@@ -11,30 +11,27 @@
 
 ### Student Features
 
-- **Personal Dashboard** with complaint statistics
-- **Submit Complaints** with facility details and photo upload
-- **Track Complaint Status** with maintenance staff updates and remarks
-- **Provide Feedback** on resolved complaints with star ratings
-
-### Maintenance Staff Features
-
-- **Maintenance Dashboard** with assigned tasks overview
-- **Task Management** - update complaint status from Pending → In Progress → Resolved
-- **Add Maintenance Remarks** for each complaint
-- **View Feedback** - see ratings and comments from students
-- **Workload Tracking** - monitor assigned vs completed tasks
+- **Dashboard** with total complaints statistics, recent complaints, and feedback given
+- **My Complaints** to track complaint progress and submit new complaints
+- **Feedback** to provide feedback on resolved complaints
 
 ### Admin Features
 
-- **Admin Dashboard** with charts
-- **Staff Management** - create and manage maintenance staff accounts
-- **Complaint Assignment** - assign unassigned tasks to appropriate maintenance staff
+- **Dashboard** with overall complaint statistics, charts, recent complaints, and recent feedback
+- **Staff Management** to create maintenance staff accounts, assign tasks, and monitor complaint status
+- **Staff Performance** to view staff rating analytics and top-rated staff members
+
+### Maintenance Staff Features
+
+- **Dashboard** to manage complaints, update status, and add remarks
+- **View Feedback** to see feedback and star ratings given by students
 
 ## Tech Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS
 - **UI Components**: shadcn/ui, Lucide React icons
 - **State Management**: React Context API
+- **Form Handling**: React Hook Form with Zod validation
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS with dark mode support
 - **Icons**: Lucide React
