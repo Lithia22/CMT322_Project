@@ -14,9 +14,9 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -33,15 +33,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Search,
-  MoreVertical,
-  Phone,
-  Calendar,
-  Plus,
-  Eye,
-  Wrench,
-} from 'lucide-react';
+import { Search, MoreVertical, Calendar, Plus, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   mockMaintenanceStaff,
@@ -57,6 +49,7 @@ const StaffManagement = () => {
   const [facilityFilter, setFacilityFilter] = useState('all');
   const [pendingSearchQuery, setPendingSearchQuery] = useState('');
   const [pendingFacilityFilter, setPendingFacilityFilter] = useState('all');
+  const [complaintStatusFilter, setComplaintStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [assignmentDialogOpen, setAssignmentDialogOpen] = useState(false);
@@ -70,7 +63,7 @@ const StaffManagement = () => {
     }, 1500);
   });
 
-  // FIXED: Only show unassigned pending complaints
+  // Only show unassigned && pending complaints
   const unassignedComplaints = useMemo(() => {
     return complaints.filter(
       complaint =>
@@ -93,7 +86,7 @@ const StaffManagement = () => {
     });
   }, [staff, searchQuery, facilityFilter]);
 
-  // FIXED: Filter for unassigned complaints only
+  // Filter for unassigned complaints only
   const filteredUnassignedComplaints = useMemo(() => {
     return unassignedComplaints.filter(complaint => {
       const matchesSearch =
@@ -118,6 +111,12 @@ const StaffManagement = () => {
     });
   }, [unassignedComplaints, pendingSearchQuery, pendingFacilityFilter]);
 
+  const filteredComplaintTimeline = complaints.filter(
+    complaint =>
+      complaint.assignedMaintenance &&
+      (complaintStatusFilter === 'all' ||
+        complaint.status === complaintStatusFilter)
+  );
   const getEligibleStaffForComplaint = complaint => {
     return staff
       .filter(member => member.facilityTypes?.includes(complaint.facilityType))
@@ -157,39 +156,24 @@ const StaffManagement = () => {
     setSelectedComplaint(complaint);
     setAssignmentDialogOpen(true);
   };
-
-  // FIXED: Keep status as 'Pending' when assigning, just set assignedMaintenance
   const assignToStaff = staffId => {
     if (selectedComplaint && staffId) {
-      // Find the staff member
       const assignedStaff = staff.find(s => s.id === staffId);
 
-      console.log(
-        'Before update:',
-        complaints.find(c => c.id === selectedComplaint.id)
-      );
-
-      // FIXED: Status remains 'Pending', only assign maintenance
       setComplaints(prevComplaints => {
         const updated = prevComplaints.map(complaint =>
           complaint.id === selectedComplaint.id
             ? {
                 ...complaint,
-                status: 'Pending', // ← KEEP as Pending
+                status: 'Pending',
                 assignedMaintenance: staffId,
-                assignedDate: new Date().toISOString().split('T')[0], // ← Add assignment date
+                assignedDate: new Date().toISOString().split('T')[0],
               }
             : complaint
-        );
-
-        console.log(
-          'After update:',
-          updated.find(c => c.id === selectedComplaint.id)
         );
         return updated;
       });
 
-      // Show success notification with staff name
       toast.success(
         `Complaint assigned to ${assignedStaff?.name || 'staff member'}`
       );
@@ -199,7 +183,19 @@ const StaffManagement = () => {
     }
   };
 
-  // Skeleton Components
+  const getStatusColor = status => {
+    switch (status) {
+      case 'Resolved':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'In Progress':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Pending':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
   const HeaderSkeleton = () => (
     <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
       <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
@@ -297,6 +293,12 @@ const StaffManagement = () => {
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
             Unassigned Tasks ({filteredUnassignedComplaints.length})
+          </TabsTrigger>
+          <TabsTrigger
+            value="complaints"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Complaint Status ({filteredComplaintTimeline.length})
           </TabsTrigger>
         </TabsList>
 
@@ -468,7 +470,7 @@ const StaffManagement = () => {
               </Select>
 
               <Badge variant="secondary" className="h-7">
-                {filteredUnassignedComplaints.length} tasks
+                {filteredUnassignedComplaints.length} unassigned tasks
               </Badge>
             </div>
             <div></div>
@@ -590,9 +592,103 @@ const StaffManagement = () => {
             </div>
           </Card>
         </TabsContent>
+
+        {/* Complaint Timeline Tab */}
+        <TabsContent value="complaints">
+          {/* Filters */}
+          <div className="flex flex-wrap gap-3 items-center justify-between mb-4">
+            <div className="flex flex-wrap gap-3 items-center">
+              <Select
+                value={complaintStatusFilter}
+                onValueChange={setComplaintStatusFilter}
+              >
+                <SelectTrigger className="w-[180px] border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Badge variant="secondary" className="h-7">
+                {filteredComplaintTimeline.length} assigned complaints
+              </Badge>
+            </div>
+          </div>
+
+          {/* Complaint Timeline Table */}
+          <Card>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[150px]">Student</TableHead>
+                    <TableHead className="min-w-[150px]">Assigned To</TableHead>
+                    <TableHead className="min-w-[120px]">Contact</TableHead>
+                    <TableHead className="min-w-[120px]">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredComplaintTimeline.length > 0 ? (
+                    filteredComplaintTimeline.map(complaint => {
+                      const assignedStaff = staff.find(
+                        s => s.id === complaint.assignedMaintenance
+                      );
+
+                      return (
+                        <TableRow key={complaint.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium text-black whitespace-nowrap">
+                                {complaint.studentName}
+                              </div>
+                              <div className="text-sm text-gray-600 whitespace-nowrap">
+                                {complaint.hostelName} - Room{' '}
+                                {complaint.roomNumber}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {assignedStaff?.name || 'Unassigned'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {assignedStaff?.phone || 'N/A'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
+                            >
+                              {complaint.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="h-32 text-center text-sm text-gray-600"
+                      >
+                        No assigned complaints found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </TabsContent>
       </Tabs>
 
-      {/* Create Staff Modal - Using the existing component */}
+      {/* Create Staff Modal */}
       <CreateMaintenanceModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}

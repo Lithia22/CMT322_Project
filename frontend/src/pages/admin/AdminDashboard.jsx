@@ -329,7 +329,7 @@ const AdminDashboard = () => {
                         {complaint.issueDescription}
                       </p>
                       {complaint.assignedMaintenance && (
-                        <p className="text-xs text-blue-600">
+                        <p className="text-xs text-purple-600">
                           Assigned to:{' '}
                           {mockMaintenanceStaff.find(
                             s => s.id === complaint.assignedMaintenance

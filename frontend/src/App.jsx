@@ -25,6 +25,7 @@ import Feedback from './pages/student/Feedback';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import EditProfile from './pages/admin/EditProfile';
 import StaffManagement from './pages/admin/StaffManagement';
+import StaffPerformance from './pages/admin/StaffPerformance';
 
 // Maintenance pages
 import MaintenanceDashboard from './pages/maintenance/MaintenanceDashboard';
@@ -102,6 +103,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <StaffManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/staff-performance"
+              element={
+                <ProtectedRoute>
+                  <StaffPerformance />
                 </ProtectedRoute>
               }
             />

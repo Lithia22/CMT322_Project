@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -32,12 +31,12 @@ import {
   LogOut,
   User,
   ChevronsUpDown,
-  Wrench,
   Users,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { TrendingUp } from 'lucide-react';
 
 // Profile Dropdown Component
 function NavUser() {
@@ -141,6 +140,11 @@ const DashboardLayout = ({ children }) => {
   const adminNavItems = [
     { path: '/admin', label: 'Dashboard', icon: Home },
     { path: '/staff-management', label: 'Staff Management', icon: Users },
+    {
+      path: '/staff-performance',
+      label: 'Staff Performance',
+      icon: TrendingUp,
+    },
   ];
 
   const maintenanceNavItems = [
