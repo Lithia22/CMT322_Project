@@ -2,8 +2,21 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import { useRef } from 'react';
 
 const Home = () => {
+  const videoRef = useRef(null);
+
+  const handleVideoClick = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
+
   return (
     <PublicLayout>
       {/* Hero Section */}
@@ -80,6 +93,7 @@ const Home = () => {
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center max-w-7xl mx-auto">
+            {/* Text Content - Left Side */}
             <div className="order-2 md:order-1 animate-fade-in-left">
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-8 sm:mb-10 leading-tight">
                 Your Comfort is Our Priority
@@ -126,15 +140,39 @@ const Home = () => {
               </ul>
             </div>
 
+            {/* Video Content - Right Side */}
             <div className="relative order-1 md:order-2 animate-fade-in-right">
               <div className="rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-300 hover:scale-[1.02]">
-                <img
-                  src="/student-section.jpg"
-                  alt="USM Hostel Room"
-                  className="w-full h-[350px] sm:h-[450px] lg:h-[500px] object-cover"
-                />
+                {/* Local Video - Click to Play/Pause, No Visible Controls */}
+                <div
+                  className="relative aspect-[4/3] w-full bg-gray-900 rounded-2xl overflow-hidden cursor-pointer"
+                  onClick={handleVideoClick}
+                >
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    poster="/student-section.jpg"
+                  >
+                    <source src="/student-life-video.mp4" type="video/mp4" />
+                    {/* Fallback image if video doesn't load */}
+                    <img
+                      src="/student-section.jpg"
+                      alt="USM Hostel Life"
+                      className="w-full h-full object-cover"
+                    />
+                  </video>
+
+                  {/* Subtle hover effect to indicate it's clickable */}
+                  <div className="absolute inset-0 bg-transparent transition-all duration-300 hover:bg-black hover:bg-opacity-10" />
+                </div>
               </div>
-              {/* Floating card - FAQ CTA */}
+
+              {/* Floating FAQ Card */}
               <div className="absolute -bottom-6 sm:-bottom-8 -left-6 sm:-left-8 bg-white rounded-xl shadow-2xl p-5 sm:p-7 max-w-[240px] sm:max-w-sm transform transition-all duration-300 hover:scale-105 animate-fade-in-up animate-delay-500">
                 <div>
                   <div className="text-base sm:text-lg font-bold text-gray-900 mb-3">
@@ -185,8 +223,8 @@ const Home = () => {
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-justify">
-                  Students fill out a simple form describing their hostel facility issue
-                  with photos and details
+                  Students fill out a simple form describing their hostel
+                  facility issue with photos and details
                 </p>
               </div>
             </div>
@@ -200,7 +238,8 @@ const Home = () => {
                   </h3>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4 text-justify">
-                  Admins review complaints and assign them to maintenance staff based on expertise, workload, and issue type
+                  Admins review complaints and assign them to maintenance staff
+                  based on expertise, workload, and issue type
                 </p>
               </div>
             </div>

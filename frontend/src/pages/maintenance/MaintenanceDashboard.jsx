@@ -45,13 +45,21 @@ import {
 import { mockComplaints, mockMaintenanceStaff } from '@/data/mockData';
 import { UpdateComplaintModal } from '@/components/modal/UpdateComplaintModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const MaintenanceDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [viewComplaintDialogOpen, setViewComplaintDialogOpen] = useState(false);
-  const [complaints, setComplaints] = useState(mockComplaints);
+
+  // Load complaints from localStorage and merge with mock data
+  const storedComplaints = JSON.parse(
+    localStorage.getItem('mockComplaints') || '[]'
+  );
+  const allComplaints = [...mockComplaints, ...storedComplaints];
+  const [complaints, setComplaints] = useState(allComplaints);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [facilityFilter, setFacilityFilter] = useState('all');
@@ -63,11 +71,9 @@ const MaintenanceDashboard = () => {
   );
 
   // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  });
+  setTimeout(() => {
+    setIsLoading(false);
+  }, 1500);
 
   // Get complaints assigned to current maintenance staff (both Pending and In Progress)
   const assignedComplaints = useMemo(() => {
@@ -139,16 +145,39 @@ const MaintenanceDashboard = () => {
   };
 
   const handleComplaintUpdate = updatedComplaint => {
-    setComplaints(prevComplaints =>
-      prevComplaints.map(complaint =>
+    try {
+      // Update in local state
+      setComplaints(prevComplaints =>
+        prevComplaints.map(complaint =>
+          complaint.id === updatedComplaint.id ? updatedComplaint : complaint
+        )
+      );
+
+      // Update in localStorage
+      const storedComplaints = JSON.parse(
+        localStorage.getItem('mockComplaints') || '[]'
+      );
+      const updatedStoredComplaints = storedComplaints.map(complaint =>
         complaint.id === updatedComplaint.id ? updatedComplaint : complaint
-      )
-    );
+      );
+      localStorage.setItem(
+        'mockComplaints',
+        JSON.stringify(updatedStoredComplaints)
+      );
 
-    toast.success('Complaint updated successfully!');
+      // Show success toast at bottom-right
+      toast.success('Complaint updated successfully!', {
+        position: 'bottom-right',
+      });
 
-    setShowUpdateModal(false);
-    setSelectedComplaint(null);
+      setShowUpdateModal(false);
+      setSelectedComplaint(null);
+    } catch (error) {
+      console.error('Error updating complaint:', error);
+      toast.error('Failed to update complaint. Please try again.', {
+        position: 'bottom-right',
+      });
+    }
   };
 
   // Skeleton Components

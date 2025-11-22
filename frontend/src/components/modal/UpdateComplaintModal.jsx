@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -24,19 +24,11 @@ export const UpdateComplaintModal = ({
   complaint,
   onUpdate,
 }) => {
+  // Initialize form data directly from complaint prop
   const [formData, setFormData] = useState({
-    status: '',
-    remarks: '',
+    status: complaint?.status || '',
+    remarks: complaint?.maintenanceRemarks || '',
   });
-
-  useEffect(() => {
-    if (complaint) {
-      setFormData({
-        status: complaint.status,
-        remarks: complaint.maintenanceRemarks || '',
-      });
-    }
-  }, [complaint]);
 
   const handleSubmit = e => {
     e.preventDefault();

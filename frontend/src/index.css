@@ -563,3 +563,17 @@ textarea {
     background: rgba(30, 41, 59, 0.4);
   }
 }
+
+/* Smooth video transitions */
+iframe {
+  transition: transform 0.3s ease;
+}
+
+iframe:hover {
+  transform: scale(1.01);
+}
+
+/* Ensure proper aspect ratio */
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
