@@ -89,28 +89,32 @@ const Feedback = () => {
   const [hoverRating, setHoverRating] = useState(0);
 
   const onSubmit = data => {
-    if (!selectedComplaint) return;
+    try {
+      if (!selectedComplaint) return;
 
-    const newFeedback = {
-      id: Date.now(),
-      complaintId: selectedComplaint.id,
-      matricNumber: user.matricNumber,
-      studentName: user.name,
-      ...data,
-      submittedDate: new Date().toISOString().split('T')[0],
-    };
+      const newFeedback = {
+        id: Date.now(),
+        complaintId: selectedComplaint.id,
+        matricNumber: user.matricNumber,
+        studentName: user.name,
+        ...data,
+        submittedDate: new Date().toISOString().split('T')[0],
+      };
 
-    const existingFeedbacks = JSON.parse(
-      localStorage.getItem('mockFeedbacks') || '[]'
-    );
-    existingFeedbacks.push(newFeedback);
-    localStorage.setItem('mockFeedbacks', JSON.stringify(existingFeedbacks));
+      const existingFeedbacks = JSON.parse(
+        localStorage.getItem('mockFeedbacks') || '[]'
+      );
+      existingFeedbacks.push(newFeedback);
+      localStorage.setItem('mockFeedbacks', JSON.stringify(existingFeedbacks));
 
-    toast.success('Feedback submitted successfully!');
-    setDialogOpen(false);
-    form.reset();
-    setSelectedComplaint(null);
-    window.location.reload();
+      form.reset();
+      setDialogOpen(false);
+      setSelectedComplaint(null);
+
+      toast.success('Feedback submitted successfully!');
+    } catch (error) {
+      toast.error('Failed to submit feedback. Please try again.');
+    }
   };
 
   const openFeedbackDialog = complaint => {

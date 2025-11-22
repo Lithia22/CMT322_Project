@@ -98,29 +98,36 @@ const MyComplaints = () => {
   });
 
   const onSubmit = data => {
-    const newComplaint = {
-      id: Date.now(),
-      matricNumber: user.matricNumber,
-      studentName: user.name,
-      hostelName: user.hostelName,
-      roomNumber: user.roomNumber,
-      ...data,
-      status: 'Pending',
-      submittedDate: new Date().toISOString().split('T')[0],
-      photo: data.photo ? data.photo.name : null,
-      maintenanceRemarks: '',
-    };
+    try {
+      const newComplaint = {
+        id: Date.now(),
+        matricNumber: user.matricNumber,
+        studentName: user.name,
+        hostelName: user.hostelName,
+        roomNumber: user.roomNumber,
+        ...data,
+        status: 'Pending',
+        submittedDate: new Date().toISOString().split('T')[0],
+        photo: data.photo ? data.photo.name : null,
+        maintenanceRemarks: '',
+      };
 
-    const existingComplaints = JSON.parse(
-      localStorage.getItem('mockComplaints') || '[]'
-    );
-    existingComplaints.push(newComplaint);
-    localStorage.setItem('mockComplaints', JSON.stringify(existingComplaints));
+      const existingComplaints = JSON.parse(
+        localStorage.getItem('mockComplaints') || '[]'
+      );
+      existingComplaints.push(newComplaint);
+      localStorage.setItem(
+        'mockComplaints',
+        JSON.stringify(existingComplaints)
+      );
 
-    toast.success('Complaint submitted successfully!');
-    setDialogOpen(false);
-    form.reset();
-    window.location.reload(); // Refresh to show new complaint
+      form.reset();
+      setDialogOpen(false);
+
+      toast.success('Complaint submitted successfully!');
+    } catch (error) {
+      toast.error('Failed to submit complaint. Please try again.');
+    }
   };
 
   const getStatusColor = status => {

@@ -144,6 +144,9 @@ const MaintenanceDashboard = () => {
         complaint.id === updatedComplaint.id ? updatedComplaint : complaint
       )
     );
+
+    toast.success('Complaint updated successfully!');
+
     setShowUpdateModal(false);
     setSelectedComplaint(null);
   };

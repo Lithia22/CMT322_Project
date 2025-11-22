@@ -109,7 +109,6 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
       });
 
       form.reset();
-      toast.success('Maintenance staff account created successfully!');
     } catch (error) {
       toast.error('Failed to create staff account. Please try again.');
     }

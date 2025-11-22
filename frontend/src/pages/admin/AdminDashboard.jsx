@@ -176,7 +176,6 @@ const AdminDashboard = () => {
         <Tabs defaultValue="complaints" className="space-y-4">
           <TabsList>
             <Skeleton className="h-10 w-32 bg-gray-200" />
-            <Skeleton className="h-10 w-32 bg-gray-200" />
           </TabsList>
           <TabsContent value="complaints">
             <Card>
@@ -300,12 +299,6 @@ const AdminDashboard = () => {
           >
             Recent Complaints
           </TabsTrigger>
-          <TabsTrigger
-            value="feedback"
-            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
-          >
-            Recent Feedback
-          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="complaints">
@@ -343,48 +336,6 @@ const AdminDashboard = () => {
                       >
                         {complaint.status}
                       </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="feedback">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                {mockFeedbacks.map(feedback => (
-                  <div
-                    key={feedback.id}
-                    className="border-b pb-4 last:border-0 last:pb-0"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1 flex-1">
-                        <p className="font-medium text-black">
-                          {feedback.studentName}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {feedback.matricNumber}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-2">
-                          {feedback.comment}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 ml-4">
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <Star
-                            key={star}
-                            size={20}
-                            className={
-                              star <= feedback.rating
-                                ? 'fill-purple-600 text-yellow-400'
-                                : 'text-gray-300'
-                            }
-                          />
-                        ))}
-                      </div>
                     </div>
                   </div>
                 ))}
