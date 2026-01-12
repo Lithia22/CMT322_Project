@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -32,25 +33,38 @@ const loginSchema = z.object({
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = data => {
-    const result = login(data.email, data.password);
-    if (result.success) {
-      // Handle navigation based on role
-      if (result.role === 'admin') {
-        navigate('/admin');
-      } else if (result.role === 'maintenance') {
-        navigate('/maintenance');
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    
+    try {
+      const result = await login(data.email, data.password);
+      
+      if (result.success) {
+        // Handle navigation based on role
+        if (result.role === 'admin') {
+          navigate('/admin');
+        } else if (result.role === 'maintenance') {
+          navigate('/maintenance');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-        navigate('/dashboard');
+        form.setError('root', { message: result.error });
       }
-    } else {
-      form.setError('root', { message: result.error });
+    } catch (error) {
+      console.error('Login error:', error);
+      form.setError('root', { 
+        message: 'An unexpected error occurred. Please try again.' 
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,8 +147,9 @@ const Login = () => {
                 <Button
                   type="submit"
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5"
+                  disabled={isLoading}
                 >
-                  Login
+                  {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
                 <div className="text-center mt-4">
                   <p className="text-sm text-gray-600">

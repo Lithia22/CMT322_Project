@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,71 +42,118 @@ import {
   AlertTriangle,
   FileText,
 } from 'lucide-react';
-import { mockComplaints, mockMaintenanceStaff } from '@/data/mockData';
 import { UpdateComplaintModal } from '@/components/modal/UpdateComplaintModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const MaintenanceDashboard = () => {
+  const [complaints, setComplaints] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [viewComplaintDialogOpen, setViewComplaintDialogOpen] = useState(false);
-
-  // Load complaints from localStorage and merge with mock data
-  const storedComplaints = JSON.parse(
-    localStorage.getItem('mockComplaints') || '[]'
-  );
-  const allComplaints = [...mockComplaints, ...storedComplaints];
-  const [complaints, setComplaints] = useState(allComplaints);
-
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [facilityFilter, setFacilityFilter] = useState('all');
   const { user } = useAuth();
 
-  // Get current maintenance staff based on user ID
-  const currentStaff = mockMaintenanceStaff.find(
-    staff => staff.id === user?.id || staff.id === user?.id?.toString()
-  );
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          toast.error('Please login again');
+          setIsLoading(false);
+          return;
+        }
 
-  // Simulate API loading
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 1500);
+        console.log('🔍 Fetching complaints for maintenance dashboard...');
+        
+        // Fetch complaints from backend
+        const complaintsResponse = await fetch('http://localhost:5000/api/complaints', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (complaintsResponse.ok) {
+          const complaintsResult = await complaintsResponse.json();
+          console.log('Complaints API result:', complaintsResult);
+          
+          if (complaintsResult.success) {
+            console.log(`✅ Found ${complaintsResult.complaints?.length || 0} complaints`);
+            setComplaints(complaintsResult.complaints || []);
+          } else {
+            console.error('Complaints API returned success: false', complaintsResult);
+            toast.error(complaintsResult.error || 'Failed to load complaints');
+            setComplaints([]);
+          }
+        } else {
+          console.error('Complaints API error status:', complaintsResponse.status);
+          const errorData = await complaintsResponse.json().catch(() => ({}));
+          toast.error(`Failed to load complaints: ${errorData.error || 'Unknown error'}`);
+          setComplaints([]);
+        }
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+        toast.error('Failed to load complaints: ' + error.message);
+        setComplaints([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Get complaints assigned to current maintenance staff (both Pending and In Progress)
+    fetchData();
+  }, []);
+
+  // Get complaints assigned to current maintenance staff
   const assignedComplaints = useMemo(() => {
-    if (!currentStaff) return [];
-    return complaints.filter(
-      complaint => complaint.assignedMaintenance === currentStaff.id
+    if (!user || user.role !== 'maintenance') return [];
+    
+    console.log('Current user ID:', user.id);
+    console.log('Total complaints:', complaints.length);
+    
+    const filtered = complaints.filter(
+      complaint => complaint.assigned_maintenance_id === user.id
     );
-  }, [complaints, currentStaff]);
+    
+    console.log(`Assigned complaints: ${filtered.length}`);
+    return filtered;
+  }, [complaints, user]);
 
   // Filter complaints for table view
   const filteredComplaints = useMemo(() => {
     return assignedComplaints.filter(complaint => {
       const matchesSearch =
-        complaint.facilityType
+        (complaint.facility_type || '')
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        complaint.hostelName
+        (complaint.hostel_name || '')
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        complaint.roomNumber
+        (complaint.room_number || '')
+          .toString()
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        complaint.studentName
+        (complaint.student_name || '')
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
-        complaint.issueDescription
+        (complaint.issue_description || '')
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
       const matchesStatus =
-        statusFilter === 'all' || complaint.status === statusFilter;
+        statusFilter === 'all' || 
+        (complaint.status && complaint.status.toLowerCase() === statusFilter.toLowerCase());
+
       const matchesFacility =
-        facilityFilter === 'all' || complaint.facilityType === facilityFilter;
+        facilityFilter === 'all' || 
+        (complaint.facility_type && complaint.facility_type === facilityFilter);
 
       return matchesSearch && matchesStatus && matchesFacility;
     });
@@ -115,22 +162,34 @@ const MaintenanceDashboard = () => {
   // Calculate stats for assigned complaints
   const stats = {
     totalAssigned: assignedComplaints.length,
-    pending: assignedComplaints.filter(c => c.status === 'Pending').length,
-    inProgress: assignedComplaints.filter(c => c.status === 'In Progress')
-      .length,
-    resolved: assignedComplaints.filter(c => c.status === 'Resolved').length,
+    pending: assignedComplaints.filter(c => c.status === 'pending').length,
+    inProgress: assignedComplaints.filter(c => c.status === 'in_progress').length,
+    resolved: assignedComplaints.filter(c => c.status === 'resolved').length,
   };
 
   const getStatusColor = status => {
-    switch (status) {
-      case 'Resolved':
+    switch (status?.toLowerCase()) {
+      case 'resolved':
         return 'bg-green-50 text-green-700 border-green-200';
-      case 'In Progress':
+      case 'in_progress':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Pending':
+      case 'pending':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusDisplay = status => {
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return 'Resolved';
+      case 'in_progress':
+        return 'In Progress';
+      case 'pending':
+        return 'Pending';
+      default:
+        return status || 'Unknown';
     }
   };
 
@@ -153,19 +212,7 @@ const MaintenanceDashboard = () => {
         )
       );
 
-      // Update in localStorage
-      const storedComplaints = JSON.parse(
-        localStorage.getItem('mockComplaints') || '[]'
-      );
-      const updatedStoredComplaints = storedComplaints.map(complaint =>
-        complaint.id === updatedComplaint.id ? updatedComplaint : complaint
-      );
-      localStorage.setItem(
-        'mockComplaints',
-        JSON.stringify(updatedStoredComplaints)
-      );
-
-      // Show success toast at bottom-right
+      // Show success toast
       toast.success('Complaint updated successfully!', {
         position: 'bottom-right',
       });
@@ -357,9 +404,9 @@ const MaintenanceDashboard = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="In Progress">In Progress</SelectItem>
-              <SelectItem value="Resolved">Resolved</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
             </SelectContent>
           </Select>
 
@@ -408,7 +455,7 @@ const MaintenanceDashboard = () => {
                     <TableCell className="text-sm text-gray-600">
                       <div className="flex items-center gap-1 whitespace-nowrap">
                         <Calendar size={14} />
-                        {complaint.submittedDate}
+                        {complaint.submitted_date || complaint.submittedDate}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -416,29 +463,29 @@ const MaintenanceDashboard = () => {
                         variant="outline"
                         className="text-xs whitespace-nowrap"
                       >
-                        {complaint.facilityType}
+                        {complaint.facility_type || complaint.facilityType}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
                         <div className="font-medium text-black whitespace-nowrap">
-                          {complaint.hostelName}
+                          {complaint.hostel_name || complaint.hostelName}
                         </div>
                         <div className="text-gray-600 whitespace-nowrap">
-                          Room {complaint.roomNumber}
+                          Room {complaint.room_number || complaint.roomNumber}
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm text-gray-600 max-w-[300px] truncate">
-                        {complaint.issueDescription}
+                        {complaint.issue_description || complaint.issueDescription}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         className={`${getStatusColor(complaint.status)} pointer-events-none`}
                       >
-                        {complaint.status}
+                        {getStatusDisplay(complaint.status)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -458,7 +505,7 @@ const MaintenanceDashboard = () => {
                           >
                             View Complaint
                           </DropdownMenuItem>
-                          {complaint.status !== 'Resolved' && (
+                          {complaint.status !== 'resolved' && complaint.status !== 'Resolved' && (
                             <DropdownMenuItem
                               onClick={() => handleUpdateComplaint(complaint)}
                             >
@@ -476,7 +523,9 @@ const MaintenanceDashboard = () => {
                     colSpan={6}
                     className="h-32 text-center text-sm text-gray-600"
                   >
-                    No complaints found matching your criteria.
+                    {assignedComplaints.length === 0 
+                      ? 'No complaints assigned to you yet.' 
+                      : 'No complaints found matching your criteria.'}
                   </TableCell>
                 </TableRow>
               )}
@@ -511,36 +560,36 @@ const MaintenanceDashboard = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="font-medium">Facility:</span>{' '}
-                    {selectedComplaint.facilityType}
+                    {selectedComplaint.facility_type || selectedComplaint.facilityType}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span>{' '}
-                    {selectedComplaint.submittedDate}
+                    {selectedComplaint.submitted_date || selectedComplaint.submittedDate}
                   </div>
                   <div>
                     <span className="font-medium">Hostel:</span>{' '}
-                    {selectedComplaint.hostelName}
+                    {selectedComplaint.hostel_name || selectedComplaint.hostelName}
                   </div>
                   <div>
                     <span className="font-medium">Room:</span>{' '}
-                    {selectedComplaint.roomNumber}
+                    {selectedComplaint.room_number || selectedComplaint.roomNumber}
                   </div>
                   <div className="col-span-2">
                     <span className="font-medium">Student:</span>{' '}
-                    {selectedComplaint.studentName}
+                    {selectedComplaint.student_name || selectedComplaint.studentName}
                   </div>
                 </div>
                 <div className="text-sm pt-2 border-t">
                   <span className="font-medium">Issue:</span>
                   <p className="text-gray-600 mt-1">
-                    {selectedComplaint.issueDescription}
+                    {selectedComplaint.issue_description || selectedComplaint.issueDescription}
                   </p>
                 </div>
-                {selectedComplaint.maintenanceRemarks && (
+                {selectedComplaint.maintenance_remarks && (
                   <div className="text-sm pt-2 border-t">
                     <span className="font-medium">Your Remarks:</span>
                     <p className="text-gray-600 mt-1">
-                      {selectedComplaint.maintenanceRemarks}
+                      {selectedComplaint.maintenance_remarks}
                     </p>
                   </div>
                 )}

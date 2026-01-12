@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,11 +25,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Validation schema
+// Validation schema - Update to match your backend user model
 const profileSchema = z.object({
-  username: z.string().min(2, 'Username must be at least 2 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
+  phone: z.string().optional(),
+  specialty: z.string().optional(),
 });
 
 const EditProfile = () => {
@@ -38,35 +41,49 @@ const EditProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true);
 
-  // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsPageLoading(false);
-    }, 1500);
-  });
-
+  // Initialize form with user data
   const form = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      username: user?.username || '',
-      email: user?.email || '',
+      name: '',
+      email: '',
+      phone: '',
+      specialty: ''
     },
   });
 
-  const onSubmit = async data => {
+  // Load user data into form when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        specialty: user.specialty || '',
+      });
+      setIsPageLoading(false);
+    }
+  }, [user, form]);
+
+  const onSubmit = async (data) => {
     setIsLoading(true);
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await updateProfile(data);
+      // Call the updateProfile function from AuthContext
+      const updatedUser = await updateProfile(data);
+      
       toast.success('Profile updated successfully!');
+      console.log('✅ Profile updated:', updatedUser);
+      
     } catch (error) {
-      toast.error('Failed to update profile. Please try again.');
+      console.error('❌ Profile update error:', error);
+      toast.error(error.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getInitials = name => {
+  const getInitials = (name) => {
     return (
       name
         ?.split(' ')
@@ -76,7 +93,7 @@ const EditProfile = () => {
     );
   };
 
-  const getRoleDisplayName = role => {
+  const getRoleDisplayName = (role) => {
     switch (role) {
       case 'admin':
         return 'Administrator';
@@ -87,11 +104,16 @@ const EditProfile = () => {
     }
   };
 
-  const getRoleBadgeColor = role => {
-    return 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700';
+  const getRoleBadgeColor = (role) => {
+    const colors = {
+      admin: 'bg-red-100 text-red-800 border-red-200',
+      maintenance: 'bg-blue-100 text-blue-800 border-blue-200',
+      student: 'bg-purple-100 text-purple-800 border-purple-200',
+    };
+    return colors[role] || 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
-  // Skeleton components with gray background
+  // Skeleton components
   const HeaderSkeleton = () => (
     <div className="space-y-2">
       <Skeleton className="h-8 w-64 bg-gray-200" />
@@ -121,14 +143,12 @@ const EditProfile = () => {
         <Skeleton className="h-4 w-64 bg-gray-200" />
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-20 bg-gray-200" />
-          <Skeleton className="h-10 w-full bg-gray-200" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24 bg-gray-200" />
-          <Skeleton className="h-10 w-full bg-gray-200" />
-        </div>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-20 bg-gray-200" />
+            <Skeleton className="h-10 w-full bg-gray-200" />
+          </div>
+        ))}
         <div className="flex justify-end space-x-3">
           <Skeleton className="h-10 w-20 bg-gray-200" />
           <Skeleton className="h-10 w-32 bg-gray-200" />
@@ -137,7 +157,7 @@ const EditProfile = () => {
     </Card>
   );
 
-  if (isPageLoading) {
+  if (isPageLoading || !user) {
     return (
       <div className="space-y-6">
         <HeaderSkeleton />
@@ -153,32 +173,42 @@ const EditProfile = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
           Edit Profile
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Update your profile information
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Info - Big avatar with text below */}
-        <Card className="lg:col-span-1 border border-gray-200 dark:border-gray-700 shadow-sm">
+        {/* Profile Info */}
+        <Card className="lg:col-span-1 border border-gray-200 shadow-sm">
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="h-24 w-24 border-2 border-gray-300 dark:border-purple-400">
+              <Avatar className="h-24 w-24 border-2 border-gray-300">
                 <AvatarImage src={user?.profileImage} alt={user?.name} />
-                <AvatarFallback className="text-lg bg-gray-100 dark:bg-purple-900 text-gray-600 dark:text-purple-200">
+                <AvatarFallback className="text-lg bg-gray-100 text-gray-600">
                   {getInitials(user?.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="text-center space-y-2">
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">
+                <h3 className="font-semibold text-lg text-gray-900">
                   {user?.name}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600">
                   {user?.email}
                 </p>
+                {user?.matric_number && (
+                  <p className="text-sm text-gray-600">
+                    Matric: {user.matric_number}
+                  </p>
+                )}
+                {user?.hostel_id && user?.room_number && (
+                  <p className="text-sm text-gray-600">
+                    Room: {user.room_number}, {user.hostel_id}
+                  </p>
+                )}
                 <div className="pt-2">
                   <Badge className={getRoleBadgeColor(user?.role)}>
                     {getRoleDisplayName(user?.role)}
@@ -205,13 +235,13 @@ const EditProfile = () => {
               >
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Username</FormLabel>
+                      <FormLabel className="text-gray-700">Full Name</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your username"
+                          placeholder="Enter your full name"
                           {...field}
                           className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                         />
@@ -238,9 +268,60 @@ const EditProfile = () => {
                         />
                       </FormControl>
                       <FormMessage />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Note: Changing email may require re-verification
+                      </p>
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700">
+                        Phone Number (Optional)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your phone number"
+                          {...field}
+                          className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {user?.role === 'maintenance' && (
+                  <FormField
+                    control={form.control}
+                    name="specialty"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">
+                          Specialty
+                        </FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+                              <SelectValue placeholder="Select your specialty" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="plumbing">Plumbing</SelectItem>
+                            <SelectItem value="electrical">Electrical</SelectItem>
+                            <SelectItem value="carpentry">Carpentry</SelectItem>
+                            <SelectItem value="general">General Maintenance</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <div className="flex justify-end space-x-3">
                   <Button
@@ -260,10 +341,10 @@ const EditProfile = () => {
                     {isLoading ? (
                       <>
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                        Saving
+                        Saving...
                       </>
                     ) : (
-                      <>Save Changes</>
+                      'Save Changes'
                     )}
                   </Button>
                 </div>

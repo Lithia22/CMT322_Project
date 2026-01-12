@@ -1,61 +1,140 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FileText, Clock, CheckCircle, AlertCircle, Star } from 'lucide-react';
-import { mockComplaints, mockFeedbacks } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-
-  // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
+  const [complaints, setComplaints] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    resolved: 0
   });
 
-  // Get stored complaints and merge with mock data
-  const storedComplaints = JSON.parse(
-    localStorage.getItem('mockComplaints') || '[]'
-  );
-  const allComplaints = [...mockComplaints, ...storedComplaints];
+  // Fetch complaints from backend
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          setIsLoading(false);
+          return;
+        }
 
-  const studentComplaints = allComplaints.filter(
-    complaint => complaint.matricNumber === user?.matricNumber
-  );
+        const response = await fetch('http://localhost:5000/api/complaints/my-complaints', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log('✅ Complaints loaded:', result.complaints);
+            setComplaints(result.complaints || []);
+            
+            // Calculate stats
+            const statsData = {
+              total: result.complaints?.length || 0,
+              pending: result.complaints?.filter(c => c.status === 'pending')?.length || 0,
+              inProgress: result.complaints?.filter(c => c.status === 'in_progress')?.length || 0,
+              resolved: result.complaints?.filter(c => c.status === 'resolved')?.length || 0
+            };
+            setStats(statsData);
+          } else {
+            toast.error(result.error || 'Failed to load complaints');
+            setComplaints([]);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          toast.error(errorData.error || 'Failed to load complaints');
+          setComplaints([]);
+        }
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+        toast.error('Failed to load complaints: ' + error.message);
+        setComplaints([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Get stored feedbacks and merge with mock data
-  const storedFeedbacks = JSON.parse(
-    localStorage.getItem('mockFeedbacks') || '[]'
-  );
-  const allFeedbacks = [...mockFeedbacks, ...storedFeedbacks];
+    fetchComplaints();
+  }, []);
 
-  const studentFeedbacks = allFeedbacks.filter(
-    feedback => feedback.matricNumber === user?.matricNumber
-  );
+  // Fetch feedbacks from backend (you'll need to create this endpoint)
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
 
-  const stats = {
-    total: studentComplaints.length,
-    pending: studentComplaints.filter(c => c.status === 'Pending').length,
-    inProgress: studentComplaints.filter(c => c.status === 'In Progress')
-      .length,
-    resolved: studentComplaints.filter(c => c.status === 'Resolved').length,
-  };
+        // This endpoint needs to be created in your backend
+        const response = await fetch('http://localhost:5000/api/feedbacks/my-feedbacks', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log('✅ Feedbacks loaded:', result.feedbacks);
+            setFeedbacks(result.feedbacks || []);
+          } else {
+            toast.error(result.error || 'Failed to load feedbacks');
+            setFeedbacks([]);
+          }
+        } else {
+          // If endpoint doesn't exist yet, use empty array
+          setFeedbacks([]);
+        }
+      } catch (error) {
+        console.error('Error fetching feedbacks:', error);
+        setFeedbacks([]);
+      }
+    };
+
+    fetchFeedbacks();
+  }, []);
 
   const getStatusColor = status => {
-    switch (status) {
-      case 'Resolved':
+    switch (status?.toLowerCase()) {
+      case 'resolved':
         return 'bg-green-50 text-green-700 border-green-200';
-      case 'In Progress':
+      case 'in_progress':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Pending':
+      case 'pending':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusDisplay = status => {
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return 'Resolved';
+      case 'in_progress':
+        return 'In Progress';
+      case 'pending':
+        return 'Pending';
+      default:
+        return status || 'Unknown';
     }
   };
 
@@ -137,8 +216,7 @@ const StudentDashboard = () => {
             Student Dashboard
           </h1>
           <p className="text-white/90">
-            Welcome back, {user?.name}. Let's make {user?.hostelName} the best
-            it can be!
+            Welcome back, {user?.name}. Let's make your hostel the best it can be!
           </p>
         </div>
       </div>
@@ -230,32 +308,32 @@ const StudentDashboard = () => {
         <TabsContent value="complaints">
           <Card>
             <CardContent className="pt-6">
-              {studentComplaints.length === 0 ? (
+              {complaints.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   No complaints submitted yet. Go to "My Complaints" to submit
                   your first complaint.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {studentComplaints.slice(0, 5).map(complaint => (
+                  {complaints.slice(0, 5).map(complaint => (
                     <div
                       key={complaint.id}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                     >
                       <div className="space-y-1 flex-1">
                         <p className="font-medium text-black">
-                          {complaint.facilityType}
+                          {complaint.facility_type || 'Unknown Facility'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {complaint.hostelName} • Room {complaint.roomNumber}
+                          Submitted: {complaint.submitted_date || 'N/A'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {complaint.issueDescription}
+                          {complaint.issue_description}
                         </p>
-                        {complaint.maintenanceRemarks ? (
+                        {complaint.maintenance_remarks ? (
                           <p className="text-xs text-purple-700 mt-1">
                             <span className="font-semibold">Remarks:</span>{' '}
-                            {complaint.maintenanceRemarks}
+                            {complaint.maintenance_remarks}
                           </p>
                         ) : (
                           <p className="text-xs text-gray-400 mt-1">
@@ -267,7 +345,7 @@ const StudentDashboard = () => {
                         <Badge
                           className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
                         >
-                          {complaint.status}
+                          {getStatusDisplay(complaint.status)}
                         </Badge>
                       </div>
                     </div>
@@ -281,52 +359,47 @@ const StudentDashboard = () => {
         <TabsContent value="feedback">
           <Card>
             <CardContent className="pt-6">
-              {studentFeedbacks.length === 0 ? (
+              {feedbacks.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   No feedback submitted yet. Go to "Feedback" to provide
                   feedback on resolved complaints.
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {studentFeedbacks.map(feedback => {
-                    const complaint = allComplaints.find(
-                      c => c.id === feedback.complaintId
-                    );
-                    return (
-                      <div
-                        key={feedback.id}
-                        className="border-b pb-4 last:border-0 last:pb-0"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1 flex-1">
-                            <p className="font-medium text-black">
-                              {complaint?.facilityType || 'Unknown Facility'}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {complaint?.hostelName || 'Unknown'} • Room{' '}
-                              {complaint?.roomNumber || 'N/A'}
-                            </p>
-                            <p className="text-sm text-gray-600 mt-2">
-                              {feedback.comment}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 ml-4">
-                            {[1, 2, 3, 4, 5].map(star => (
-                              <Star
-                                key={star}
-                                size={20}
-                                className={
-                                  star <= feedback.rating
-                                    ? 'fill-purple-600 text-yellow-400'
-                                    : 'text-gray-300'
-                                }
-                              />
-                            ))}
-                          </div>
+                  {feedbacks.map(feedback => (
+                    <div
+                      key={feedback.id}
+                      className="border-b pb-4 last:border-0 last:pb-0"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1 flex-1">
+                          <p className="font-medium text-black">
+                            Complaint #{feedback.complaint_id}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Submitted: {feedback.submitted_at ? 
+                              new Date(feedback.submitted_at).toLocaleDateString('en-MY') : 'N/A'}
+                          </p>
+                          <p className="text-sm text-gray-600 mt-2">
+                            {feedback.comment}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 ml-4">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Star
+                              key={star}
+                              size={20}
+                              className={
+                                star <= feedback.rating
+                                  ? 'fill-purple-600 text-yellow-400'
+                                  : 'text-gray-300'
+                              }
+                            />
+                          ))}
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>

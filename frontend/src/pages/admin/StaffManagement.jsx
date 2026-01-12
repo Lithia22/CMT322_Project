@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { AssignMaintenanceModal } from '@/components/modal/AssignMaintenanceModal';
 import {
   Table,
   TableBody,
@@ -16,7 +17,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -35,16 +35,15 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MoreVertical, Calendar, Plus, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  mockMaintenanceStaff,
-  mockComplaints,
-  facilityTypes,
-} from '@/data/mockData';
+import { mockComplaints, facilityTypes as mockFacilityTypes } from '@/data/mockData';
 import { CreateMaintenanceModal } from '@/components/modal/CreateMaintenanceModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StaffManagement = () => {
-  const [staff, setStaff] = useState(mockMaintenanceStaff);
-  const [complaints, setComplaints] = useState(mockComplaints);
+  const { user } = useAuth();
+  const [staff, setStaff] = useState([]);
+  const [complaints, setComplaints] = useState([]);
+  const [facilityTypes, setFacilityTypes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [facilityFilter, setFacilityFilter] = useState('all');
   const [pendingSearchQuery, setPendingSearchQuery] = useState('');
@@ -56,31 +55,144 @@ const StaffManagement = () => {
   const [viewComplaintDialogOpen, setViewComplaintDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  });
+  // Fetch data from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        
+        // Fetch staff
+        const staffResponse = await fetch('http://localhost:5000/api/auth/staff', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (staffResponse.ok) {
+          const staffResult = await staffResponse.json();
+          if (staffResult.success) {
+            setStaff(staffResult.staff || []);
+          }
+        }
+        
+        // Fetch facility types
+        const facilityResponse = await fetch('http://localhost:5000/api/auth/facility-types', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (facilityResponse.ok) {
+          const facilityResult = await facilityResponse.json();
+          if (facilityResult.success) {
+            setFacilityTypes(facilityResult.facility_types || []);
+          }
+        }
+        
+        // Fetch complaints
+        const complaintsResponse = await fetch('http://localhost:5000/api/complaints', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (complaintsResponse.ok) {
+          const complaintsResult = await complaintsResponse.json();
+          if (complaintsResult.success) {
+            setComplaints(complaintsResult.complaints || []);
+          } else {
+            setComplaints(mockComplaints); // Fallback
+          }
+        } else {
+          setComplaints(mockComplaints); // Fallback
+        }
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load data');
+        setComplaints(mockComplaints); // Fallback
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle create staff
+  const handleCreateStaff = async (staffData) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Create name-to-ID mapping based on your facility_types table
+      const nameToIdMap = {
+        'Air Conditioner': 1,
+        'Bathroom': 2,
+        'Furniture': 3,
+        'Electrical': 4,
+        'Plumbing': 5,
+        'Door/Window': 6,
+        'Lighting': 7,
+        'Others': 8
+      };
+      
+      // Convert facility type names to IDs
+      const facilityTypeIds = staffData.facilityTypes.map(name => nameToIdMap[name]);
+      
+      const payload = {
+        name: staffData.name,
+        email: staffData.email,
+        password: staffData.password,
+        phone: staffData.phone,
+        specialty: staffData.specialty || '',
+        facility_type_ids: facilityTypeIds
+      };
+      
+      const response = await fetch('http://localhost:5000/api/auth/register-staff', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Add new staff to state
+        setStaff(prev => [result.staff, ...prev]);
+        setShowCreateModal(false);
+        toast.success('Staff account created successfully!');
+      } else {
+        toast.error(result.error || 'Failed to create staff');
+      }
+    } catch (error) {
+      console.error('Error creating staff:', error);
+      toast.error('Failed to create staff account');
+    }
+  };
 
   // Only show unassigned && pending complaints
   const unassignedComplaints = useMemo(() => {
     return complaints.filter(
       complaint =>
-        complaint.status === 'Pending' && !complaint.assignedMaintenance
+        (complaint.status === 'Pending' || complaint.status === 'pending') && 
+        !complaint.assigned_maintenance_id
     );
   }, [complaints]);
 
   const filteredStaff = useMemo(() => {
     return staff.filter(member => {
       const matchesSearch =
-        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.phone.toLowerCase().includes(searchQuery.toLowerCase());
+        member.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        member.phone?.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesFacility =
         facilityFilter === 'all' ||
-        member.facilityTypes?.includes(facilityFilter);
+        member.facility_types?.includes(facilityFilter);
 
       return matchesSearch && matchesFacility;
     });
@@ -90,39 +202,32 @@ const StaffManagement = () => {
   const filteredUnassignedComplaints = useMemo(() => {
     return unassignedComplaints.filter(complaint => {
       const matchesSearch =
-        complaint.facilityType
-          .toLowerCase()
-          .includes(pendingSearchQuery.toLowerCase()) ||
-        complaint.hostelName
-          .toLowerCase()
-          .includes(pendingSearchQuery.toLowerCase()) ||
-        complaint.roomNumber
-          .toLowerCase()
-          .includes(pendingSearchQuery.toLowerCase()) ||
-        complaint.studentName
-          .toLowerCase()
-          .includes(pendingSearchQuery.toLowerCase());
+        complaint.facility_type?.toLowerCase().includes(pendingSearchQuery.toLowerCase()) ||
+        complaint.hostel_name?.toLowerCase().includes(pendingSearchQuery.toLowerCase()) ||
+        (complaint.room_number?.toString() || '').includes(pendingSearchQuery.toLowerCase()) ||
+        complaint.student_name?.toLowerCase().includes(pendingSearchQuery.toLowerCase());
 
       const matchesFacility =
         pendingFacilityFilter === 'all' ||
-        complaint.facilityType === pendingFacilityFilter;
+        complaint.facility_type === pendingFacilityFilter;
 
       return matchesSearch && matchesFacility;
     });
   }, [unassignedComplaints, pendingSearchQuery, pendingFacilityFilter]);
 
-  const filteredComplaintTimeline = complaints.filter(
-    complaint =>
-      complaint.assignedMaintenance &&
-      (complaintStatusFilter === 'all' ||
-        complaint.status === complaintStatusFilter)
-  );
-  const getEligibleStaffForComplaint = complaint => {
+  const getEligibleStaffForComplaint = (complaint) => {
     return staff
-      .filter(member => member.facilityTypes?.includes(complaint.facilityType))
+      .filter(member => {
+        // Check if staff has the required facility type specialty
+        return member.facility_types?.some(facilityType => 
+          facilityType === complaint.facility_type
+        );
+      })
       .map(member => {
+        // Count current workload from backend data - FIXED LOGIC
         const assignedCount = complaints.filter(
-          c => c.assignedMaintenance === member.id && c.status !== 'Resolved'
+          c => c.assigned_maintenance_id === member.id && 
+               (c.status === 'in_progress' || c.status === 'pending')
         ).length;
 
         return {
@@ -133,69 +238,86 @@ const StaffManagement = () => {
       .sort((a, b) => a.assignedCount - b.assignedCount);
   };
 
-  const handleCreateStaff = staffData => {
-    const newStaff = {
-      ...staffData,
-      id: Date.now().toString(),
-      joinDate: new Date().toISOString().split('T')[0],
-      assignedComplaints: [],
-      completedComplaints: [],
-    };
-
-    setStaff(prev => [...prev, newStaff]);
-    setShowCreateModal(false);
-    toast.success('Staff account created successfully!');
-  };
-
-  const handleViewComplaint = complaint => {
+  const handleViewComplaint = (complaint) => {
     setSelectedComplaint(complaint);
     setViewComplaintDialogOpen(true);
   };
 
-  const handleAssignComplaint = complaint => {
+  const handleAssignComplaint = (complaint) => {
     setSelectedComplaint(complaint);
     setAssignmentDialogOpen(true);
   };
-  const assignToStaff = staffId => {
+
+  const assignToStaff = async (staffId) => {
     if (selectedComplaint && staffId) {
-      const assignedStaff = staff.find(s => s.id === staffId);
-
-      setComplaints(prevComplaints => {
-        const updated = prevComplaints.map(complaint =>
-          complaint.id === selectedComplaint.id
-            ? {
-                ...complaint,
-                status: 'Pending',
-                assignedMaintenance: staffId,
-                assignedDate: new Date().toISOString().split('T')[0],
-              }
-            : complaint
-        );
-        return updated;
-      });
-
-      toast.success(
-        `Complaint assigned to ${assignedStaff?.name || 'staff member'}`
-      );
-
-      setAssignmentDialogOpen(false);
-      setSelectedComplaint(null);
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:5000/api/complaints/${selectedComplaint.id}/assign`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            assigned_maintenance_id: staffId
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            // Update complaints state
+            setComplaints(prev => 
+              prev.map(complaint => 
+                complaint.id === selectedComplaint.id 
+                  ? result.complaint 
+                  : complaint
+              )
+            );
+            
+            const assignedStaff = staff.find(s => s.id === staffId);
+            toast.success(result.message || `Complaint assigned to ${assignedStaff?.name || 'staff member'}`);
+            setAssignmentDialogOpen(false);
+            setSelectedComplaint(null);
+          } else {
+            toast.error(result.error || 'Failed to assign complaint');
+          }
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.error || 'Failed to assign complaint');
+        }
+      } catch (error) {
+        console.error('Error assigning complaint:', error);
+        toast.error('Failed to assign complaint');
+      }
     }
   };
 
-  const getStatusColor = status => {
-    switch (status) {
-      case 'Resolved':
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'resolved':
         return 'bg-green-50 text-green-700 border-green-200';
-      case 'In Progress':
+      case 'in progress':
+      case 'in_progress':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Pending':
+      case 'pending':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
+  // Calculate staff workload function
+  const calculateStaffWorkload = (staffId) => {
+    if (!staffId) return 0;
+    
+    return complaints.filter(complaint => 
+      complaint.assigned_maintenance_id === staffId && 
+      complaint.status !== 'resolved'
+    ).length;
+  };
+
+  // Skeleton Components
   const HeaderSkeleton = () => (
     <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
       <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
@@ -243,19 +365,25 @@ const StaffManagement = () => {
     return (
       <div className="space-y-6">
         <HeaderSkeleton />
-
         <div className="space-y-6">
           <div className="flex gap-2">
             <Skeleton className="h-10 w-[200px] bg-gray-200 rounded-md" />
             <Skeleton className="h-10 w-[180px] bg-gray-200 rounded-md" />
           </div>
-
           <FiltersSkeleton />
           <TableSkeleton />
         </div>
       </div>
     );
   }
+
+  // Get unique facility types for filter dropdown
+  const allFacilityTypes = Array.from(
+    new Set([
+      ...facilityTypes.map(ft => ft.name),
+      ...mockFacilityTypes
+    ])
+  ).sort();
 
   return (
     <div className="space-y-6">
@@ -298,13 +426,13 @@ const StaffManagement = () => {
             value="complaints"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
-            Complaint Status ({filteredComplaintTimeline.length})
+            Complaint Status ({complaints.filter(c => c.assigned_maintenance_id).length})
           </TabsTrigger>
         </TabsList>
 
         {/* Staff Management Tab */}
         <TabsContent value="staff">
-          {/* Search and Filters - Single Row */}
+          {/* Search and Filters */}
           <div className="flex flex-wrap gap-3 items-center justify-between mb-4">
             {/* Left side - Search, Filters, Count */}
             <div className="flex flex-wrap gap-3 items-center">
@@ -313,7 +441,7 @@ const StaffManagement = () => {
                 <Input
                   placeholder="Search by name, email, or phone..."
                   value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 />
               </div>
@@ -324,7 +452,7 @@ const StaffManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Facilities</SelectItem>
-                  {facilityTypes.map(type => (
+                  {allFacilityTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -347,30 +475,25 @@ const StaffManagement = () => {
             </Button>
           </div>
 
-          {/* Staff Table - Responsive with horizontal scroll */}
+          {/* Staff Table */}
           <Card>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[200px]">
-                      Staff Member
-                    </TableHead>
+                    <TableHead className="min-w-[200px]">Staff Member</TableHead>
                     <TableHead className="min-w-[150px]">Contact</TableHead>
-                    <TableHead className="min-w-[200px]">
-                      Facility Types
-                    </TableHead>
+                    <TableHead className="min-w-[100px]">Specialty</TableHead>
+                    <TableHead className="min-w-[200px]">Facility Types</TableHead>
                     <TableHead className="min-w-[100px]">Workload</TableHead>
+                    <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredStaff.length > 0 ? (
-                    filteredStaff.map(member => {
-                      const assignedCount = complaints.filter(
-                        c =>
-                          c.assignedMaintenance === member.id &&
-                          c.status !== 'Resolved'
-                      ).length;
+                    filteredStaff.map((member) => {
+                      // FIXED: Calculate workload correctly
+                      const assignedCount = calculateStaffWorkload(member.id);
 
                       return (
                         <TableRow key={member.id}>
@@ -378,6 +501,11 @@ const StaffManagement = () => {
                             <div>
                               <div className="font-medium text-black whitespace-nowrap">
                                 {member.name}
+                                {member.status !== 'active' && (
+                                  <Badge variant="outline" className="ml-2 text-xs">
+                                    {member.status}
+                                  </Badge>
+                                )}
                               </div>
                               <div className="text-sm text-gray-600 whitespace-nowrap">
                                 {member.email}
@@ -385,37 +513,58 @@ const StaffManagement = () => {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-gray-600">
-                              <div className="flex items-center gap-1 whitespace-nowrap">
-                                {member.phone}
-                              </div>
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {member.phone || 'Not set'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-600 whitespace-nowrap">
+                              {member.specialty || 'General'}
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-nowrap overflow-x-auto">
-                              {member.facilityTypes?.slice(0, 3).map(type => (
+                              {member.facility_types?.slice(0, 3).map((type, index) => (
                                 <Badge
-                                  key={type}
+                                  key={index}
                                   variant="outline"
                                   className="text-xs whitespace-nowrap"
                                 >
                                   {type}
                                 </Badge>
                               ))}
-                              {member.facilityTypes?.length > 3 && (
+                              {member.facility_types?.length > 3 && (
                                 <Badge
                                   variant="outline"
                                   className="text-xs whitespace-nowrap"
                                 >
-                                  +{member.facilityTypes.length - 3}
+                                  +{member.facility_types.length - 3}
                                 </Badge>
+                              )}
+                              {(!member.facility_types || member.facility_types.length === 0) && (
+                                <span className="text-xs text-gray-400">None</span>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className="font-medium text-purple-600 whitespace-nowrap">
-                              {assignedCount} tasks
+                            <span className={`font-medium whitespace-nowrap ${
+                              assignedCount === 0 ? 'text-gray-500' : 
+                              assignedCount <= 2 ? 'text-green-600' : 
+                              assignedCount <= 4 ? 'text-amber-600' : 'text-red-600'
+                            }`}>
+                              {assignedCount} {assignedCount === 1 ? 'task' : 'tasks'}
                             </span>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewComplaint(member)}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
@@ -423,7 +572,7 @@ const StaffManagement = () => {
                   ) : (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={6}
                         className="h-32 text-center text-sm text-gray-600"
                       >
                         No staff members found
@@ -438,16 +587,15 @@ const StaffManagement = () => {
 
         {/* Unassigned Tasks Tab */}
         <TabsContent value="unassigned">
-          {/* Search and Filters - Single Row */}
+          {/* Search and Filters */}
           <div className="flex flex-wrap gap-3 items-center justify-between mb-4">
-            {/* Left side - Search, Filters, Count */}
             <div className="flex flex-wrap gap-3 items-center">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search unassigned tasks..."
                   value={pendingSearchQuery}
-                  onChange={e => setPendingSearchQuery(e.target.value)}
+                  onChange={(e) => setPendingSearchQuery(e.target.value)}
                   className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 />
               </div>
@@ -461,7 +609,7 @@ const StaffManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Facilities</SelectItem>
-                  {facilityTypes.map(type => (
+                  {allFacilityTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -473,7 +621,6 @@ const StaffManagement = () => {
                 {filteredUnassignedComplaints.length} unassigned tasks
               </Badge>
             </div>
-            <div></div>
           </div>
 
           <Card>
@@ -481,31 +628,24 @@ const StaffManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[120px]">
-                      Complaint Date
-                    </TableHead>
-                    <TableHead className="min-w-[150px]">
-                      Facility Type
-                    </TableHead>
+                    <TableHead className="min-w-[120px]">Date</TableHead>
+                    <TableHead className="min-w-[150px]">Facility Type</TableHead>
                     <TableHead className="min-w-[200px]">Location</TableHead>
-                    <TableHead className="min-w-[200px]">
-                      Recommended Staff
-                    </TableHead>
+                    <TableHead className="min-w-[200px]">Recommended Staff</TableHead>
                     <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUnassignedComplaints.length > 0 ? (
-                    filteredUnassignedComplaints.map(complaint => {
-                      const eligibleStaff =
-                        getEligibleStaffForComplaint(complaint);
+                    filteredUnassignedComplaints.map((complaint) => {
+                      const eligibleStaff = getEligibleStaffForComplaint(complaint);
 
                       return (
                         <TableRow key={complaint.id}>
                           <TableCell className="text-sm text-gray-600">
                             <div className="flex items-center gap-1 whitespace-nowrap">
                               <Calendar size={14} />
-                              {complaint.submittedDate}
+                              {complaint.submitted_date || complaint.submittedDate}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -513,29 +653,29 @@ const StaffManagement = () => {
                               variant="outline"
                               className="text-xs whitespace-nowrap"
                             >
-                              {complaint.facilityType}
+                              {complaint.facility_type}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
                               <div className="font-medium text-black whitespace-nowrap">
-                                {complaint.hostelName}
+                                {complaint.hostel_name || complaint.hostelName}
                               </div>
                               <div className="text-gray-600 whitespace-nowrap">
-                                Room {complaint.roomNumber}
+                                Room {complaint.room_number || complaint.roomNumber}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-nowrap overflow-x-auto">
                               {eligibleStaff.length > 0 ? (
-                                eligibleStaff.slice(0, 2).map(staff => (
+                                eligibleStaff.slice(0, 2).map((staffMember) => (
                                   <Badge
-                                    key={staff.id}
+                                    key={staffMember.id}
                                     variant="outline"
                                     className="text-xs whitespace-nowrap"
                                   >
-                                    {staff.name}
+                                    {staffMember.name} ({staffMember.assignedCount})
                                   </Badge>
                                 ))
                               ) : (
@@ -545,7 +685,6 @@ const StaffManagement = () => {
                               )}
                             </div>
                           </TableCell>
-
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -564,9 +703,7 @@ const StaffManagement = () => {
                                   View Complaint
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() =>
-                                    handleAssignComplaint(complaint)
-                                  }
+                                  onClick={() => handleAssignComplaint(complaint)}
                                   disabled={eligibleStaff.length === 0}
                                 >
                                   Assign Task
@@ -595,7 +732,6 @@ const StaffManagement = () => {
 
         {/* Complaint Timeline Tab */}
         <TabsContent value="complaints">
-          {/* Filters */}
           <div className="flex flex-wrap gap-3 items-center justify-between mb-4">
             <div className="flex flex-wrap gap-3 items-center">
               <Select
@@ -607,35 +743,41 @@ const StaffManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="In Progress">In Progress</SelectItem>
-                  <SelectItem value="Resolved">Resolved</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
                 </SelectContent>
               </Select>
 
               <Badge variant="secondary" className="h-7">
-                {filteredComplaintTimeline.length} assigned complaints
+                {complaints.filter(c => c.assigned_maintenance_id).length} assigned complaints
               </Badge>
             </div>
           </div>
 
-          {/* Complaint Timeline Table */}
           <Card>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px]">Student</TableHead>
+                    <TableHead className="min-w-[150px]">Facility Type</TableHead>
                     <TableHead className="min-w-[150px]">Assigned To</TableHead>
                     <TableHead className="min-w-[120px]">Contact</TableHead>
                     <TableHead className="min-w-[120px]">Status</TableHead>
+                    <TableHead className="min-w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredComplaintTimeline.length > 0 ? (
-                    filteredComplaintTimeline.map(complaint => {
+                  {complaints
+                    .filter(complaint => 
+                      complaint.assigned_maintenance_id &&
+                      (complaintStatusFilter === 'all' || 
+                       complaint.status?.toLowerCase() === complaintStatusFilter.toLowerCase())
+                    )
+                    .map((complaint) => {
                       const assignedStaff = staff.find(
-                        s => s.id === complaint.assignedMaintenance
+                        (s) => s.id === complaint.assigned_maintenance_id
                       );
 
                       return (
@@ -643,17 +785,25 @@ const StaffManagement = () => {
                           <TableCell>
                             <div>
                               <div className="font-medium text-black whitespace-nowrap">
-                                {complaint.studentName}
+                                {complaint.student_name || complaint.studentName}
                               </div>
                               <div className="text-sm text-gray-600 whitespace-nowrap">
-                                {complaint.hostelName} - Room{' '}
-                                {complaint.roomNumber}
+                                {complaint.hostel_name || complaint.hostelName} - Room{' '}
+                                {complaint.room_number || complaint.roomNumber}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {complaint.facility_type || 'Unknown'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
                             <div className="text-sm text-gray-600 whitespace-nowrap">
                               {assignedStaff?.name || 'Unassigned'}
+                            </div>
+                            <div className="text-xs text-gray-500 whitespace-nowrap">
+                              {assignedStaff?.specialty || ''}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -665,22 +815,26 @@ const StaffManagement = () => {
                             <Badge
                               className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
                             >
-                              {complaint.status}
+                              {complaint.status === 'in_progress' ? 'In Progress' : 
+                               complaint.status === 'pending' ? 'Pending' : 
+                               complaint.status === 'resolved' ? 'Resolved' : 
+                               complaint.status}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewComplaint(complaint)}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
-                    })
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="h-32 text-center text-sm text-gray-600"
-                      >
-                        No assigned complaints found
-                      </TableCell>
-                    </TableRow>
-                  )}
+                    })}
                 </TableBody>
               </Table>
             </div>
@@ -693,6 +847,7 @@ const StaffManagement = () => {
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSave={handleCreateStaff}
+        facilityTypes={allFacilityTypes}
       />
 
       {/* View Complaint Dialog */}
@@ -710,29 +865,29 @@ const StaffManagement = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="font-medium">Facility:</span>{' '}
-                    {selectedComplaint.facilityType}
+                    {selectedComplaint.facility_type || selectedComplaint.facilityType}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span>{' '}
-                    {selectedComplaint.submittedDate}
+                    {selectedComplaint.submitted_date || selectedComplaint.submittedDate}
                   </div>
                   <div>
                     <span className="font-medium">Hostel:</span>{' '}
-                    {selectedComplaint.hostelName}
+                    {selectedComplaint.hostel_name || selectedComplaint.hostelName}
                   </div>
                   <div>
                     <span className="font-medium">Room:</span>{' '}
-                    {selectedComplaint.roomNumber}
+                    {selectedComplaint.room_number || selectedComplaint.roomNumber}
                   </div>
                   <div className="col-span-2">
                     <span className="font-medium">Student:</span>{' '}
-                    {selectedComplaint.studentName}
+                    {selectedComplaint.student_name || selectedComplaint.studentName}
                   </div>
                 </div>
                 <div className="text-sm pt-2 border-t">
                   <span className="font-medium">Issue:</span>
                   <p className="text-gray-600 mt-1">
-                    {selectedComplaint.issueDescription}
+                    {selectedComplaint.issue_description || selectedComplaint.issueDescription}
                   </p>
                 </div>
               </div>
@@ -741,81 +896,25 @@ const StaffManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Assignment Dialog */}
-      <Dialog
+      {/* Assignment Dialog - Using the new modal */}
+      <AssignMaintenanceModal
         open={assignmentDialogOpen}
-        onOpenChange={setAssignmentDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Assign Maintenance Staff</DialogTitle>
-            <DialogDescription>
-              Select the best staff member for this task
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedComplaint && (
-            <div className="space-y-4">
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-sm mb-2">Task Details</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="font-medium">Facility:</span>{' '}
-                    {selectedComplaint.facilityType}
-                  </div>
-                  <div>
-                    <span className="font-medium">Date:</span>{' '}
-                    {selectedComplaint.submittedDate}
-                  </div>
-                  <div>
-                    <span className="font-medium">Location:</span>{' '}
-                    {selectedComplaint.hostelName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Room:</span>{' '}
-                    {selectedComplaint.roomNumber}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Recommended Staff</h4>
-                {getEligibleStaffForComplaint(selectedComplaint).map(staff => (
-                  <div
-                    key={staff.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div>
-                      <p className="font-medium">{staff.name}</p>
-                      <div className="flex gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">
-                          {staff.assignedCount} tasks
-                        </Badge>
-                        {staff.facilityTypes?.slice(0, 2).map(type => (
-                          <Badge
-                            key={type}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {type}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => assignToStaff(staff.id)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      Assign
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+        onClose={() => {
+          setAssignmentDialogOpen(false);
+          setSelectedComplaint(null);
+        }}
+        complaint={selectedComplaint}
+        onAssign={(updatedComplaint) => {
+          // Update complaints list
+          setComplaints(prev => 
+            prev.map(complaint => 
+              complaint.id === updatedComplaint.id 
+                ? updatedComplaint 
+                : complaint
+            )
+          );
+        }}
+      />
     </div>
   );
 };

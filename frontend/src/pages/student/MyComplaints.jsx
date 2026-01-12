@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -41,17 +41,53 @@ import {
   Plus,
   Upload,
 } from 'lucide-react';
-import { mockComplaints, facilityTypes } from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const complaintSchema = z.object({
-  facilityType: z.string().min(1, 'Please select a facility type'),
-  issueDescription: z
+  facility_type_id: z.string().min(1, 'Please select a facility type'),
+  issue_description: z
     .string()
     .min(10, 'Description must be at least 10 characters'),
-  photo: z.any().optional(),
+  photo_url: z.any().optional(),
+  priority: z.string().optional(),
 });
+
+// Facility type mapping based on your database
+const facilityTypeMapping = {
+  'Air Conditioner': 1,
+  'Bathroom': 2,
+  'Furniture': 3,
+  'Electrical': 4,
+  'Plumbing': 5,
+  'Door/Window': 6,
+  'Lighting': 7,
+  'Others': 8
+};
+
+// Reverse mapping for display
+const idToFacilityType = {
+  1: 'Air Conditioner',
+  2: 'Bathroom',
+  3: 'Furniture',
+  4: 'Electrical',
+  5: 'Plumbing',
+  6: 'Door/Window',
+  7: 'Lighting',
+  8: 'Others'
+};
+
+// Facility types for the dropdown (sorted alphabetically)
+const facilityTypes = [
+  'Air Conditioner',
+  'Bathroom',
+  'Door/Window',
+  'Electrical',
+  'Furniture',
+  'Lighting',
+  'Plumbing',
+  'Others'
+];
 
 const MyComplaints = () => {
   const { user } = useAuth();
@@ -59,91 +95,220 @@ const MyComplaints = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [complaints, setComplaints] = useState([]);
+  const [hostelInfo, setHostelInfo] = useState(null);
+  const [loadingHostel, setLoadingHostel] = useState(false);
 
-  // Simulate API loading
-  useState(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-  });
+  // Fetch hostel information based on user's hostel_id
+  useEffect(() => {
+    const fetchHostelInfo = async () => {
+      if (!user?.hostel_id) {
+        console.log('No hostel_id found for user');
+        return;
+      }
 
-  // Get stored complaints and merge with mock data
-  const storedComplaints = JSON.parse(
-    localStorage.getItem('mockComplaints') || '[]'
-  );
-  const allComplaints = [...mockComplaints, ...storedComplaints];
+      try {
+        setLoadingHostel(true);
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:5000/api/hostels/${user.hostel_id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log('✅ Hostel info loaded:', result.hostel);
+            setHostelInfo(result.hostel);
+          } else {
+            console.warn('Failed to load hostel info:', result.error);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching hostel info:', error);
+      } finally {
+        setLoadingHostel(false);
+      }
+    };
 
-  const studentComplaints = allComplaints.filter(
-    complaint => complaint.matricNumber === user?.matricNumber
-  );
+    fetchHostelInfo();
+  }, [user?.hostel_id]);
 
-  const filteredComplaints = studentComplaints.filter(complaint => {
+  // Fetch complaints from backend
+  useEffect(() => {
+    const fetchComplaints = async () => {
+      try {
+        setIsLoading(true);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error('No token found');
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/complaints/my-complaints', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            console.log('✅ Complaints loaded:', result.complaints);
+            setComplaints(result.complaints || []);
+          } else {
+            toast.error(result.error || 'Failed to load complaints');
+            setComplaints([]);
+          }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          toast.error(errorData.error || 'Failed to load complaints');
+          setComplaints([]);
+        }
+      } catch (error) {
+        console.error('Error fetching complaints:', error);
+        toast.error('Failed to load complaints: ' + error.message);
+        setComplaints([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchComplaints();
+  }, []);
+
+  // Filter complaints
+  const filteredComplaints = complaints.filter(complaint => {
     const matchesSearch =
-      complaint.facilityType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      complaint.issueDescription
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      complaint.hostelName.toLowerCase().includes(searchTerm.toLowerCase());
+      (complaint.facility_type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (complaint.issue_description || '').toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus =
-      statusFilter === 'all' || complaint.status === statusFilter;
+      statusFilter === 'all' || 
+      (complaint.status && complaint.status.toLowerCase() === statusFilter.toLowerCase());
+
     return matchesSearch && matchesStatus;
   });
 
   const form = useForm({
     resolver: zodResolver(complaintSchema),
     defaultValues: {
-      facilityType: '',
-      issueDescription: '',
+      facility_type_id: '',
+      issue_description: '',
+      priority: 'medium',
     },
   });
 
-  const onSubmit = data => {
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    
     try {
-      const newComplaint = {
-        id: Date.now(),
-        matricNumber: user.matricNumber,
-        studentName: user.name,
-        hostelName: user.hostelName,
-        roomNumber: user.roomNumber,
-        ...data,
-        status: 'Pending',
-        submittedDate: new Date().toISOString().split('T')[0],
-        photo: data.photo ? data.photo.name : null,
-        maintenanceRemarks: '',
+      // Get facility type ID from mapping
+      const facilityTypeId = facilityTypeMapping[data.facility_type_id] || 8;
+      
+      console.log('🔍 Selected facility type:', data.facility_type_id);
+      console.log('🔍 Mapped to ID:', facilityTypeId);
+      
+      // Prepare complaint data for API
+      const complaintData = {
+        issue_description: data.issue_description,
+        facility_type_id: facilityTypeId,
+        priority: data.priority || 'medium',
+        photo_url: null // You can implement file upload later
       };
 
-      const existingComplaints = JSON.parse(
-        localStorage.getItem('mockComplaints') || '[]'
-      );
-      existingComplaints.push(newComplaint);
-      localStorage.setItem(
-        'mockComplaints',
-        JSON.stringify(existingComplaints)
-      );
-
-      form.reset();
-      setDialogOpen(false);
-
-      toast.success('Complaint submitted successfully!');
+      console.log('📤 Sending to API:', complaintData);
+      
+      // Send to backend API
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/complaints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(complaintData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Complaint saved to database:', result.complaint);
+        
+        // Add new complaint to state
+        const newComplaint = {
+          ...result.complaint,
+          facility_type: idToFacilityType[result.complaint.facility_type_id] || 'Unknown',
+          submitted_date: result.complaint.submitted_at ? 
+            new Date(result.complaint.submitted_at).toLocaleDateString('en-MY') : 'N/A'
+        };
+        
+        setComplaints(prev => [newComplaint, ...prev]);
+        toast.success('Complaint submitted successfully!');
+        
+      } else {
+        console.error('API error:', result.error);
+        toast.error(result.error || 'Failed to submit complaint');
+      }
+      
     } catch (error) {
+      console.error('Submission error:', error);
       toast.error('Failed to submit complaint. Please try again.');
     }
+    
+    form.reset();
+    setDialogOpen(false);
+    setIsSubmitting(false);
   };
 
   const getStatusColor = status => {
-    switch (status) {
-      case 'Resolved':
+    switch (status?.toLowerCase()) {
+      case 'resolved':
         return 'bg-green-50 text-green-700 border-green-200';
-      case 'In Progress':
+      case 'in_progress':
         return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Pending':
+      case 'pending':
         return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
-  // Skeleton components
+  const getStatusDisplay = status => {
+    switch (status?.toLowerCase()) {
+      case 'resolved':
+        return 'Resolved';
+      case 'in_progress':
+        return 'In Progress';
+      case 'pending':
+        return 'Pending';
+      default:
+        return status || 'Unknown';
+    }
+  };
+
+  // Function to display hostel information
+  const getHostelDisplay = () => {
+    if (loadingHostel) {
+      return 'Loading...';
+    }
+    
+    if (hostelInfo?.name) {
+      return hostelInfo.name;
+    }
+    
+    if (user?.hostel_id) {
+      return `Hostel ID: ${user.hostel_id}`;
+    }
+    
+    return 'Not assigned';
+  };
+
+  // Skeleton Components
   const HeaderSkeleton = () => (
     <div className="rounded-xl p-6 bg-white border-2 border-gray-100">
       <Skeleton className="h-8 w-64 mb-2 bg-gray-200" />
@@ -178,17 +343,6 @@ const MyComplaints = () => {
             <Skeleton className="h-4 w-3/4 bg-gray-200" />
           </div>
         </div>
-      </CardContent>
-    </Card>
-  );
-
-  const EmptyStateSkeleton = () => (
-    <Card>
-      <CardContent className="py-12 text-center">
-        <Skeleton className="h-12 w-12 mx-auto mb-4 bg-gray-200 rounded-full" />
-        <Skeleton className="h-6 w-48 mx-auto mb-2 bg-gray-200" />
-        <Skeleton className="h-4 w-64 mx-auto mb-4 bg-gray-200" />
-        <Skeleton className="h-10 w-48 mx-auto bg-gray-200" />
       </CardContent>
     </Card>
   );
@@ -247,14 +401,14 @@ const MyComplaints = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="In Progress">In Progress</SelectItem>
-                <SelectItem value="Resolved">Resolved</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="resolved">Resolved</SelectItem>
               </SelectContent>
             </Select>
 
             <Badge variant="secondary" className="h-7 whitespace-nowrap">
-              {filteredComplaints.length} of {studentComplaints.length}
+              {filteredComplaints.length} of {complaints.length}
             </Badge>
           </div>
         </div>
@@ -288,31 +442,31 @@ const MyComplaints = () => {
                       <label className="font-medium text-gray-800">
                         Student Name
                       </label>
-                      <p className="text-gray-500">{user?.name}</p>
+                      <p className="text-gray-500">{user?.name || 'Not available'}</p>
                     </div>
                     <div>
                       <label className="font-medium text-gray-800">
                         Matric Number
                       </label>
-                      <p className="text-gray-500">{user?.matricNumber}</p>
+                      <p className="text-gray-500">{user?.matricNumber || user?.matric_num || 'Not available'}</p>
                     </div>
                     <div>
                       <label className="font-medium text-gray-800">
                         Hostel
                       </label>
-                      <p className="text-gray-500">{user?.hostelName}</p>
+                      <p className="text-gray-500">{getHostelDisplay()}</p>
                     </div>
                     <div>
                       <label className="font-medium text-gray-800">
                         Room Number
                       </label>
-                      <p className="text-gray-500">{user?.roomNumber}</p>
+                      <p className="text-gray-500">{user?.room_number || 'Not available'}</p>
                     </div>
                   </div>
 
                   <FormField
                     control={form.control}
-                    name="facilityType"
+                    name="facility_type_id"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-black">
@@ -342,7 +496,7 @@ const MyComplaints = () => {
 
                   <FormField
                     control={form.control}
-                    name="issueDescription"
+                    name="issue_description"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-black">
@@ -360,49 +514,33 @@ const MyComplaints = () => {
                     )}
                   />
 
-                  {/* Photo Upload (Optional) */}
                   <FormField
                     control={form.control}
-                    name="photo"
-                    render={({ field: { value, onChange, ...fieldProps } }) => (
+                    name="priority"
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-black">
-                          Upload Photo (Optional)
+                          Priority Level
                         </FormLabel>
-                        <FormControl>
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
-                            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={e => onChange(e.target.files?.[0])}
-                              className="hidden"
-                              id="photo-upload"
-                              {...fieldProps}
-                            />
-                            <label
-                              htmlFor="photo-upload"
-                              className="cursor-pointer"
-                            >
-                              <span className="text-purple-600 hover:underline font-semibold">
-                                Choose a file
-                              </span>
-                              <span className="text-gray-500">
-                                {' '}
-                                or drag and drop
-                              </span>
-                            </label>
-                            {value && (
-                              <p className="text-sm text-green-600 mt-2">
-                                ✓ {value.name}
-                              </p>
-                            )}
-                          </div>
-                        </FormControl>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                            <SelectItem value="urgent">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
-                          Upload a photo to help us better understand the issue
+                          How urgent is this issue?
                         </FormDescription>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -413,14 +551,16 @@ const MyComplaints = () => {
                       variant="outline"
                       onClick={() => setDialogOpen(false)}
                       className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+                      disabled={isSubmitting}
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
                       className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
+                      disabled={isSubmitting}
                     >
-                      Submit Complaint
+                      {isSubmitting ? 'Submitting...' : 'Submit Complaint'}
                     </Button>
                   </div>
                 </form>
@@ -436,178 +576,23 @@ const MyComplaints = () => {
           <CardContent className="py-12 text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-semibold mb-2 text-black">
-              {studentComplaints.length === 0
+              {complaints.length === 0
                 ? 'No Complaints Yet'
                 : 'No Complaints Found'}
             </h3>
             <p className="text-gray-600 mb-4">
-              {studentComplaints.length === 0
+              {complaints.length === 0
                 ? 'Get started by submitting your first complaint!'
                 : 'Try adjusting your filters or search terms'}
             </p>
-            {studentComplaints.length === 0 && (
-              <Dialog>
-                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-black">
-                      Submit New Complaint
-                    </DialogTitle>
-                    <DialogDescription className="text-gray-600">
-                      Report an issue with your hostel facility
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-6"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-100 text-sm">
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Matric Number
-                          </label>
-                          <p className="text-gray-900">{user?.matricNumber}</p>
-                        </div>
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Hostel
-                          </label>
-                          <p className="text-gray-900">{user?.hostelName}</p>
-                        </div>
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Room Number
-                          </label>
-                          <p className="text-gray-900">{user?.roomNumber}</p>
-                        </div>
-                        <div>
-                          <label className="font-medium text-gray-700">
-                            Name
-                          </label>
-                          <p className="text-gray-900">{user?.name}</p>
-                        </div>
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="facilityType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-black">
-                              Facility Type
-                            </FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
-                                  <SelectValue placeholder="Select facility type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {facilityTypes.map(type => (
-                                  <SelectItem key={type} value={type}>
-                                    {type}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="issueDescription"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-black">
-                              Issue Description
-                            </FormLabel>
-                            <FormControl>
-                              <Textarea
-                                placeholder="Describe the issue in detail..."
-                                className="min-h-32 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="photo"
-                        render={({
-                          field: { value, onChange, ...fieldProps },
-                        }) => (
-                          <FormItem>
-                            <FormLabel className="text-black">
-                              Upload Photo (Optional)
-                            </FormLabel>
-                            <FormControl>
-                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition-colors">
-                                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                                <Input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={e => onChange(e.target.files?.[0])}
-                                  className="hidden"
-                                  id="photo-upload-2"
-                                  {...fieldProps}
-                                />
-                                <label
-                                  htmlFor="photo-upload-2"
-                                  className="cursor-pointer"
-                                >
-                                  <span className="text-purple-600 hover:underline font-semibold">
-                                    Choose a file
-                                  </span>
-                                  <span className="text-gray-500">
-                                    {' '}
-                                    or drag and drop
-                                  </span>
-                                </label>
-                                {value && (
-                                  <p className="text-sm text-green-600 mt-2">
-                                    ✓ {value.name}
-                                  </p>
-                                )}
-                              </div>
-                            </FormControl>
-                            <FormDescription>
-                              Upload a photo to help us better understand the
-                              issue
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <div className="flex gap-4 pt-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setDialogOpen(false)}
-                          className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="submit"
-                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
-                        >
-                          Submit Complaint
-                        </Button>
-                      </div>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
+            {complaints.length === 0 && (
+              <Button 
+                onClick={() => setDialogOpen(true)}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Submit First Complaint
+              </Button>
             )}
           </CardContent>
         </Card>
@@ -624,42 +609,58 @@ const MyComplaints = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-lg font-semibold mb-1 text-black">
-                          {complaint.facilityType}
+                          {complaint.facility_type || 'Unknown Facility'}
                         </h3>
                         <div className="flex items-center flex-wrap gap-3 text-sm text-gray-600">
                           <span className="flex items-center">
-                            <MapPin size={14} className="mr-1" />
-                            {complaint.hostelName}
-                          </span>
-                          <span>Room {complaint.roomNumber}</span>
-                          <span className="flex items-center">
                             <Calendar size={14} className="mr-1" />
-                            {complaint.submittedDate}
+                            {complaint.submitted_date || 'N/A'}
                           </span>
+                          {complaint.priority && (
+                            <Badge variant="outline" className="text-xs">
+                              Priority: {complaint.priority}
+                            </Badge>
+                          )}
+                          {complaint.hostel_name && (
+                            <span className="flex items-center">
+                              <MapPin size={14} className="mr-1" />
+                              {complaint.hostel_name}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <Badge
                         className={`${getStatusColor(complaint.status)} pointer-events-none text-xs border`}
                       >
-                        {complaint.status}
+                        {getStatusDisplay(complaint.status)}
                       </Badge>
                     </div>
 
                     <p className="text-gray-600 mb-4">
-                      {complaint.issueDescription}
+                      {complaint.issue_description}
                     </p>
 
-                    {complaint.maintenanceRemarks ? (
+                    {complaint.maintenance_remarks ? (
                       <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
                         <p className="font-semibold mb-1 text-gray-800">
-                          Remarks:
+                          Maintenance Remarks:
                         </p>
                         <p className="text-sm text-gray-700">
-                          {complaint.maintenanceRemarks}
+                          {complaint.maintenance_remarks}
                         </p>
                       </div>
-                    ) : (
-                      <p className="text-sm text-gray-400 italic">No remarks</p>
+                    ) : null}
+
+                    {complaint.assigned_maintenance && (
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Assigned to:</span>{' '}
+                        {complaint.assigned_maintenance}
+                        {complaint.assigned_maintenance_phone && (
+                          <span className="ml-2">
+                            📞 {complaint.assigned_maintenance_phone}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

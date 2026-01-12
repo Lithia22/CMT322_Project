@@ -1,3 +1,5 @@
+// src/components/modal/CreateMaintenanceModal.jsx
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,9 +22,6 @@ import {
 } from '@/components/ui/form';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { facilityTypes } from '@/data/mockData';
-
-// Check if Select components exist, if not we'll use a native select
 import {
   Select,
   SelectContent,
@@ -31,7 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Validation schema
+// Updated validation schema for Supabase
 const maintenanceStaffSchema = z
   .object({
     name: z
@@ -48,6 +47,7 @@ const maintenanceStaffSchema = z
       .string()
       .min(10, 'Phone number must be at least 10 characters')
       .regex(/^\+?[\d\s-]+$/, 'Please enter a valid phone number'),
+    specialty: z.string().optional(),
     facilityTypes: z
       .array(z.string())
       .min(1, 'Please select at least one facility type'),
@@ -66,18 +66,94 @@ const maintenanceStaffSchema = z
   });
 
 export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
+  const [facilityOptions, setFacilityOptions] = useState([]);
+  const [loadingFacilities, setLoadingFacilities] = useState(false);
+  
   const form = useForm({
     resolver: zodResolver(maintenanceStaffSchema),
     defaultValues: {
       name: '',
       email: '',
       phone: '',
+      specialty: '',
       facilityTypes: [],
       password: '',
       confirmPassword: '',
     },
     mode: 'onChange',
   });
+
+  // Fetch facility types from Supabase
+// In CreateMaintenanceModal.jsx - update the useEffect that fetches facility types
+useEffect(() => {
+  const fetchFacilityTypes = async () => {
+    if (!open) return;
+    
+    try {
+      setLoadingFacilities(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/auth/facility-types', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setFacilityOptions(result.facility_types || []);
+          console.log('✅ Facility types loaded:', result.facility_types);
+        } else {
+          console.error('Failed to load facility types:', result.error);
+          toast.error('Failed to load facility types');
+          // Fallback to mock data
+          setFacilityOptions([
+            { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
+            { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
+            { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
+            { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
+            { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
+            { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
+            { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
+            { id: 8, name: 'Others', created_at: new Date().toISOString() }
+          ]);
+        }
+      } else {
+        console.error('HTTP error:', response.status);
+        toast.error('Failed to load facility types');
+        // Fallback to mock data
+        setFacilityOptions([
+          { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
+          { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
+          { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
+          { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
+          { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
+          { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
+          { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
+          { id: 8, name: 'Others', created_at: new Date().toISOString() }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching facility types:', error);
+      toast.error('Failed to load facility types');
+      // Fallback to mock data
+      setFacilityOptions([
+        { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
+        { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
+        { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
+        { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
+        { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
+        { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
+        { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
+        { id: 8, name: 'Others', created_at: new Date().toISOString() }
+      ]);
+    } finally {
+      setLoadingFacilities(false);
+    }
+  };
+
+  fetchFacilityTypes();
+}, [open]);
 
   const selectedFacilityTypes = form.watch('facilityTypes') || [];
 
@@ -95,33 +171,34 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
     form.setValue('facilityTypes', newTypes, { shouldValidate: true });
   };
 
-  const onSubmit = data => {
-    try {
-      // Remove confirmPassword before saving
-      const { confirmPassword, ...staffData } = data;
-
-      onSave({
-        ...staffData,
-        id: Date.now().toString(),
-        status: 'Active',
-        joinDate: new Date().toISOString().split('T')[0],
-        username: data.email.split('@')[0] + '_maintenance',
-      });
-
-      form.reset();
-    } catch (error) {
-      toast.error('Failed to create staff account. Please try again.');
-    }
-  };
+  // In CreateMaintenanceModal.jsx - onSubmit function
+const onSubmit = async (data) => {
+  try {
+    // Prepare the staff data for backend
+    const staffData = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phone: data.phone,
+      specialty: data.specialty || '',
+      facilityTypes: data.facilityTypes  // Send names, backend will convert to IDs
+    };
+    
+    await onSave(staffData);
+    
+    // Reset form on success
+    form.reset();
+    
+  } catch (error) {
+    console.error('Form submission error:', error);
+    toast.error('Failed to create staff. Please try again.');
+  }
+};
 
   const handleClose = () => {
     form.reset();
     onClose();
   };
-
-  // Check if Select components are available
-  const hasSelectComponents =
-    Select && SelectContent && SelectItem && SelectTrigger && SelectValue;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -139,7 +216,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Full Name
+                    Full Name *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -160,7 +237,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Email Address
+                    Email Address *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -185,11 +262,32 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Phone Number
+                    Phone Number *
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="+6012-345 6789"
+                      {...field}
+                      className="border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:text-white text-sm"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Specialty (Optional) */}
+            <FormField
+              control={form.control}
+              name="specialty"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-black dark:text-white">
+                    Specialty (Optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g., Electrical, Plumbing, HVAC"
                       {...field}
                       className="border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:text-white text-sm"
                     />
@@ -206,81 +304,66 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Facility Types
+                    Facility Types *
                   </FormLabel>
                   <div className="space-y-3">
-                    {hasSelectComponents ? (
-                      // Use Shadcn Select components if available
-                      <Select onValueChange={addFacilityType}>
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
-                            <SelectValue placeholder="Select facility types" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {facilityTypes.map(type => (
-                            <SelectItem
-                              key={type}
-                              value={type}
-                              disabled={selectedFacilityTypes.includes(type)}
-                            >
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      // Fallback to native select
-                      <FormControl>
-                        <select
-                          onChange={e => {
-                            if (e.target.value) {
-                              addFacilityType(e.target.value);
-                              e.target.value = ''; // Reset selection
-                            }
-                          }}
-                          className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-black dark:text-white focus:border-purple-500 focus:ring-purple-500"
-                        >
-                          <option value="">Select facility types</option>
-                          {facilityTypes.map(type => (
-                            <option
-                              key={type}
-                              value={type}
-                              disabled={selectedFacilityTypes.includes(type)}
-                            >
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </FormControl>
-                    )}
-
-                    {/* Selected Types Display */}
-                    {selectedFacilityTypes.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Selected Types:
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedFacilityTypes.map(type => (
-                            <Badge
-                              key={type}
-                              variant="secondary"
-                              className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 px-3 py-1 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-700"
-                              onClick={() => removeFacilityType(type)}
-                            >
-                              {type}
-                              <span className="ml-1 text-xs">×</span>
-                            </Badge>
-                          ))}
-                        </div>
+                    {loadingFacilities ? (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                        <span className="text-sm text-gray-500">Loading facility types...</span>
                       </div>
+                    ) : facilityOptions.length === 0 ? (
+                      <p className="text-sm text-amber-600 py-2">
+                        No facility types available. Please add facility types to the database first.
+                      </p>
+                    ) : (
+                      <>
+                        <Select onValueChange={addFacilityType}>
+                          <FormControl>
+                            <SelectTrigger className="border-gray-300 dark:border-gray-600 focus:border-purple-500 focus:ring-purple-500 dark:bg-gray-700 dark:text-white">
+                              <SelectValue placeholder="Select facility types" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {facilityOptions.map(facility => (
+                              <SelectItem
+                                key={facility.id}
+                                value={facility.name}
+                                disabled={selectedFacilityTypes.includes(facility.name)}
+                              >
+                                {facility.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                        {/* Selected Types Display */}
+                        {selectedFacilityTypes.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Selected Types:
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedFacilityTypes.map(type => (
+                                <Badge
+                                  key={type}
+                                  variant="secondary"
+                                  className="bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 px-3 py-1 cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-700"
+                                  onClick={() => removeFacilityType(type)}
+                                >
+                                  {type}
+                                  <span className="ml-1 text-xs">×</span>
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   <FormMessage />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Select facility types this staff can handle. Click on badges
-                    to remove.
+                    Select facility types this staff can handle. Click on badges to remove.
                   </p>
                 </FormItem>
               )}
@@ -293,7 +376,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Temporary Password
+                    Temporary Password *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -305,8 +388,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
                   </FormControl>
                   <FormMessage />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Must be at least 8 characters with uppercase, lowercase, and
-                    number
+                    Must be at least 8 characters with uppercase, lowercase, and number
                   </p>
                 </FormItem>
               )}
@@ -319,7 +401,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-black dark:text-white">
-                    Confirm Password
+                    Confirm Password *
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -346,7 +428,10 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
               <Button
                 type="submit"
                 disabled={
-                  !form.formState.isValid || form.formState.isSubmitting
+                  !form.formState.isValid || 
+                  form.formState.isSubmitting || 
+                  loadingFacilities ||
+                  facilityOptions.length === 0
                 }
                 className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
               >
@@ -366,3 +451,5 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
     </Dialog>
   );
 };
+
+export default CreateMaintenanceModal;

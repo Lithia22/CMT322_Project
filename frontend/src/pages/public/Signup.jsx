@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,9 +32,21 @@ const signUpSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const hostelMapping = {
+  "Desasiswa Aman Damai": 1,
+  "Desasiswa Fajar Harapan": 2,
+  "Desasiswa Bakti Permai": 3,
+  "Desasiswa Cahaya Gemilang": 4,
+  "Desasiswa Indah Kembara": 5,
+  "Desasiswa Restu": 6,
+  "Desasiswa Saujana": 7,
+  "Desasiswa Tekun": 8
+};
+
 const SignUp = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(signUpSchema),
@@ -48,12 +61,46 @@ const SignUp = () => {
     },
   });
 
-  const onSubmit = (data) => {
-    const result = register(data);
-    if (result.success) {
-      navigate('/login');
-    } else {
-      form.setError('root', { message: result.error });
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    
+    try {
+      // Convert hostel name to hostel_id using mapping
+      const hostel_id = hostelMapping[data.hostelName];
+      
+      if (!hostel_id) {
+        throw new Error('Invalid hostel selected');
+      }
+
+      // Prepare data for backend (using correct field names)
+      const backendData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: 'student',
+        matric_number: data.matricNumber, // Backend expects snake_case
+        hostel_id: hostel_id.toString(), // Convert to string (backend will parse to int)
+        room_number: data.roomNumber, // Backend expects snake_case
+        phone: '' // Add empty phone if needed
+      };
+
+      console.log('📤 Frontend sending:', backendData); // Debug log
+      
+      const result = await register(backendData);
+      
+      if (result.success) {
+        form.reset();
+        navigate('/dashboard');
+      } else {
+        form.setError('root', { message: result.error });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      form.setError('root', { 
+        message: error.message || 'An unexpected error occurred. Please try again.' 
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -238,8 +285,9 @@ const SignUp = () => {
                 <Button 
                   type="submit" 
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5"
+                  disabled={isLoading}
                 >
-                  Create Account
+                  {isLoading ? 'Creating Account...' : 'Create Account'}
                 </Button>
 
                 <div className="text-center mt-4">

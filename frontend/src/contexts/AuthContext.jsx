@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { mockUsers } from '../data/mockData';
 
 const AuthContext = createContext(null);
 
@@ -9,100 +8,119 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
+    const token = localStorage.getItem('token');
+    
+    if (storedUser && token) {
       setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  const register = userData => {
-    const existingUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
-
-    // Check if email already exists
-    const existingUserByEmail = existingUsers.find(
-      u => u.email === userData.email
-    );
-    if (existingUserByEmail) {
-      return {
-        success: false,
-        error:
-          'An account with this email already exists. Please login instead.',
-      };
-    }
-
-    // Check if matric number already exists (for student accounts)
-    if (userData.email.includes('@student.usm.my')) {
-      const existingUserByMatric = existingUsers.find(
-        u => u.matricNumber === userData.matricNumber
-      );
-      if (existingUserByMatric) {
-        return {
-          success: false,
-          error:
-            'This matric number is already registered. Please use your existing account or contact support if you need help.',
+  const register = async (userData) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        return { 
+          success: false, 
+          error: data.error || data.message || 'Registration failed' 
         };
       }
-    }
-
-    const newUser = {
-      id: Date.now(),
-      ...userData,
-      role: userData.email.includes('@student.usm.my') ? 'student' : 'admin',
-    };
-
-    existingUsers.push(newUser);
-    localStorage.setItem('mockUsers', JSON.stringify(existingUsers));
-
-    return { success: true, user: newUser };
-  };
-
-  const login = (email, password) => {
-    // Check mock users first
-    let foundUser = mockUsers.find(
-      u => u.email === email && u.password === password
-    );
-
-    // Then check localStorage for registered users
-    if (!foundUser) {
-      const registeredUsers = JSON.parse(
-        localStorage.getItem('mockUsers') || '[]'
-      );
-      foundUser = registeredUsers.find(
-        u => u.email === email && u.password === password
-      );
-    }
-
-    if (foundUser) {
-      const userWithoutPassword = { ...foundUser };
-      delete userWithoutPassword.password;
-      setUser(userWithoutPassword);
-      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-
-      return {
-        success: true,
-        user: userWithoutPassword,
-        // Return the role so the component can handle navigation
-        role: foundUser.role,
+      
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      setUser(data.user);
+      
+      return { success: true, user: data.user };
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { 
+        success: false, 
+        error: 'Network error. Please try again.' 
       };
     }
+  };
 
-    return { success: false, error: 'Invalid email or password' };
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        return { success: false, error: data.error || data.message || 'Login failed' };
+      }
+      
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('currentUser', JSON.stringify(data.user));
+      setUser(data.user);
+      
+      return {
+        success: true,
+        user: data.user,
+        role: data.user.role
+      };
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: 'Network error. Please try again.' 
+      };
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
   };
 
-  const updateProfile = async profileData => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const updatedUser = { ...user, ...profileData };
-        setUser(updatedUser);
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        resolve(updatedUser);
-      }, 500);
-    });
+  const updateProfile = async (profileData) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(profileData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Profile update failed');
+      }
+      
+      const updatedUser = { ...user, ...data.user };
+      setUser(updatedUser);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      
+      return updatedUser;
+      
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
   };
 
   const value = {
@@ -116,6 +134,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === 'admin',
     isStudent: user?.role === 'student',
     isMaintenance: user?.role === 'maintenance',
+    getToken: () => localStorage.getItem('token')
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
