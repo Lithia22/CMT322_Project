@@ -8,6 +8,9 @@ const PORT = process.env.PORT || 5000;
 const authRoutes = require("./routes/auth");
 const complaintsRoutes = require("./routes/complaints");
 const feedbacksRoutes = require("./routes/feedbacks");
+// Setup first admin if needed
+const createFirstAdmin = require('./setup/first-admin');
+createFirstAdmin();
 
 // Middleware
 app.use(express.json());
