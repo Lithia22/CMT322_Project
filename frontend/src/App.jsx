@@ -14,8 +14,7 @@ import Home from './pages/public/Home';
 import FAQ from './pages/public/FAQ';
 import Login from './pages/public/Login';
 import Contact from './pages/public/Contact';
-import SignUp from './pages/public/SignUp';
-
+import SignUp from './pages/public/Signup';
 // Student pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import MyComplaints from './pages/student/MyComplaints';
