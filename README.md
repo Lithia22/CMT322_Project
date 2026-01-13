@@ -1,4 +1,33 @@
-# USM Hostel Complaint Management System - DesaFix
+# DesaFix - USM Hostel Complaint Management System
+
+A web-based complaint management system for Universiti Sains Malaysia hostel facilities, enabling students to report issues and track their resolution.
+
+## Project Structure
+
+```
+CMT322_Project/
+├── frontend/          # React frontend
+│   ├── src/
+│   │   ├── components/
+│   │   ├── contexts/
+│   │   ├── pages/
+│   │   └── config/
+│   └── package.json
+│
+└── BACKEND/          # Express backend
+    ├── src/
+    │   ├── routes/
+    │   ├── middleware/
+    │   └── config/
+    └── package.json
+```
+
+**Team Members:**
+
+- Tejashree Laxmi A/P Kanthan (163506)
+- Dershyani A/P B.Thessaruva (164062)
+- Lithia A/P Kisnen (163850)
+- Kavitashini A/P Seluvarajoo (164329)
 
 ## Features
 
@@ -6,91 +35,54 @@
 
 - **Home Page** with system overview and features
 - **FAQ Section** for common questions
-- **Contact Section** for each hostel's contact information
-- **Login/SignUp System** with role-based access
+- **Contact Section** for hostel contact information
+- **Login/Registration System** with role-based access
 
 ### Student Features
 
-- **Dashboard** with total complaints statistics, recent complaints, and feedback given
-- **My Complaints** to track complaint progress and submit new complaints
-- **Feedback** to provide feedback on resolved complaints
+- **Dashboard** with complaint statistics and recent activity
+- **My Complaints** to submit and track complaint progress
+- **Feedback System** to rate resolved complaints
 
 ### Admin Features
 
-- **Dashboard** with overall complaint statistics, charts, recent complaints, and recent feedback
-- **Staff Management** to create maintenance staff accounts, assign tasks, and monitor complaint status
-- **Staff Performance** to view staff rating analytics and top-rated staff members
+- **Dashboard** with system-wide statistics and analytics
+- **Staff Management** to create and manage maintenance staff accounts
+- **Staff Performance** to view ratings and performance metrics
 
 ### Maintenance Staff Features
 
-- **Dashboard** to manage complaints, update status, and add remarks
-- **View Feedback** to see feedback and star ratings given by students
+- **Dashboard** to manage assigned complaints and update status
+- **Feedback View** to see student ratings and comments
 
 ## Tech Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS
-- **UI Components**: shadcn/ui, Lucide React icons
-- **State Management**: React Context API
-- **Form Handling**: React Hook Form with Zod validation
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS with dark mode support
-- **Icons**: Lucide React
-- **Charts**: Recharts for data visualization
+**Frontend:**
+
+- React 18 with Vite
+- Tailwind CSS + shadcn/ui
+- React Hook Form + Zod validation
+- Recharts for data visualization
+
+**Backend:**
+
+- Node.js + Express.js
+- JWT authentication
+- bcrypt password hashing
+
+**Database:**
+
+- Supabase (PostgreSQL)
+
+**Deployment:**
+
+- Frontend: Vercel
+- Backend: Render
+- Database: Supabase Cloud
 
 ## Installation & Setup
 
 ### Prerequisites
 
-- Node.js (version 16 or higher)
-- npm or yarn
-
-### Quick Start
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/Lithia22/CMT322.git
-   cd CMT322
-
-   ```
-
-2. **Navigate to frontend directory**
-
-   ```bash
-   cd frontend
-
-   ```
-
-3. **Install dependencies**
-
-   ```bash
-   npm install
-
-   ```
-
-4. **Start development server**
-
-   ```bash
-   npm run dev
-
-   ```
-
-5. **Open your browser**
-   Navigate to `http://localhost:5173`
-
-## Demo Credentials
-
-### Student Login
-
-- **Email**: `test@student.usm.my`
-- **Password**: `password`
-
-### Admin Login
-
-- **Email**: `admin@usm.my`
-- **Password**: `password`
-
-### Maintenance Staff Login
-
-- **Email**: `ahmad@usm.my`
-- **Password**: `password123`
+- Node.js (v16+)
+- npm
