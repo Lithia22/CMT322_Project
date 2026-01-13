@@ -75,7 +75,7 @@ const MaintenanceDashboard = () => {
         console.log('🔍 Fetching complaints for maintenance dashboard...');
 
         // Fetch complaints from backend
-        const complaintsResponse = await fetch('${API_URL}/api/complaints', {
+        const complaintsResponse = await fetch(`${API_URL}/api/complaints`, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

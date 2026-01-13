@@ -53,7 +53,7 @@ const ViewFeedback = () => {
           return;
         }
 
-        const response = await fetch('${API_URL}/api/feedbacks', {
+        const response = await fetch(`${API_URL}/api/feedbacks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

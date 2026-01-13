@@ -65,7 +65,7 @@ const Feedback = () => {
 
         // Fetch user's complaints
         const response = await fetch(
-          '${API_URL}/api/complaints/my-complaints',
+          `${API_URL}/api/complaints/my-complaints`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -112,7 +112,7 @@ const Feedback = () => {
           return;
         }
 
-        const response = await fetch('${API_URL}/api/feedbacks/my-feedbacks', {
+        const response = await fetch(`${API_URL}/api/feedbacks/my-feedbacks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -158,7 +158,7 @@ const Feedback = () => {
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('${API_URL}/api/feedbacks', {
+      const response = await fetch(`${API_URL}/api/feedbacks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

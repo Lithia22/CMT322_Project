@@ -46,7 +46,7 @@ const AdminDashboard = () => {
           return;
         }
 
-        const response = await fetch('${API_URL}/api/complaints', {
+        const response = await fetch(`${API_URL}/api/complaints`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

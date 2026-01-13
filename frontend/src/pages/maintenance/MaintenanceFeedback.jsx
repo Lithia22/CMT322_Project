@@ -56,7 +56,7 @@ const MaintenanceFeedback = () => {
 
         // Try to fetch feedbacks with complaint details
         const response = await fetch(
-          '${API_URL}/api/feedbacks/maintenance-feedbacks',
+          `${API_URL}/api/feedbacks/maintenance-feedbacks`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

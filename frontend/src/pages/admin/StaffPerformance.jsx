@@ -45,7 +45,7 @@ const StaffPerformance = () => {
         }
 
         // Fetch all staff
-        const staffResponse = await fetch('${API_URL}/api/auth/staff', {
+        const staffResponse = await fetch(`${API_URL}/api/auth/staff`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -58,7 +58,7 @@ const StaffPerformance = () => {
 
             // Fetch all complaints to calculate performance
             const complaintsResponse = await fetch(
-              '${API_URL}/api/complaints',
+              `${API_URL}/api/complaints`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -74,7 +74,7 @@ const StaffPerformance = () => {
 
               // Fetch all feedbacks for ratings
               const feedbacksResponse = await fetch(
-                '${API_URL}/api/feedbacks',
+                `${API_URL}/api/feedbacks`,
                 {
                   headers: {
                     Authorization: `Bearer ${token}`,

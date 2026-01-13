@@ -67,7 +67,7 @@ const StaffManagement = () => {
         const token = localStorage.getItem('token');
 
         // Fetch staff
-        const staffResponse = await fetch('${API_URL}/api/auth/staff', {
+        const staffResponse = await fetch(`${API_URL}/api/auth/staff`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -82,7 +82,7 @@ const StaffManagement = () => {
 
         // Fetch facility types
         const facilityResponse = await fetch(
-          '${API_URL}/api/auth/facility-types',
+          `${API_URL}/api/auth/facility-types`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -98,7 +98,7 @@ const StaffManagement = () => {
         }
 
         // Fetch complaints
-        const complaintsResponse = await fetch('${API_URL}/api/complaints', {
+        const complaintsResponse = await fetch(`${API_URL}/api/complaints`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -157,7 +157,7 @@ const StaffManagement = () => {
         facility_type_ids: facilityTypeIds,
       };
 
-      const response = await fetch('${API_URL}/api/auth/register-staff', {
+      const response = await fetch(`${API_URL}/api/auth/register-staff`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

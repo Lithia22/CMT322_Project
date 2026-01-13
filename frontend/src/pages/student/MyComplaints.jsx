@@ -154,7 +154,7 @@ const MyComplaints = () => {
         }
 
         const response = await fetch(
-          '${API_URL}/api/complaints/my-complaints',
+          `${API_URL}/api/complaints/my-complaints`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -237,7 +237,7 @@ const MyComplaints = () => {
 
       // Send to backend API
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/complaints', {
+      const response = await fetch(`${API_URL}/api/complaints`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

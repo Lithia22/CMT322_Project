@@ -33,7 +33,7 @@ const StudentDashboard = () => {
         }
 
         const response = await fetch(
-          '${API_URL}/api/complaints/my-complaints',
+          `${API_URL}/api/complaints/my-complaints`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ const StudentDashboard = () => {
         }
 
         // This endpoint needs to be created in your backend
-        const response = await fetch('${API_URL}/api/feedbacks/my-feedbacks', {
+        const response = await fetch(`${API_URL}/api/feedbacks/my-feedbacks`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -92,7 +92,7 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
       try {
         setLoadingFacilities(true);
         const token = localStorage.getItem('token');
-        const response = await fetch(' ${API_URL}/api/auth/facility-types', {
+        const response = await fetch(`${API_URL}/api/auth/facility-types`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
