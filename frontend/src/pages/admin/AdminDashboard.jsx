@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +12,7 @@ import {
   Star,
   AlertCircle,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -26,7 +27,7 @@ const AdminDashboard = () => {
     in_progress: 0,
     resolved: 0,
     avgResolutionTime: 0,
-    trend: 0
+    trend: 0,
   });
   const [facilityStats, setFacilityStats] = useState([]);
   const [hostelStats, setHostelStats] = useState([]);
@@ -38,25 +39,25 @@ const AdminDashboard = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/complaints', {
+        const response = await fetch('${API_URL}/api/complaints', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
             console.log('✅ Complaints loaded:', result.complaints.length);
             setComplaints(result.complaints || []);
-            
+
             // Calculate statistics
             calculateStats(result.complaints);
             calculateFacilityStats(result.complaints);
@@ -83,59 +84,73 @@ const AdminDashboard = () => {
     fetchComplaints();
   }, []);
 
-  const calculateStats = (complaintsData) => {
+  const calculateStats = complaintsData => {
     const total = complaintsData.length;
     const pending = complaintsData.filter(c => c.status === 'pending').length;
-    const in_progress = complaintsData.filter(c => c.status === 'in_progress').length;
+    const in_progress = complaintsData.filter(
+      c => c.status === 'in_progress'
+    ).length;
     const resolved = complaintsData.filter(c => c.status === 'resolved').length;
-    
+
     // Calculate average resolution time
-    const resolvedComplaints = complaintsData.filter(c => c.status === 'resolved' && c.resolution_date && c.submitted_at);
+    const resolvedComplaints = complaintsData.filter(
+      c => c.status === 'resolved' && c.resolution_date && c.submitted_at
+    );
     let totalResolutionTime = 0;
-    
+
     resolvedComplaints.forEach(complaint => {
       const submitted = new Date(complaint.submitted_at);
       const resolved = new Date(complaint.resolution_date);
-      const diffDays = Math.ceil((resolved - submitted) / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil(
+        (resolved - submitted) / (1000 * 60 * 60 * 24)
+      );
       totalResolutionTime += diffDays;
     });
-    
-    const avgResolutionTime = resolvedComplaints.length > 0 
-      ? Math.round(totalResolutionTime / resolvedComplaints.length) 
-      : 0;
-    
+
+    const avgResolutionTime =
+      resolvedComplaints.length > 0
+        ? Math.round(totalResolutionTime / resolvedComplaints.length)
+        : 0;
+
     // Calculate trend (comparing last 30 days vs previous 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-    
-    const recentComplaints = complaintsData.filter(c => 
-      new Date(c.submitted_at) >= thirtyDaysAgo
+
+    const recentComplaints = complaintsData.filter(
+      c => new Date(c.submitted_at) >= thirtyDaysAgo
     ).length;
-    
-    const previousComplaints = complaintsData.filter(c => 
-      new Date(c.submitted_at) >= sixtyDaysAgo && new Date(c.submitted_at) < thirtyDaysAgo
+
+    const previousComplaints = complaintsData.filter(
+      c =>
+        new Date(c.submitted_at) >= sixtyDaysAgo &&
+        new Date(c.submitted_at) < thirtyDaysAgo
     ).length;
-    
-    const trend = previousComplaints > 0 
-      ? Math.round(((recentComplaints - previousComplaints) / previousComplaints) * 100)
-      : recentComplaints > 0 ? 100 : 0;
-    
+
+    const trend =
+      previousComplaints > 0
+        ? Math.round(
+            ((recentComplaints - previousComplaints) / previousComplaints) * 100
+          )
+        : recentComplaints > 0
+          ? 100
+          : 0;
+
     setStats({
       total,
       pending,
       in_progress,
       resolved,
       avgResolutionTime,
-      trend
+      trend,
     });
   };
 
-  const calculateFacilityStats = (complaintsData) => {
+  const calculateFacilityStats = complaintsData => {
     const facilityMap = {};
-    
+
     complaintsData.forEach(complaint => {
       const facilityType = complaint.facility_type || 'Unknown';
       if (!facilityMap[facilityType]) {
@@ -143,18 +158,20 @@ const AdminDashboard = () => {
       }
       facilityMap[facilityType]++;
     });
-    
-    const facilityArray = Object.keys(facilityMap).map(facility => ({
-      name: facility,
-      value: facilityMap[facility]
-    })).sort((a, b) => b.value - a.value);
-    
+
+    const facilityArray = Object.keys(facilityMap)
+      .map(facility => ({
+        name: facility,
+        value: facilityMap[facility],
+      }))
+      .sort((a, b) => b.value - a.value);
+
     setFacilityStats(facilityArray);
   };
 
-  const calculateHostelStats = (complaintsData) => {
+  const calculateHostelStats = complaintsData => {
     const hostelMap = {};
-    
+
     complaintsData.forEach(complaint => {
       const hostelName = complaint.hostel_name || 'Unknown Hostel';
       if (!hostelMap[hostelName]) {
@@ -162,30 +179,32 @@ const AdminDashboard = () => {
       }
       hostelMap[hostelName]++;
     });
-    
-    const hostelArray = Object.keys(hostelMap).map(hostel => ({
-      hostel,
-      count: hostelMap[hostel]
-    })).sort((a, b) => b.count - a.count);
-    
+
+    const hostelArray = Object.keys(hostelMap)
+      .map(hostel => ({
+        hostel,
+        count: hostelMap[hostel],
+      }))
+      .sort((a, b) => b.count - a.count);
+
     setHostelStats(hostelArray);
   };
 
-  const calculateTimeSeriesData = (complaintsData) => {
+  const calculateTimeSeriesData = complaintsData => {
     const days = 30;
     const today = new Date();
     const data = [];
-    
+
     // Create a map for last 30 days
     const complaintCountByDate = {};
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateString = date.toISOString().split('T')[0];
       complaintCountByDate[dateString] = 0;
     }
-    
+
     // Count complaints by date
     complaintsData.forEach(complaint => {
       if (complaint.submitted_at) {
@@ -195,19 +214,19 @@ const AdminDashboard = () => {
         }
       }
     });
-    
+
     // Convert to array format
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateString = date.toISOString().split('T')[0];
-      
+
       data.push({
         date: dateString,
         complaints: complaintCountByDate[dateString] || 0,
       });
     }
-    
+
     setTimeSeriesData(data);
   };
 
@@ -331,7 +350,8 @@ const AdminDashboard = () => {
       >
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
         <p className="text-white/90">
-          Welcome back, {user?.name}. Overview of hostel complaints and system performance
+          Welcome back, {user?.name}. Overview of hostel complaints and system
+          performance
         </p>
       </div>
 
@@ -348,9 +368,7 @@ const AdminDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">
-              {stats.total}
-            </div>
+            <div className="text-2xl font-bold text-black">{stats.total}</div>
             <p className="text-xs text-gray-600 mt-1">All submissions</p>
           </CardContent>
         </Card>
@@ -423,7 +441,9 @@ const AdminDashboard = () => {
             <div className="text-2xl font-bold text-black">
               {stats.avgResolutionTime} days
             </div>
-            <p className="text-xs text-gray-600 mt-1">Average time to resolve complaints</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Average time to resolve complaints
+            </p>
           </CardContent>
         </Card>
 
@@ -433,17 +453,23 @@ const AdminDashboard = () => {
               Trend (30 days)
             </CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-              {stats.trend >= 0 ? 
-                <TrendingUp className="h-4 w-4 text-green-600" /> : 
+              {stats.trend >= 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              ) : (
                 <TrendingDown className="h-4 w-4 text-red-600" />
-              }
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.trend >= 0 ? '+' : ''}{stats.trend}%
+            <div
+              className={`text-2xl font-bold ${stats.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              {stats.trend >= 0 ? '+' : ''}
+              {stats.trend}%
             </div>
-            <p className="text-xs text-gray-600 mt-1">Compared to previous period</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Compared to previous period
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -451,26 +477,35 @@ const AdminDashboard = () => {
       {/* Facility Statistics */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-black">Complaints by Facility Type</CardTitle>
+          <CardTitle className="text-black">
+            Complaints by Facility Type
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {facilityStats.slice(0, 8).map((facility, index) => (
-              <div key={facility.name} className="flex items-center justify-between">
+              <div
+                key={facility.name}
+                className="flex items-center justify-between"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-purple-700">{index + 1}</span>
+                    <span className="text-xs font-semibold text-purple-700">
+                      {index + 1}
+                    </span>
                   </div>
                   <span className="text-sm font-medium">{facility.name}</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold">{facility.value}</span>
+                  <span className="text-sm font-semibold">
+                    {facility.value}
+                  </span>
                   <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-full"
-                      style={{ 
+                      style={{
                         width: `${(facility.value / stats.total) * 100}%`,
-                        maxWidth: '100%'
+                        maxWidth: '100%',
                       }}
                     />
                   </div>
@@ -481,83 +516,85 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
-{/* Recent Activity Tabs */}
-<Tabs defaultValue="complaints" className="space-y-4">
-  <TabsList>
-    <TabsTrigger
-      value="complaints"
-      className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
-    >
-      Recent Complaints
-    </TabsTrigger>
-  </TabsList>
+      {/* Recent Activity Tabs */}
+      <Tabs defaultValue="complaints" className="space-y-4">
+        <TabsList>
+          <TabsTrigger
+            value="complaints"
+            className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
+          >
+            Recent Complaints
+          </TabsTrigger>
+        </TabsList>
 
-  <TabsContent value="complaints">
-    <Card>
-      <CardContent className="pt-6">
-        {complaints.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold mb-2 text-black">
-              No Complaints Found
-            </h3>
-            <p className="text-gray-600">
-              No complaints have been submitted yet.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {complaints.slice(0, 5).map(complaint => (
-              <div
-                key={complaint.id}
-                className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
-              >
-                <div className="space-y-1 flex-1">
-                  <p className="font-medium text-black">
-                    {complaint.facility_type || 'Unknown Facility'}
+        <TabsContent value="complaints">
+          <Card>
+            <CardContent className="pt-6">
+              {complaints.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2 text-black">
+                    No Complaints Found
+                  </h3>
+                  <p className="text-gray-600">
+                    No complaints have been submitted yet.
                   </p>
-                  <p className="text-sm text-gray-600">
-                    {/* Fixed: Use student_name and hostel_name */}
-                    {complaint.student_name || 'Unknown Student'} • {complaint.hostel_name || 'Unknown Hostel'}
-                    {/* Removed matric number since it's not in the complaint data */}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {complaint.issue_description?.substring(0, 80)}...
-                  </p>
-                  {complaint.assigned_maintenance && (
-                    <p className="text-xs text-purple-600">
-                      Assigned to: {complaint.assigned_maintenance}
-                    </p>
-                  )}
-                  {complaint.maintenance_remarks && (
-                    <p className="text-xs text-blue-600 mt-1">
-                      <span className="font-semibold">Remarks:</span> {complaint.maintenance_remarks}
-                    </p>
-                  )}
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                  <Badge
-                    className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
-                  >
-                    {getStatusDisplay(complaint.status)}
-                  </Badge>
-                  {complaint.priority && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs capitalize"
+              ) : (
+                <div className="space-y-4">
+                  {complaints.slice(0, 5).map(complaint => (
+                    <div
+                      key={complaint.id}
+                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
                     >
-                      {complaint.priority}
-                    </Badge>
-                  )}
+                      <div className="space-y-1 flex-1">
+                        <p className="font-medium text-black">
+                          {complaint.facility_type || 'Unknown Facility'}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {/* Fixed: Use student_name and hostel_name */}
+                          {complaint.student_name || 'Unknown Student'} •{' '}
+                          {complaint.hostel_name || 'Unknown Hostel'}
+                          {/* Removed matric number since it's not in the complaint data */}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {complaint.issue_description?.substring(0, 80)}...
+                        </p>
+                        {complaint.assigned_maintenance && (
+                          <p className="text-xs text-purple-600">
+                            Assigned to: {complaint.assigned_maintenance}
+                          </p>
+                        )}
+                        {complaint.maintenance_remarks && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            <span className="font-semibold">Remarks:</span>{' '}
+                            {complaint.maintenance_remarks}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge
+                          className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
+                        >
+                          {getStatusDisplay(complaint.status)}
+                        </Badge>
+                        {complaint.priority && (
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
+                            {complaint.priority}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  </TabsContent>
-</Tabs>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

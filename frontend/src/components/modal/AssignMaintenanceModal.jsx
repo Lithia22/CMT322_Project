@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -38,13 +39,16 @@ export const AssignMaintenanceModal = ({
     try {
       setIsLoading(true);
       const token = localStorage.getItem('token');
-      
-      const response = await fetch(`http://localhost:5000/api/complaints/${complaint.id}/recommended-staff`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+
+      const response = await fetch(
+        `${API_URL}/api/complaints/${complaint.id}/recommended-staff`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      });
-      
+      );
+
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
@@ -66,18 +70,21 @@ export const AssignMaintenanceModal = ({
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
-        const response = await fetch(`http://localhost:5000/api/complaints/${complaint.id}/assign`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            assigned_maintenance_id: selectedStaff
-          })
-        });
-        
+
+        const response = await fetch(
+          `${API_URL}/api/complaints/${complaint.id}/assign`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              assigned_maintenance_id: selectedStaff,
+            }),
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -144,7 +151,7 @@ export const AssignMaintenanceModal = ({
             <label className="text-sm font-medium">
               Select Maintenance Staff
             </label>
-            
+
             {isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-10 w-full" />
@@ -156,17 +163,19 @@ export const AssignMaintenanceModal = ({
               </div>
             ) : (
               <>
-                <Select 
-                  value={selectedStaff} 
+                <Select
+                  value={selectedStaff}
                   onValueChange={setSelectedStaff}
                   disabled={recommendedStaff.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={
-                      recommendedStaff.length === 0 
-                        ? "No qualified staff available" 
-                        : "Choose maintenance staff"
-                    } />
+                    <SelectValue
+                      placeholder={
+                        recommendedStaff.length === 0
+                          ? 'No qualified staff available'
+                          : 'Choose maintenance staff'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {recommendedStaff.map(staff => (
@@ -187,13 +196,15 @@ export const AssignMaintenanceModal = ({
                 {/* Staff Details List */}
                 {recommendedStaff.length > 0 && (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
-                    <p className="text-xs text-gray-500">Recommended staff (sorted by workload):</p>
+                    <p className="text-xs text-gray-500">
+                      Recommended staff (sorted by workload):
+                    </p>
                     {recommendedStaff.map(staff => (
                       <div
                         key={staff.id}
                         className={`p-3 border rounded-lg transition-colors ${
-                          selectedStaff === staff.id 
-                            ? 'bg-purple-50 border-purple-200' 
+                          selectedStaff === staff.id
+                            ? 'bg-purple-50 border-purple-200'
                             : 'hover:bg-gray-50'
                         }`}
                         onClick={() => setSelectedStaff(staff.id)}
@@ -202,25 +213,35 @@ export const AssignMaintenanceModal = ({
                           <div>
                             <p className="font-medium">{staff.name}</p>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              <span className="text-xs text-gray-600">{staff.specialty || 'General'}</span>
+                              <span className="text-xs text-gray-600">
+                                {staff.specialty || 'General'}
+                              </span>
                               <span className="text-xs text-gray-500">•</span>
-                              <span className="text-xs text-gray-600">{staff.phone || 'No phone'}</span>
+                              <span className="text-xs text-gray-600">
+                                {staff.phone || 'No phone'}
+                              </span>
                             </div>
                             <div className="flex flex-wrap gap-1 mt-1">
-                              {staff.facility_types?.slice(0, 3).map((type, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs"
-                                >
-                                  {type}
-                                </Badge>
-                              ))}
+                              {staff.facility_types
+                                ?.slice(0, 3)
+                                .map((type, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {type}
+                                  </Badge>
+                                ))}
                             </div>
                           </div>
                           <div className="text-right">
-                            <Badge 
-                              variant={staff.assigned_count === 0 ? "default" : "secondary"}
+                            <Badge
+                              variant={
+                                staff.assigned_count === 0
+                                  ? 'default'
+                                  : 'secondary'
+                              }
                               className="text-xs"
                             >
                               {staff.assigned_count} current tasks
@@ -238,17 +259,18 @@ export const AssignMaintenanceModal = ({
           {recommendedStaff.length === 0 && !isLoading && (
             <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
               <p className="text-sm text-amber-800">
-                ⚠️ No maintenance staff qualified for this facility type. 
-                Please add staff with {complaint.facility_type || complaint.facilityType} specialty.
+                ⚠️ No maintenance staff qualified for this facility type. Please
+                add staff with{' '}
+                {complaint.facility_type || complaint.facilityType} specialty.
               </p>
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onClose}
             disabled={isLoading}
           >
@@ -257,7 +279,9 @@ export const AssignMaintenanceModal = ({
           <Button
             type="button"
             onClick={handleAssign}
-            disabled={!selectedStaff || isLoading || recommendedStaff.length === 0}
+            disabled={
+              !selectedStaff || isLoading || recommendedStaff.length === 0
+            }
             className="bg-purple-600 hover:bg-purple-700"
           >
             {isLoading ? 'Assigning...' : 'Assign Staff'}

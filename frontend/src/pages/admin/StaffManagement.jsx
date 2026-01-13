@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,10 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MoreVertical, Calendar, Plus, Eye } from 'lucide-react';
 import { toast } from 'sonner';
-import { mockComplaints, facilityTypes as mockFacilityTypes } from '@/data/mockData';
+import {
+  mockComplaints,
+  facilityTypes as mockFacilityTypes,
+} from '@/data/mockData';
 import { CreateMaintenanceModal } from '@/components/modal/CreateMaintenanceModal';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -61,42 +65,45 @@ const StaffManagement = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         // Fetch staff
-        const staffResponse = await fetch('http://localhost:5000/api/auth/staff', {
+        const staffResponse = await fetch('${API_URL}/api/auth/staff', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (staffResponse.ok) {
           const staffResult = await staffResponse.json();
           if (staffResult.success) {
             setStaff(staffResult.staff || []);
           }
         }
-        
+
         // Fetch facility types
-        const facilityResponse = await fetch('http://localhost:5000/api/auth/facility-types', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const facilityResponse = await fetch(
+          '${API_URL}/api/auth/facility-types',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (facilityResponse.ok) {
           const facilityResult = await facilityResponse.json();
           if (facilityResult.success) {
             setFacilityTypes(facilityResult.facility_types || []);
           }
         }
-        
+
         // Fetch complaints
-        const complaintsResponse = await fetch('http://localhost:5000/api/complaints', {
+        const complaintsResponse = await fetch('${API_URL}/api/complaints', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (complaintsResponse.ok) {
           const complaintsResult = await complaintsResponse.json();
           if (complaintsResult.success) {
@@ -107,7 +114,6 @@ const StaffManagement = () => {
         } else {
           setComplaints(mockComplaints); // Fallback
         }
-        
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load data');
@@ -121,45 +127,47 @@ const StaffManagement = () => {
   }, []);
 
   // Handle create staff
-  const handleCreateStaff = async (staffData) => {
+  const handleCreateStaff = async staffData => {
     try {
       const token = localStorage.getItem('token');
-      
+
       // Create name-to-ID mapping based on your facility_types table
       const nameToIdMap = {
         'Air Conditioner': 1,
-        'Bathroom': 2,
-        'Furniture': 3,
-        'Electrical': 4,
-        'Plumbing': 5,
+        Bathroom: 2,
+        Furniture: 3,
+        Electrical: 4,
+        Plumbing: 5,
         'Door/Window': 6,
-        'Lighting': 7,
-        'Others': 8
+        Lighting: 7,
+        Others: 8,
       };
-      
+
       // Convert facility type names to IDs
-      const facilityTypeIds = staffData.facilityTypes.map(name => nameToIdMap[name]);
-      
+      const facilityTypeIds = staffData.facilityTypes.map(
+        name => nameToIdMap[name]
+      );
+
       const payload = {
         name: staffData.name,
         email: staffData.email,
         password: staffData.password,
         phone: staffData.phone,
         specialty: staffData.specialty || '',
-        facility_type_ids: facilityTypeIds
+        facility_type_ids: facilityTypeIds,
       };
-      
-      const response = await fetch('http://localhost:5000/api/auth/register-staff', {
+
+      const response = await fetch('${API_URL}/api/auth/register-staff', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         // Add new staff to state
         setStaff(prev => [result.staff, ...prev]);
@@ -178,7 +186,7 @@ const StaffManagement = () => {
   const unassignedComplaints = useMemo(() => {
     return complaints.filter(
       complaint =>
-        (complaint.status === 'Pending' || complaint.status === 'pending') && 
+        (complaint.status === 'Pending' || complaint.status === 'pending') &&
         !complaint.assigned_maintenance_id
     );
   }, [complaints]);
@@ -202,10 +210,18 @@ const StaffManagement = () => {
   const filteredUnassignedComplaints = useMemo(() => {
     return unassignedComplaints.filter(complaint => {
       const matchesSearch =
-        complaint.facility_type?.toLowerCase().includes(pendingSearchQuery.toLowerCase()) ||
-        complaint.hostel_name?.toLowerCase().includes(pendingSearchQuery.toLowerCase()) ||
-        (complaint.room_number?.toString() || '').includes(pendingSearchQuery.toLowerCase()) ||
-        complaint.student_name?.toLowerCase().includes(pendingSearchQuery.toLowerCase());
+        complaint.facility_type
+          ?.toLowerCase()
+          .includes(pendingSearchQuery.toLowerCase()) ||
+        complaint.hostel_name
+          ?.toLowerCase()
+          .includes(pendingSearchQuery.toLowerCase()) ||
+        (complaint.room_number?.toString() || '').includes(
+          pendingSearchQuery.toLowerCase()
+        ) ||
+        complaint.student_name
+          ?.toLowerCase()
+          .includes(pendingSearchQuery.toLowerCase());
 
       const matchesFacility =
         pendingFacilityFilter === 'all' ||
@@ -215,19 +231,20 @@ const StaffManagement = () => {
     });
   }, [unassignedComplaints, pendingSearchQuery, pendingFacilityFilter]);
 
-  const getEligibleStaffForComplaint = (complaint) => {
+  const getEligibleStaffForComplaint = complaint => {
     return staff
       .filter(member => {
         // Check if staff has the required facility type specialty
-        return member.facility_types?.some(facilityType => 
-          facilityType === complaint.facility_type
+        return member.facility_types?.some(
+          facilityType => facilityType === complaint.facility_type
         );
       })
       .map(member => {
         // Count current workload from backend data - FIXED LOGIC
         const assignedCount = complaints.filter(
-          c => c.assigned_maintenance_id === member.id && 
-               (c.status === 'in_progress' || c.status === 'pending')
+          c =>
+            c.assigned_maintenance_id === member.id &&
+            (c.status === 'in_progress' || c.status === 'pending')
         ).length;
 
         return {
@@ -238,45 +255,51 @@ const StaffManagement = () => {
       .sort((a, b) => a.assignedCount - b.assignedCount);
   };
 
-  const handleViewComplaint = (complaint) => {
+  const handleViewComplaint = complaint => {
     setSelectedComplaint(complaint);
     setViewComplaintDialogOpen(true);
   };
 
-  const handleAssignComplaint = (complaint) => {
+  const handleAssignComplaint = complaint => {
     setSelectedComplaint(complaint);
     setAssignmentDialogOpen(true);
   };
 
-  const assignToStaff = async (staffId) => {
+  const assignToStaff = async staffId => {
     if (selectedComplaint && staffId) {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/complaints/${selectedComplaint.id}/assign`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            assigned_maintenance_id: staffId
-          })
-        });
-        
+        const response = await fetch(
+          `${API_URL}/api/complaints/${selectedComplaint.id}/assign`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              assigned_maintenance_id: staffId,
+            }),
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
             // Update complaints state
-            setComplaints(prev => 
-              prev.map(complaint => 
-                complaint.id === selectedComplaint.id 
-                  ? result.complaint 
+            setComplaints(prev =>
+              prev.map(complaint =>
+                complaint.id === selectedComplaint.id
+                  ? result.complaint
                   : complaint
               )
             );
-            
+
             const assignedStaff = staff.find(s => s.id === staffId);
-            toast.success(result.message || `Complaint assigned to ${assignedStaff?.name || 'staff member'}`);
+            toast.success(
+              result.message ||
+                `Complaint assigned to ${assignedStaff?.name || 'staff member'}`
+            );
             setAssignmentDialogOpen(false);
             setSelectedComplaint(null);
           } else {
@@ -293,7 +316,7 @@ const StaffManagement = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'resolved':
         return 'bg-green-50 text-green-700 border-green-200';
@@ -308,12 +331,13 @@ const StaffManagement = () => {
   };
 
   // Calculate staff workload function
-  const calculateStaffWorkload = (staffId) => {
+  const calculateStaffWorkload = staffId => {
     if (!staffId) return 0;
-    
-    return complaints.filter(complaint => 
-      complaint.assigned_maintenance_id === staffId && 
-      complaint.status !== 'resolved'
+
+    return complaints.filter(
+      complaint =>
+        complaint.assigned_maintenance_id === staffId &&
+        complaint.status !== 'resolved'
     ).length;
   };
 
@@ -379,10 +403,7 @@ const StaffManagement = () => {
 
   // Get unique facility types for filter dropdown
   const allFacilityTypes = Array.from(
-    new Set([
-      ...facilityTypes.map(ft => ft.name),
-      ...mockFacilityTypes
-    ])
+    new Set([...facilityTypes.map(ft => ft.name), ...mockFacilityTypes])
   ).sort();
 
   return (
@@ -426,7 +447,8 @@ const StaffManagement = () => {
             value="complaints"
             className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 data-[state=active]:bg-white"
           >
-            Complaint Status ({complaints.filter(c => c.assigned_maintenance_id).length})
+            Complaint Status (
+            {complaints.filter(c => c.assigned_maintenance_id).length})
           </TabsTrigger>
         </TabsList>
 
@@ -441,7 +463,7 @@ const StaffManagement = () => {
                 <Input
                   placeholder="Search by name, email, or phone..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 />
               </div>
@@ -452,7 +474,7 @@ const StaffManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Facilities</SelectItem>
-                  {allFacilityTypes.map((type) => (
+                  {allFacilityTypes.map(type => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -481,17 +503,21 @@ const StaffManagement = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="min-w-[200px]">Staff Member</TableHead>
+                    <TableHead className="min-w-[200px]">
+                      Staff Member
+                    </TableHead>
                     <TableHead className="min-w-[150px]">Contact</TableHead>
                     <TableHead className="min-w-[100px]">Specialty</TableHead>
-                    <TableHead className="min-w-[200px]">Facility Types</TableHead>
+                    <TableHead className="min-w-[200px]">
+                      Facility Types
+                    </TableHead>
                     <TableHead className="min-w-[100px]">Workload</TableHead>
                     <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredStaff.length > 0 ? (
-                    filteredStaff.map((member) => {
+                    filteredStaff.map(member => {
                       // FIXED: Calculate workload correctly
                       const assignedCount = calculateStaffWorkload(member.id);
 
@@ -502,7 +528,10 @@ const StaffManagement = () => {
                               <div className="font-medium text-black whitespace-nowrap">
                                 {member.name}
                                 {member.status !== 'active' && (
-                                  <Badge variant="outline" className="ml-2 text-xs">
+                                  <Badge
+                                    variant="outline"
+                                    className="ml-2 text-xs"
+                                  >
                                     {member.status}
                                   </Badge>
                                 )}
@@ -524,15 +553,17 @@ const StaffManagement = () => {
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-nowrap overflow-x-auto">
-                              {member.facility_types?.slice(0, 3).map((type, index) => (
-                                <Badge
-                                  key={index}
-                                  variant="outline"
-                                  className="text-xs whitespace-nowrap"
-                                >
-                                  {type}
-                                </Badge>
-                              ))}
+                              {member.facility_types
+                                ?.slice(0, 3)
+                                .map((type, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs whitespace-nowrap"
+                                  >
+                                    {type}
+                                  </Badge>
+                                ))}
                               {member.facility_types?.length > 3 && (
                                 <Badge
                                   variant="outline"
@@ -541,18 +572,28 @@ const StaffManagement = () => {
                                   +{member.facility_types.length - 3}
                                 </Badge>
                               )}
-                              {(!member.facility_types || member.facility_types.length === 0) && (
-                                <span className="text-xs text-gray-400">None</span>
+                              {(!member.facility_types ||
+                                member.facility_types.length === 0) && (
+                                <span className="text-xs text-gray-400">
+                                  None
+                                </span>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className={`font-medium whitespace-nowrap ${
-                              assignedCount === 0 ? 'text-gray-500' : 
-                              assignedCount <= 2 ? 'text-green-600' : 
-                              assignedCount <= 4 ? 'text-amber-600' : 'text-red-600'
-                            }`}>
-                              {assignedCount} {assignedCount === 1 ? 'task' : 'tasks'}
+                            <span
+                              className={`font-medium whitespace-nowrap ${
+                                assignedCount === 0
+                                  ? 'text-gray-500'
+                                  : assignedCount <= 2
+                                    ? 'text-green-600'
+                                    : assignedCount <= 4
+                                      ? 'text-amber-600'
+                                      : 'text-red-600'
+                              }`}
+                            >
+                              {assignedCount}{' '}
+                              {assignedCount === 1 ? 'task' : 'tasks'}
                             </span>
                           </TableCell>
                           <TableCell>
@@ -595,7 +636,7 @@ const StaffManagement = () => {
                 <Input
                   placeholder="Search unassigned tasks..."
                   value={pendingSearchQuery}
-                  onChange={(e) => setPendingSearchQuery(e.target.value)}
+                  onChange={e => setPendingSearchQuery(e.target.value)}
                   className="pl-9 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 />
               </div>
@@ -609,7 +650,7 @@ const StaffManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Facilities</SelectItem>
-                  {allFacilityTypes.map((type) => (
+                  {allFacilityTypes.map(type => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -629,23 +670,29 @@ const StaffManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[120px]">Date</TableHead>
-                    <TableHead className="min-w-[150px]">Facility Type</TableHead>
+                    <TableHead className="min-w-[150px]">
+                      Facility Type
+                    </TableHead>
                     <TableHead className="min-w-[200px]">Location</TableHead>
-                    <TableHead className="min-w-[200px]">Recommended Staff</TableHead>
+                    <TableHead className="min-w-[200px]">
+                      Recommended Staff
+                    </TableHead>
                     <TableHead className="min-w-[80px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUnassignedComplaints.length > 0 ? (
-                    filteredUnassignedComplaints.map((complaint) => {
-                      const eligibleStaff = getEligibleStaffForComplaint(complaint);
+                    filteredUnassignedComplaints.map(complaint => {
+                      const eligibleStaff =
+                        getEligibleStaffForComplaint(complaint);
 
                       return (
                         <TableRow key={complaint.id}>
                           <TableCell className="text-sm text-gray-600">
                             <div className="flex items-center gap-1 whitespace-nowrap">
                               <Calendar size={14} />
-                              {complaint.submitted_date || complaint.submittedDate}
+                              {complaint.submitted_date ||
+                                complaint.submittedDate}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -662,20 +709,22 @@ const StaffManagement = () => {
                                 {complaint.hostel_name || complaint.hostelName}
                               </div>
                               <div className="text-gray-600 whitespace-nowrap">
-                                Room {complaint.room_number || complaint.roomNumber}
+                                Room{' '}
+                                {complaint.room_number || complaint.roomNumber}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-nowrap overflow-x-auto">
                               {eligibleStaff.length > 0 ? (
-                                eligibleStaff.slice(0, 2).map((staffMember) => (
+                                eligibleStaff.slice(0, 2).map(staffMember => (
                                   <Badge
                                     key={staffMember.id}
                                     variant="outline"
                                     className="text-xs whitespace-nowrap"
                                   >
-                                    {staffMember.name} ({staffMember.assignedCount})
+                                    {staffMember.name} (
+                                    {staffMember.assignedCount})
                                   </Badge>
                                 ))
                               ) : (
@@ -703,7 +752,9 @@ const StaffManagement = () => {
                                   View Complaint
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleAssignComplaint(complaint)}
+                                  onClick={() =>
+                                    handleAssignComplaint(complaint)
+                                  }
                                   disabled={eligibleStaff.length === 0}
                                 >
                                   Assign Task
@@ -750,7 +801,8 @@ const StaffManagement = () => {
               </Select>
 
               <Badge variant="secondary" className="h-7">
-                {complaints.filter(c => c.assigned_maintenance_id).length} assigned complaints
+                {complaints.filter(c => c.assigned_maintenance_id).length}{' '}
+                assigned complaints
               </Badge>
             </div>
           </div>
@@ -761,7 +813,9 @@ const StaffManagement = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px]">Student</TableHead>
-                    <TableHead className="min-w-[150px]">Facility Type</TableHead>
+                    <TableHead className="min-w-[150px]">
+                      Facility Type
+                    </TableHead>
                     <TableHead className="min-w-[150px]">Assigned To</TableHead>
                     <TableHead className="min-w-[120px]">Contact</TableHead>
                     <TableHead className="min-w-[120px]">Status</TableHead>
@@ -770,14 +824,16 @@ const StaffManagement = () => {
                 </TableHeader>
                 <TableBody>
                   {complaints
-                    .filter(complaint => 
-                      complaint.assigned_maintenance_id &&
-                      (complaintStatusFilter === 'all' || 
-                       complaint.status?.toLowerCase() === complaintStatusFilter.toLowerCase())
+                    .filter(
+                      complaint =>
+                        complaint.assigned_maintenance_id &&
+                        (complaintStatusFilter === 'all' ||
+                          complaint.status?.toLowerCase() ===
+                            complaintStatusFilter.toLowerCase())
                     )
-                    .map((complaint) => {
+                    .map(complaint => {
                       const assignedStaff = staff.find(
-                        (s) => s.id === complaint.assigned_maintenance_id
+                        s => s.id === complaint.assigned_maintenance_id
                       );
 
                       return (
@@ -785,10 +841,12 @@ const StaffManagement = () => {
                           <TableCell>
                             <div>
                               <div className="font-medium text-black whitespace-nowrap">
-                                {complaint.student_name || complaint.studentName}
+                                {complaint.student_name ||
+                                  complaint.studentName}
                               </div>
                               <div className="text-sm text-gray-600 whitespace-nowrap">
-                                {complaint.hostel_name || complaint.hostelName} - Room{' '}
+                                {complaint.hostel_name || complaint.hostelName}{' '}
+                                - Room{' '}
                                 {complaint.room_number || complaint.roomNumber}
                               </div>
                             </div>
@@ -815,10 +873,13 @@ const StaffManagement = () => {
                             <Badge
                               className={`${getStatusColor(complaint.status)} pointer-events-none text-xs`}
                             >
-                              {complaint.status === 'in_progress' ? 'In Progress' : 
-                               complaint.status === 'pending' ? 'Pending' : 
-                               complaint.status === 'resolved' ? 'Resolved' : 
-                               complaint.status}
+                              {complaint.status === 'in_progress'
+                                ? 'In Progress'
+                                : complaint.status === 'pending'
+                                  ? 'Pending'
+                                  : complaint.status === 'resolved'
+                                    ? 'Resolved'
+                                    : complaint.status}
                             </Badge>
                           </TableCell>
                           <TableCell>
@@ -865,29 +926,35 @@ const StaffManagement = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="font-medium">Facility:</span>{' '}
-                    {selectedComplaint.facility_type || selectedComplaint.facilityType}
+                    {selectedComplaint.facility_type ||
+                      selectedComplaint.facilityType}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span>{' '}
-                    {selectedComplaint.submitted_date || selectedComplaint.submittedDate}
+                    {selectedComplaint.submitted_date ||
+                      selectedComplaint.submittedDate}
                   </div>
                   <div>
                     <span className="font-medium">Hostel:</span>{' '}
-                    {selectedComplaint.hostel_name || selectedComplaint.hostelName}
+                    {selectedComplaint.hostel_name ||
+                      selectedComplaint.hostelName}
                   </div>
                   <div>
                     <span className="font-medium">Room:</span>{' '}
-                    {selectedComplaint.room_number || selectedComplaint.roomNumber}
+                    {selectedComplaint.room_number ||
+                      selectedComplaint.roomNumber}
                   </div>
                   <div className="col-span-2">
                     <span className="font-medium">Student:</span>{' '}
-                    {selectedComplaint.student_name || selectedComplaint.studentName}
+                    {selectedComplaint.student_name ||
+                      selectedComplaint.studentName}
                   </div>
                 </div>
                 <div className="text-sm pt-2 border-t">
                   <span className="font-medium">Issue:</span>
                   <p className="text-gray-600 mt-1">
-                    {selectedComplaint.issue_description || selectedComplaint.issueDescription}
+                    {selectedComplaint.issue_description ||
+                      selectedComplaint.issueDescription}
                   </p>
                 </div>
               </div>
@@ -904,12 +971,12 @@ const StaffManagement = () => {
           setSelectedComplaint(null);
         }}
         complaint={selectedComplaint}
-        onAssign={(updatedComplaint) => {
+        onAssign={updatedComplaint => {
           // Update complaints list
-          setComplaints(prev => 
-            prev.map(complaint => 
-              complaint.id === updatedComplaint.id 
-                ? updatedComplaint 
+          setComplaints(prev =>
+            prev.map(complaint =>
+              complaint.id === updatedComplaint.id
+                ? updatedComplaint
                 : complaint
             )
           );

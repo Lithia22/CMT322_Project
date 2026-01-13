@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,13 +57,13 @@ const complaintSchema = z.object({
 // Facility type mapping based on your database
 const facilityTypeMapping = {
   'Air Conditioner': 1,
-  'Bathroom': 2,
-  'Furniture': 3,
-  'Electrical': 4,
-  'Plumbing': 5,
+  Bathroom: 2,
+  Furniture: 3,
+  Electrical: 4,
+  Plumbing: 5,
   'Door/Window': 6,
-  'Lighting': 7,
-  'Others': 8
+  Lighting: 7,
+  Others: 8,
 };
 
 // Reverse mapping for display
@@ -74,7 +75,7 @@ const idToFacilityType = {
   5: 'Plumbing',
   6: 'Door/Window',
   7: 'Lighting',
-  8: 'Others'
+  8: 'Others',
 };
 
 // Facility types for the dropdown (sorted alphabetically)
@@ -86,7 +87,7 @@ const facilityTypes = [
   'Furniture',
   'Lighting',
   'Plumbing',
-  'Others'
+  'Others',
 ];
 
 const MyComplaints = () => {
@@ -111,12 +112,15 @@ const MyComplaints = () => {
       try {
         setLoadingHostel(true);
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/hostels/${user.hostel_id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          `${API_URL}/api/hostels/${user.hostel_id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -142,19 +146,22 @@ const MyComplaints = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/complaints/my-complaints', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          '${API_URL}/api/complaints/my-complaints',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -184,12 +191,17 @@ const MyComplaints = () => {
   // Filter complaints
   const filteredComplaints = complaints.filter(complaint => {
     const matchesSearch =
-      (complaint.facility_type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (complaint.issue_description || '').toLowerCase().includes(searchTerm.toLowerCase());
+      (complaint.facility_type || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (complaint.issue_description || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
     const matchesStatus =
-      statusFilter === 'all' || 
-      (complaint.status && complaint.status.toLowerCase() === statusFilter.toLowerCase());
+      statusFilter === 'all' ||
+      (complaint.status &&
+        complaint.status.toLowerCase() === statusFilter.toLowerCase());
 
     return matchesSearch && matchesStatus;
   });
@@ -203,63 +215,65 @@ const MyComplaints = () => {
     },
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     setIsSubmitting(true);
-    
+
     try {
       // Get facility type ID from mapping
       const facilityTypeId = facilityTypeMapping[data.facility_type_id] || 8;
-      
+
       console.log('🔍 Selected facility type:', data.facility_type_id);
       console.log('🔍 Mapped to ID:', facilityTypeId);
-      
+
       // Prepare complaint data for API
       const complaintData = {
         issue_description: data.issue_description,
         facility_type_id: facilityTypeId,
         priority: data.priority || 'medium',
-        photo_url: null // You can implement file upload later
+        photo_url: null, // You can implement file upload later
       };
 
       console.log('📤 Sending to API:', complaintData);
-      
+
       // Send to backend API
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/complaints', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(complaintData)
+        body: JSON.stringify(complaintData),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         console.log('✅ Complaint saved to database:', result.complaint);
-        
+
         // Add new complaint to state
         const newComplaint = {
           ...result.complaint,
-          facility_type: idToFacilityType[result.complaint.facility_type_id] || 'Unknown',
-          submitted_date: result.complaint.submitted_at ? 
-            new Date(result.complaint.submitted_at).toLocaleDateString('en-MY') : 'N/A'
+          facility_type:
+            idToFacilityType[result.complaint.facility_type_id] || 'Unknown',
+          submitted_date: result.complaint.submitted_at
+            ? new Date(result.complaint.submitted_at).toLocaleDateString(
+                'en-MY'
+              )
+            : 'N/A',
         };
-        
+
         setComplaints(prev => [newComplaint, ...prev]);
         toast.success('Complaint submitted successfully!');
-        
       } else {
         console.error('API error:', result.error);
         toast.error(result.error || 'Failed to submit complaint');
       }
-      
     } catch (error) {
       console.error('Submission error:', error);
       toast.error('Failed to submit complaint. Please try again.');
     }
-    
+
     form.reset();
     setDialogOpen(false);
     setIsSubmitting(false);
@@ -296,15 +310,15 @@ const MyComplaints = () => {
     if (loadingHostel) {
       return 'Loading...';
     }
-    
+
     if (hostelInfo?.name) {
       return hostelInfo.name;
     }
-    
+
     if (user?.hostel_id) {
       return `Hostel ID: ${user.hostel_id}`;
     }
-    
+
     return 'Not assigned';
   };
 
@@ -442,13 +456,19 @@ const MyComplaints = () => {
                       <label className="font-medium text-gray-800">
                         Student Name
                       </label>
-                      <p className="text-gray-500">{user?.name || 'Not available'}</p>
+                      <p className="text-gray-500">
+                        {user?.name || 'Not available'}
+                      </p>
                     </div>
                     <div>
                       <label className="font-medium text-gray-800">
                         Matric Number
                       </label>
-                      <p className="text-gray-500">{user?.matricNumber || user?.matric_num || 'Not available'}</p>
+                      <p className="text-gray-500">
+                        {user?.matricNumber ||
+                          user?.matric_num ||
+                          'Not available'}
+                      </p>
                     </div>
                     <div>
                       <label className="font-medium text-gray-800">
@@ -460,7 +480,9 @@ const MyComplaints = () => {
                       <label className="font-medium text-gray-800">
                         Room Number
                       </label>
-                      <p className="text-gray-500">{user?.room_number || 'Not available'}</p>
+                      <p className="text-gray-500">
+                        {user?.room_number || 'Not available'}
+                      </p>
                     </div>
                   </div>
 
@@ -586,7 +608,7 @@ const MyComplaints = () => {
                 : 'Try adjusting your filters or search terms'}
             </p>
             {complaints.length === 0 && (
-              <Button 
+              <Button
                 onClick={() => setDialogOpen(true)}
                 className="bg-purple-600 hover:bg-purple-700 text-white"
               >

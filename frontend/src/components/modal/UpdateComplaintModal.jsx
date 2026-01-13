@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -67,65 +68,65 @@ export const UpdateComplaintModal = ({
     }
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!formData.status || !complaint) {
-    toast.error('Please select a status');
-    return;
-  }
+  const handleSubmit = async e => {
+    e.preventDefault();
 
-  try {
-    setIsLoading(true);
-    const token = localStorage.getItem('token');
-    
-    let endpoint = '';
-    let body = {};
-    
-    if (formData.status === 'resolved') {
-      // Call resolve endpoint
-      endpoint = `http://localhost:5000/api/complaints/${complaint.id}/resolve`;
-      body = { 
-        maintenance_remarks: formData.maintenance_remarks || null 
-      };
-    } else {
-      // Call general update endpoint
-      endpoint = `http://localhost:5000/api/complaints/${complaint.id}`;
-      body = { 
-        status: formData.status,
-        maintenance_remarks: formData.maintenance_remarks || null 
-      };
+    if (!formData.status || !complaint) {
+      toast.error('Please select a status');
+      return;
     }
 
-    const response = await fetch(endpoint, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    });
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
 
-    if (response.ok) {
-      const result = await response.json();
-      if (result.success) {
-        toast.success(result.message || 'Complaint updated successfully!');
-        onUpdate(result.complaint);
-        onClose();
+      let endpoint = '';
+      let body = {};
+
+      if (formData.status === 'resolved') {
+        // Call resolve endpoint
+        endpoint = `${API_URL}/api/complaints/${complaint.id}/resolve`;
+        body = {
+          maintenance_remarks: formData.maintenance_remarks || null,
+        };
       } else {
-        toast.error(result.error || 'Failed to update complaint');
+        // Call general update endpoint
+        endpoint = `${API_URL}/api/complaints/${complaint.id}`;
+        body = {
+          status: formData.status,
+          maintenance_remarks: formData.maintenance_remarks || null,
+        };
       }
-    } else {
-      const errorData = await response.json().catch(() => ({}));
-      toast.error(errorData.error || 'Failed to update complaint');
+
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          toast.success(result.message || 'Complaint updated successfully!');
+          onUpdate(result.complaint);
+          onClose();
+        } else {
+          toast.error(result.error || 'Failed to update complaint');
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(errorData.error || 'Failed to update complaint');
+      }
+    } catch (error) {
+      console.error('Error updating complaint:', error);
+      toast.error('Failed to update complaint. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error('Error updating complaint:', error);
-    toast.error('Failed to update complaint. Please try again.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({
@@ -206,7 +207,9 @@ export const UpdateComplaintModal = ({
             <Textarea
               id="remarks"
               value={formData.maintenance_remarks}
-              onChange={e => handleChange('maintenance_remarks', e.target.value)}
+              onChange={e =>
+                handleChange('maintenance_remarks', e.target.value)
+              }
               placeholder="Add your remarks about the repair, parts used, time spent, or any follow-up needed..."
               rows={4}
             />
@@ -217,9 +220,9 @@ export const UpdateComplaintModal = ({
 
           {/* Action Buttons */}
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isLoading}
             >

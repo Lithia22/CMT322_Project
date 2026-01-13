@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +23,7 @@ import {
   Award,
   TrendingUp,
   Home,
-  Wrench
+  Wrench,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -37,7 +38,7 @@ const MaintenanceFeedback = () => {
     total: 0,
     averageRating: 0,
     ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-    recentTrend: 0
+    recentTrend: 0,
   });
 
   // Fetch feedbacks for current maintenance staff
@@ -46,7 +47,7 @@ const MaintenanceFeedback = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
@@ -54,34 +55,50 @@ const MaintenanceFeedback = () => {
         }
 
         // Try to fetch feedbacks with complaint details
-        const response = await fetch('http://localhost:5000/api/feedbacks/maintenance-feedbacks', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          '${API_URL}/api/feedbacks/maintenance-feedbacks',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
             console.log('✅ Feedbacks loaded:', result.feedbacks);
-            
+
             // Transform feedback data to include facility information
-            const transformedFeedbacks = result.feedbacks?.map(feedback => {
-              // Extract complaint details from feedback or related data
-              const complaintDetails = feedback.complaint || feedback.complaint_details || {};
-              
-              return {
-                ...feedback,
-                complaint_details: {
-                  facility_type: complaintDetails.facility_type || feedback.facility_type || 'N/A',
-                  hostel_name: complaintDetails.hostel_name || feedback.hostel_name || 'Unknown Hostel',
-                  room_number: complaintDetails.room_number || feedback.room_number,
-                  issue_description: complaintDetails.issue_description || feedback.issue_description,
-                  maintenance_remarks: complaintDetails.maintenance_remarks || feedback.maintenance_remarks
-                }
-              };
-            }) || [];
-            
+            const transformedFeedbacks =
+              result.feedbacks?.map(feedback => {
+                // Extract complaint details from feedback or related data
+                const complaintDetails =
+                  feedback.complaint || feedback.complaint_details || {};
+
+                return {
+                  ...feedback,
+                  complaint_details: {
+                    facility_type:
+                      complaintDetails.facility_type ||
+                      feedback.facility_type ||
+                      'N/A',
+                    hostel_name:
+                      complaintDetails.hostel_name ||
+                      feedback.hostel_name ||
+                      'Unknown Hostel',
+                    room_number:
+                      complaintDetails.room_number || feedback.room_number,
+                    issue_description:
+                      complaintDetails.issue_description ||
+                      feedback.issue_description,
+                    maintenance_remarks:
+                      complaintDetails.maintenance_remarks ||
+                      feedback.maintenance_remarks,
+                  },
+                };
+              }) || [];
+
             console.log('Transformed feedbacks:', transformedFeedbacks);
             setFeedbacks(transformedFeedbacks);
             calculateStats(transformedFeedbacks);
@@ -111,14 +128,19 @@ const MaintenanceFeedback = () => {
     }
   }, [user?.id, user?.role]);
 
-  const calculateStats = (feedbacksData) => {
+  const calculateStats = feedbacksData => {
     const total = feedbacksData.length;
-    
+
     // Calculate average rating
-    const averageRating = total > 0
-      ? parseFloat((feedbacksData.reduce((sum, f) => sum + f.rating, 0) / total).toFixed(1))
-      : 0;
-    
+    const averageRating =
+      total > 0
+        ? parseFloat(
+            (
+              feedbacksData.reduce((sum, f) => sum + f.rating, 0) / total
+            ).toFixed(1)
+          )
+        : 0;
+
     // Calculate rating distribution
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     feedbacksData.forEach(f => {
@@ -126,31 +148,38 @@ const MaintenanceFeedback = () => {
         ratingDistribution[f.rating]++;
       }
     });
-    
+
     // Calculate recent trend (last 30 days vs previous 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const sixtyDaysAgo = new Date();
     sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-    
-    const recentFeedbacks = feedbacksData.filter(f => 
-      new Date(f.submitted_at) >= thirtyDaysAgo
+
+    const recentFeedbacks = feedbacksData.filter(
+      f => new Date(f.submitted_at) >= thirtyDaysAgo
     ).length;
-    
-    const previousFeedbacks = feedbacksData.filter(f => 
-      new Date(f.submitted_at) >= sixtyDaysAgo && new Date(f.submitted_at) < thirtyDaysAgo
+
+    const previousFeedbacks = feedbacksData.filter(
+      f =>
+        new Date(f.submitted_at) >= sixtyDaysAgo &&
+        new Date(f.submitted_at) < thirtyDaysAgo
     ).length;
-    
-    const recentTrend = previousFeedbacks > 0 
-      ? Math.round(((recentFeedbacks - previousFeedbacks) / previousFeedbacks) * 100)
-      : recentFeedbacks > 0 ? 100 : 0;
-    
+
+    const recentTrend =
+      previousFeedbacks > 0
+        ? Math.round(
+            ((recentFeedbacks - previousFeedbacks) / previousFeedbacks) * 100
+          )
+        : recentFeedbacks > 0
+          ? 100
+          : 0;
+
     setStats({
       total,
       averageRating,
       ratingDistribution,
-      recentTrend
+      recentTrend,
     });
   };
 
@@ -160,29 +189,28 @@ const MaintenanceFeedback = () => {
     const comment = feedback.comment || '';
     const facilityType = feedback.complaint_details?.facility_type || '';
     const hostelName = feedback.complaint_details?.hostel_name || '';
-    
-    const matchesSearch = 
+
+    const matchesSearch =
       studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
       facilityType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       hostelName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRating = 
-      ratingFilter === 'all' || 
-      feedback.rating.toString() === ratingFilter;
-    
+
+    const matchesRating =
+      ratingFilter === 'all' || feedback.rating.toString() === ratingFilter;
+
     return matchesSearch && matchesRating;
   });
 
   // Format date
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-MY', {
         day: 'numeric',
         month: 'short',
-        year: 'numeric'
+        year: 'numeric',
       });
     } catch (error) {
       return 'N/A';
@@ -190,7 +218,7 @@ const MaintenanceFeedback = () => {
   };
 
   // Get initials from name
-  const getInitials = (name) => {
+  const getInitials = name => {
     if (!name) return 'U';
     return name
       .split(' ')
@@ -201,15 +229,13 @@ const MaintenanceFeedback = () => {
   };
 
   // Render stars
-  const renderStars = (rating) => {
+  const renderStars = rating => {
     return [1, 2, 3, 4, 5].map(star => (
       <Star
         key={star}
         size={16}
         className={
-          star <= rating
-            ? 'fill-purple-600 text-purple-600'
-            : 'text-gray-300'
+          star <= rating ? 'fill-purple-600 text-purple-600' : 'text-gray-300'
         }
       />
     ));
@@ -252,10 +278,7 @@ const MaintenanceFeedback = () => {
               <Skeleton className="h-4 w-32 bg-gray-200" />
               <div className="flex space-x-1">
                 {[...Array(5)].map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    className="h-4 w-4 rounded bg-gray-200"
-                  />
+                  <Skeleton key={i} className="h-4 w-4 rounded bg-gray-200" />
                 ))}
               </div>
             </div>
@@ -337,7 +360,8 @@ const MaintenanceFeedback = () => {
       >
         <h1 className="text-3xl font-bold tracking-tight">My Feedback</h1>
         <p className="text-white/90">
-          Welcome back, {user?.name}. View ratings and comments from students for your work
+          Welcome back, {user?.name}. View ratings and comments from students
+          for your work
         </p>
       </div>
 
@@ -370,7 +394,9 @@ const MaintenanceFeedback = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.averageRating}/5.0</div>
+            <div className="text-2xl font-bold text-black">
+              {stats.averageRating}/5.0
+            </div>
             <div className="flex items-center gap-1 mt-1">
               {renderStars(Math.round(stats.averageRating))}
             </div>
@@ -384,15 +410,22 @@ const MaintenanceFeedback = () => {
               Recent Trend
             </CardTitle>
             <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-              {stats.recentTrend >= 0 ? 
-                <TrendingUp className="h-4 w-4 text-green-600" /> : 
-                <TrendingUp className="h-4 w-4 text-red-600" style={{ transform: 'rotate(180deg)' }} />
-              }
+              {stats.recentTrend >= 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              ) : (
+                <TrendingUp
+                  className="h-4 w-4 text-red-600"
+                  style={{ transform: 'rotate(180deg)' }}
+                />
+              )}
             </div>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.recentTrend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {stats.recentTrend >= 0 ? '+' : ''}{stats.recentTrend}%
+            <div
+              className={`text-2xl font-bold ${stats.recentTrend >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              {stats.recentTrend >= 0 ? '+' : ''}
+              {stats.recentTrend}%
             </div>
             <p className="text-xs text-gray-600 mt-1">Last 30 days</p>
           </CardContent>
@@ -416,9 +449,7 @@ const MaintenanceFeedback = () => {
               >
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600 w-4">{rating}</span>
-                  <div className="flex space-x-0.5">
-                    {renderStars(rating)}
-                  </div>
+                  <div className="flex space-x-0.5">{renderStars(rating)}</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-semibold text-purple-600">
@@ -427,12 +458,18 @@ const MaintenanceFeedback = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
-                        rating >= 4 ? 'bg-green-500' :
-                        rating === 3 ? 'bg-yellow-500' : 'bg-red-500'
+                        rating >= 4
+                          ? 'bg-green-500'
+                          : rating === 3
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
                       }`}
-                      style={{ 
-                        width: stats.total > 0 ? `${(stats.ratingDistribution[rating] / stats.total) * 100}%` : '0%',
-                        maxWidth: '100%'
+                      style={{
+                        width:
+                          stats.total > 0
+                            ? `${(stats.ratingDistribution[rating] / stats.total) * 100}%`
+                            : '0%',
+                        maxWidth: '100%',
                       }}
                     />
                   </div>
@@ -454,12 +491,15 @@ const MaintenanceFeedback = () => {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">
-                  Based on <span className="font-semibold">{stats.total}</span> reviews
+                  Based on <span className="font-semibold">{stats.total}</span>{' '}
+                  reviews
                 </p>
                 <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    {stats.ratingDistribution[5] + stats.ratingDistribution[4]} positive
+                    {stats.ratingDistribution[5] +
+                      stats.ratingDistribution[4]}{' '}
+                    positive
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
@@ -467,7 +507,9 @@ const MaintenanceFeedback = () => {
                   </span>
                   <span className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                    {stats.ratingDistribution[2] + stats.ratingDistribution[1]} needs improvement
+                    {stats.ratingDistribution[2] +
+                      stats.ratingDistribution[1]}{' '}
+                    needs improvement
                   </span>
                 </div>
               </div>
@@ -527,8 +569,8 @@ const MaintenanceFeedback = () => {
               {stats.total === 0 ? 'No Feedback Yet' : 'No Feedback Found'}
             </h3>
             <p className="text-gray-600">
-              {stats.total === 0 
-                ? 'You haven\'t received any feedback from students yet.' 
+              {stats.total === 0
+                ? "You haven't received any feedback from students yet."
                 : 'Try adjusting your filters or search terms'}
             </p>
           </CardContent>
@@ -536,7 +578,10 @@ const MaintenanceFeedback = () => {
       ) : (
         <div className="space-y-4">
           {filteredFeedbacks.map(feedback => (
-            <Card key={feedback.id} className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <Card
+              key={feedback.id}
+              className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-10 w-10">
@@ -564,7 +609,7 @@ const MaintenanceFeedback = () => {
                     </div>
 
                     <p className="text-sm text-gray-700 mb-3 leading-relaxed">
-                      {feedback.comment || "No comment provided"}
+                      {feedback.comment || 'No comment provided'}
                     </p>
 
                     {/* Complaint Details Section */}
@@ -573,38 +618,50 @@ const MaintenanceFeedback = () => {
                         {/* Facility Type */}
                         <div className="flex items-center gap-2">
                           <Wrench size={12} className="text-gray-500" />
-                          <span className="font-medium text-gray-700">Facility:</span>
+                          <span className="font-medium text-gray-700">
+                            Facility:
+                          </span>
                           <Badge variant="outline" className="h-4 text-xs">
-                            {feedback.complaint_details?.facility_type || 'General Maintenance'}
+                            {feedback.complaint_details?.facility_type ||
+                              'General Maintenance'}
                           </Badge>
                         </div>
-                        
+
                         {/* Hostel and Room */}
                         <div className="flex items-center gap-2">
                           <Home size={12} className="text-gray-500" />
-                          <span className="font-medium text-gray-700">Location:</span>
+                          <span className="font-medium text-gray-700">
+                            Location:
+                          </span>
                           <span className="text-gray-600">
-                            {feedback.complaint_details?.hostel_name || 'Unknown Hostel'}
+                            {feedback.complaint_details?.hostel_name ||
+                              'Unknown Hostel'}
                             {feedback.complaint_details?.room_number && (
-                              <span className="ml-1">(Room {feedback.complaint_details.room_number})</span>
+                              <span className="ml-1">
+                                (Room {feedback.complaint_details.room_number})
+                              </span>
                             )}
                           </span>
                         </div>
-                        
+
                         {/* Issue Description */}
                         {feedback.complaint_details?.issue_description && (
                           <div className="sm:col-span-2 pt-2 border-t border-gray-200">
-                            <span className="font-medium text-gray-700">Issue Description:</span>
+                            <span className="font-medium text-gray-700">
+                              Issue Description:
+                            </span>
                             <p className="text-gray-600 mt-1 text-xs italic">
                               "{feedback.complaint_details.issue_description}"
                             </p>
                           </div>
                         )}
-                        
+
                         {/* Maintenance Remarks */}
                         {feedback.complaint_details?.maintenance_remarks && (
                           <div className="sm:col-span-2 pt-2 border-t border-gray-200">
-                            <span className="font-medium text-blue-600">Your Remarks:</span>
+                            <span className="font-medium text-blue-600">
+                              Your Remarks:
+                            </span>
                             <p className="text-blue-600 mt-1 text-xs italic">
                               "{feedback.complaint_details.maintenance_remarks}"
                             </p>

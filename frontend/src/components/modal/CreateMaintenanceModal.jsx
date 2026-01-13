@@ -1,4 +1,4 @@
-// src/components/modal/CreateMaintenanceModal.jsx
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -68,7 +68,7 @@ const maintenanceStaffSchema = z
 export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
   const [facilityOptions, setFacilityOptions] = useState([]);
   const [loadingFacilities, setLoadingFacilities] = useState(false);
-  
+
   const form = useForm({
     resolver: zodResolver(maintenanceStaffSchema),
     defaultValues: {
@@ -84,76 +84,104 @@ export const CreateMaintenanceModal = ({ open, onClose, onSave }) => {
   });
 
   // Fetch facility types from Supabase
-// In CreateMaintenanceModal.jsx - update the useEffect that fetches facility types
-useEffect(() => {
-  const fetchFacilityTypes = async () => {
-    if (!open) return;
-    
-    try {
-      setLoadingFacilities(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/facility-types', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          setFacilityOptions(result.facility_types || []);
-          console.log('✅ Facility types loaded:', result.facility_types);
+  // In CreateMaintenanceModal.jsx - update the useEffect that fetches facility types
+  useEffect(() => {
+    const fetchFacilityTypes = async () => {
+      if (!open) return;
+
+      try {
+        setLoadingFacilities(true);
+        const token = localStorage.getItem('token');
+        const response = await fetch(' ${API_URL}/api/auth/facility-types', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            setFacilityOptions(result.facility_types || []);
+            console.log('✅ Facility types loaded:', result.facility_types);
+          } else {
+            console.error('Failed to load facility types:', result.error);
+            toast.error('Failed to load facility types');
+            // Fallback to mock data
+            setFacilityOptions([
+              {
+                id: 1,
+                name: 'Air Conditioner',
+                created_at: new Date().toISOString(),
+              },
+              { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
+              {
+                id: 3,
+                name: 'Furniture',
+                created_at: new Date().toISOString(),
+              },
+              {
+                id: 4,
+                name: 'Electrical',
+                created_at: new Date().toISOString(),
+              },
+              { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
+              {
+                id: 6,
+                name: 'Door/Window',
+                created_at: new Date().toISOString(),
+              },
+              { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
+              { id: 8, name: 'Others', created_at: new Date().toISOString() },
+            ]);
+          }
         } else {
-          console.error('Failed to load facility types:', result.error);
+          console.error('HTTP error:', response.status);
           toast.error('Failed to load facility types');
           // Fallback to mock data
           setFacilityOptions([
-            { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
+            {
+              id: 1,
+              name: 'Air Conditioner',
+              created_at: new Date().toISOString(),
+            },
             { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
             { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
             { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
             { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
-            { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
+            {
+              id: 6,
+              name: 'Door/Window',
+              created_at: new Date().toISOString(),
+            },
             { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
-            { id: 8, name: 'Others', created_at: new Date().toISOString() }
+            { id: 8, name: 'Others', created_at: new Date().toISOString() },
           ]);
         }
-      } else {
-        console.error('HTTP error:', response.status);
+      } catch (error) {
+        console.error('Error fetching facility types:', error);
         toast.error('Failed to load facility types');
         // Fallback to mock data
         setFacilityOptions([
-          { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
+          {
+            id: 1,
+            name: 'Air Conditioner',
+            created_at: new Date().toISOString(),
+          },
           { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
           { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
           { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
           { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
           { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
           { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
-          { id: 8, name: 'Others', created_at: new Date().toISOString() }
+          { id: 8, name: 'Others', created_at: new Date().toISOString() },
         ]);
+      } finally {
+        setLoadingFacilities(false);
       }
-    } catch (error) {
-      console.error('Error fetching facility types:', error);
-      toast.error('Failed to load facility types');
-      // Fallback to mock data
-      setFacilityOptions([
-        { id: 1, name: 'Air Conditioner', created_at: new Date().toISOString() },
-        { id: 2, name: 'Bathroom', created_at: new Date().toISOString() },
-        { id: 3, name: 'Furniture', created_at: new Date().toISOString() },
-        { id: 4, name: 'Electrical', created_at: new Date().toISOString() },
-        { id: 5, name: 'Plumbing', created_at: new Date().toISOString() },
-        { id: 6, name: 'Door/Window', created_at: new Date().toISOString() },
-        { id: 7, name: 'Lighting', created_at: new Date().toISOString() },
-        { id: 8, name: 'Others', created_at: new Date().toISOString() }
-      ]);
-    } finally {
-      setLoadingFacilities(false);
-    }
-  };
+    };
 
-  fetchFacilityTypes();
-}, [open]);
+    fetchFacilityTypes();
+  }, [open]);
 
   const selectedFacilityTypes = form.watch('facilityTypes') || [];
 
@@ -172,28 +200,27 @@ useEffect(() => {
   };
 
   // In CreateMaintenanceModal.jsx - onSubmit function
-const onSubmit = async (data) => {
-  try {
-    // Prepare the staff data for backend
-    const staffData = {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      phone: data.phone,
-      specialty: data.specialty || '',
-      facilityTypes: data.facilityTypes  // Send names, backend will convert to IDs
-    };
-    
-    await onSave(staffData);
-    
-    // Reset form on success
-    form.reset();
-    
-  } catch (error) {
-    console.error('Form submission error:', error);
-    toast.error('Failed to create staff. Please try again.');
-  }
-};
+  const onSubmit = async data => {
+    try {
+      // Prepare the staff data for backend
+      const staffData = {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+        specialty: data.specialty || '',
+        facilityTypes: data.facilityTypes, // Send names, backend will convert to IDs
+      };
+
+      await onSave(staffData);
+
+      // Reset form on success
+      form.reset();
+    } catch (error) {
+      console.error('Form submission error:', error);
+      toast.error('Failed to create staff. Please try again.');
+    }
+  };
 
   const handleClose = () => {
     form.reset();
@@ -310,11 +337,14 @@ const onSubmit = async (data) => {
                     {loadingFacilities ? (
                       <div className="flex items-center justify-center py-4">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                        <span className="text-sm text-gray-500">Loading facility types...</span>
+                        <span className="text-sm text-gray-500">
+                          Loading facility types...
+                        </span>
                       </div>
                     ) : facilityOptions.length === 0 ? (
                       <p className="text-sm text-amber-600 py-2">
-                        No facility types available. Please add facility types to the database first.
+                        No facility types available. Please add facility types
+                        to the database first.
                       </p>
                     ) : (
                       <>
@@ -329,7 +359,9 @@ const onSubmit = async (data) => {
                               <SelectItem
                                 key={facility.id}
                                 value={facility.name}
-                                disabled={selectedFacilityTypes.includes(facility.name)}
+                                disabled={selectedFacilityTypes.includes(
+                                  facility.name
+                                )}
                               >
                                 {facility.name}
                               </SelectItem>
@@ -363,7 +395,8 @@ const onSubmit = async (data) => {
                   </div>
                   <FormMessage />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Select facility types this staff can handle. Click on badges to remove.
+                    Select facility types this staff can handle. Click on badges
+                    to remove.
                   </p>
                 </FormItem>
               )}
@@ -388,7 +421,8 @@ const onSubmit = async (data) => {
                   </FormControl>
                   <FormMessage />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Must be at least 8 characters with uppercase, lowercase, and number
+                    Must be at least 8 characters with uppercase, lowercase, and
+                    number
                   </p>
                 </FormItem>
               )}
@@ -428,8 +462,8 @@ const onSubmit = async (data) => {
               <Button
                 type="submit"
                 disabled={
-                  !form.formState.isValid || 
-                  form.formState.isSubmitting || 
+                  !form.formState.isValid ||
+                  form.formState.isSubmitting ||
                   loadingFacilities ||
                   facilityOptions.length === 0
                 }

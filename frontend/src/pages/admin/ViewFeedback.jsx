@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,7 +21,7 @@ import {
   MessageSquare,
   AlertCircle,
   Award,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -35,7 +36,7 @@ const ViewFeedback = () => {
     total: 0,
     averageRating: 0,
     ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
-    hostelStats: []
+    hostelStats: [],
   });
   const [topRatedStaff, setTopRatedStaff] = useState([]);
 
@@ -45,19 +46,19 @@ const ViewFeedback = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/feedbacks', {
+        const response = await fetch('${API_URL}/api/feedbacks', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -86,14 +87,19 @@ const ViewFeedback = () => {
     fetchFeedbacks();
   }, []);
 
-  const calculateStats = (feedbacksData) => {
+  const calculateStats = feedbacksData => {
     const total = feedbacksData.length;
-    
+
     // Calculate average rating
-    const averageRating = total > 0
-      ? parseFloat((feedbacksData.reduce((sum, f) => sum + f.rating, 0) / total).toFixed(1))
-      : 0;
-    
+    const averageRating =
+      total > 0
+        ? parseFloat(
+            (
+              feedbacksData.reduce((sum, f) => sum + f.rating, 0) / total
+            ).toFixed(1)
+          )
+        : 0;
+
     // Calculate rating distribution
     const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     feedbacksData.forEach(f => {
@@ -101,7 +107,7 @@ const ViewFeedback = () => {
         ratingDistribution[f.rating]++;
       }
     });
-    
+
     // Calculate hostel stats
     const hostelMap = {};
     feedbacksData.forEach(f => {
@@ -111,51 +117,61 @@ const ViewFeedback = () => {
       }
       hostelMap[hostelName]++;
     });
-    
-    const hostelStats = Object.keys(hostelMap).map(hostel => ({
-      name: hostel,
-      count: hostelMap[hostel]
-    })).sort((a, b) => b.count - a.count);
-    
+
+    const hostelStats = Object.keys(hostelMap)
+      .map(hostel => ({
+        name: hostel,
+        count: hostelMap[hostel],
+      }))
+      .sort((a, b) => b.count - a.count);
+
     setStats({
       total,
       averageRating,
       ratingDistribution,
-      hostelStats
+      hostelStats,
     });
   };
 
-  const calculateTopRatedStaff = (feedbacksData) => {
+  const calculateTopRatedStaff = feedbacksData => {
     const staffMap = {};
-    
+
     feedbacksData.forEach(feedback => {
-      const staffName = feedback.complaint_details?.assigned_maintenance_name || 'Unknown Staff';
+      const staffName =
+        feedback.complaint_details?.assigned_maintenance_name ||
+        'Unknown Staff';
       const staffId = feedback.complaint_details?.assigned_maintenance_id;
-      
+
       if (!staffMap[staffId]) {
         staffMap[staffId] = {
           name: staffName,
           ratings: [],
-          totalComplaints: 0
+          totalComplaints: 0,
         };
       }
-      
+
       staffMap[staffId].ratings.push(feedback.rating);
     });
-    
+
     // Calculate average rating for each staff
     const staffArray = Object.values(staffMap)
       .map(staff => ({
         ...staff,
-        averageRating: staff.ratings.length > 0
-          ? parseFloat((staff.ratings.reduce((a, b) => a + b, 0) / staff.ratings.length).toFixed(1))
-          : 0,
-        feedbackCount: staff.ratings.length
+        averageRating:
+          staff.ratings.length > 0
+            ? parseFloat(
+                (
+                  staff.ratings.reduce((a, b) => a + b, 0) /
+                  staff.ratings.length
+                ).toFixed(1)
+              )
+            : 0,
+        feedbackCount: staff.ratings.length,
       }))
       .filter(staff => staff.feedbackCount > 0)
       .sort((a, b) => b.averageRating - a.averageRating)
       .slice(0, 5);
-    
+
     setTopRatedStaff(staffArray);
   };
 
@@ -165,30 +181,30 @@ const ViewFeedback = () => {
     const comment = feedback.comment || '';
     const facilityType = feedback.complaint_details?.facility_type || '';
     const hostelName = feedback.complaint_details?.hostel_name || '';
-    const staffName = feedback.complaint_details?.assigned_maintenance_name || '';
-    
-    const matchesSearch = 
+    const staffName =
+      feedback.complaint_details?.assigned_maintenance_name || '';
+
+    const matchesSearch =
       studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.toLowerCase().includes(searchTerm.toLowerCase()) ||
       facilityType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       hostelName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       staffName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRating = 
-      ratingFilter === 'all' || 
-      feedback.rating.toString() === ratingFilter;
-    
+
+    const matchesRating =
+      ratingFilter === 'all' || feedback.rating.toString() === ratingFilter;
+
     return matchesSearch && matchesRating;
   });
 
   // Format date
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-MY', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -311,7 +327,9 @@ const ViewFeedback = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.averageRating}/5.0</div>
+            <div className="text-2xl font-bold text-black">
+              {stats.averageRating}/5.0
+            </div>
             <div className="flex items-center gap-1 mt-1">
               {[1, 2, 3, 4, 5].map(star => (
                 <Star
@@ -356,7 +374,12 @@ const ViewFeedback = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {Math.round((stats.ratingDistribution[4] + stats.ratingDistribution[5]) / stats.total * 100)}%
+              {Math.round(
+                ((stats.ratingDistribution[4] + stats.ratingDistribution[5]) /
+                  stats.total) *
+                  100
+              )}
+              %
             </div>
             <p className="text-xs text-gray-600 mt-1">Positive (4-5 stars)</p>
           </CardContent>
@@ -379,19 +402,23 @@ const ViewFeedback = () => {
                   className="flex justify-between items-center text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-500 w-6">{index + 1}.</span>
+                    <span className="text-xs font-medium text-gray-500 w-6">
+                      {index + 1}.
+                    </span>
                     <span className="text-gray-800">
                       {hostel.name.replace('Desasiswa ', '')}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-semibold text-purple-600">{hostel.count}</span>
+                    <span className="font-semibold text-purple-600">
+                      {hostel.count}
+                    </span>
                     <div className="w-24 bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-gradient-to-r from-purple-600 to-purple-400 h-2 rounded-full"
-                        style={{ 
+                        style={{
                           width: `${(hostel.count / stats.total) * 100}%`,
-                          maxWidth: '100%'
+                          maxWidth: '100%',
                         }}
                       />
                     </div>
@@ -437,12 +464,15 @@ const ViewFeedback = () => {
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div
                       className={`h-2 rounded-full ${
-                        rating >= 4 ? 'bg-green-500' :
-                        rating === 3 ? 'bg-yellow-500' : 'bg-red-500'
+                        rating >= 4
+                          ? 'bg-green-500'
+                          : rating === 3
+                            ? 'bg-yellow-500'
+                            : 'bg-red-500'
                       }`}
-                      style={{ 
+                      style={{
                         width: `${(stats.ratingDistribution[rating] / stats.total) * 100}%`,
-                        maxWidth: '100%'
+                        maxWidth: '100%',
                       }}
                     />
                   </div>
@@ -465,7 +495,10 @@ const ViewFeedback = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {topRatedStaff.map((staff, index) => (
-                <div key={index} className="flex flex-col items-center text-center p-3 bg-purple-50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex flex-col items-center text-center p-3 bg-purple-50 rounded-lg"
+                >
                   <div className="relative">
                     <Avatar className="h-12 w-12 mb-2 border-2 border-purple-300">
                       <AvatarFallback className="bg-purple-100 text-purple-700 font-bold">
@@ -478,12 +511,18 @@ const ViewFeedback = () => {
                       </div>
                     )}
                   </div>
-                  <h4 className="font-semibold text-sm mb-1 truncate w-full">{staff.name}</h4>
+                  <h4 className="font-semibold text-sm mb-1 truncate w-full">
+                    {staff.name}
+                  </h4>
                   <div className="flex items-center gap-1 mb-1">
                     <Star className="h-3 w-3 fill-purple-600 text-yellow-400" />
-                    <span className="font-bold text-purple-600 text-sm">{staff.averageRating}</span>
+                    <span className="font-bold text-purple-600 text-sm">
+                      {staff.averageRating}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-600">{staff.feedbackCount} ratings</span>
+                  <span className="text-xs text-gray-600">
+                    {staff.feedbackCount} ratings
+                  </span>
                 </div>
               ))}
             </div>
@@ -535,8 +574,8 @@ const ViewFeedback = () => {
               No Feedback Found
             </h3>
             <p className="text-gray-600">
-              {feedbacks.length === 0 
-                ? 'No feedback has been submitted yet.' 
+              {feedbacks.length === 0
+                ? 'No feedback has been submitted yet.'
                 : 'Try adjusting your filters or search terms'}
             </p>
           </CardContent>
@@ -544,7 +583,10 @@ const ViewFeedback = () => {
       ) : (
         <div className="space-y-4">
           {filteredFeedbacks.map(feedback => (
-            <Card key={feedback.id} className="border border-gray-200 shadow-sm">
+            <Card
+              key={feedback.id}
+              className="border border-gray-200 shadow-sm"
+            >
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-10 w-10">
@@ -589,23 +631,46 @@ const ViewFeedback = () => {
                       <div className="bg-gray-50 rounded-lg p-3 text-xs">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2">
                           <div>
-                            <span className="font-medium text-gray-700">Facility:</span>{' '}
-                            <span className="text-gray-600">{feedback.complaint_details.facility_type || 'N/A'}</span>
+                            <span className="font-medium text-gray-700">
+                              Facility:
+                            </span>{' '}
+                            <span className="text-gray-600">
+                              {feedback.complaint_details.facility_type ||
+                                'N/A'}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-700">Hostel:</span>
-                            <span className="text-gray-600">{feedback.complaint_details.hostel_name || 'N/A'}</span>
+                            <span className="font-medium text-gray-700">
+                              Hostel:
+                            </span>
+                            <span className="text-gray-600">
+                              {feedback.complaint_details.hostel_name || 'N/A'}
+                            </span>
                           </div>
-                          {feedback.complaint_details.assigned_maintenance_name && (
+                          {feedback.complaint_details
+                            .assigned_maintenance_name && (
                             <div>
-                              <span className="font-medium text-gray-700">Maintenance Staff:</span>{' '}
-                              <span className="text-purple-600">{feedback.complaint_details.assigned_maintenance_name}</span>
+                              <span className="font-medium text-gray-700">
+                                Maintenance Staff:
+                              </span>{' '}
+                              <span className="text-purple-600">
+                                {
+                                  feedback.complaint_details
+                                    .assigned_maintenance_name
+                                }
+                              </span>
                             </div>
                           )}
                           {feedback.complaint_details.maintenance_remarks && (
                             <div className="sm:col-span-2">
-                              <span className="font-medium text-gray-700">Staff Remarks:</span>{' '}
-                              <span className="text-blue-600 italic">"{feedback.complaint_details.maintenance_remarks}"</span>
+                              <span className="font-medium text-gray-700">
+                                Staff Remarks:
+                              </span>{' '}
+                              <span className="text-blue-600 italic">
+                                "
+                                {feedback.complaint_details.maintenance_remarks}
+                                "
+                              </span>
                             </div>
                           )}
                         </div>

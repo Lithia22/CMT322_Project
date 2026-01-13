@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,7 +56,7 @@ const Feedback = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
@@ -63,17 +64,21 @@ const Feedback = () => {
         }
 
         // Fetch user's complaints
-        const response = await fetch('http://localhost:5000/api/complaints/my-complaints', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          '${API_URL}/api/complaints/my-complaints',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
             // Filter resolved complaints
-            const resolved = result.complaints?.filter(c => c.status === 'resolved') || [];
+            const resolved =
+              result.complaints?.filter(c => c.status === 'resolved') || [];
             setResolvedComplaints(resolved);
           } else {
             toast.error(result.error || 'Failed to load complaints');
@@ -101,18 +106,18 @@ const Feedback = () => {
     const fetchFeedbacks = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/feedbacks/my-feedbacks', {
+        const response = await fetch('${API_URL}/api/feedbacks/my-feedbacks', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -141,42 +146,44 @@ const Feedback = () => {
 
   // Complaints with feedback (for Feedback Done tab)
   const complaintsWithFeedback = myFeedbacks.map(feedback => {
-    const complaint = resolvedComplaints.find(c => c.id === feedback.complaint_id);
+    const complaint = resolvedComplaints.find(
+      c => c.id === feedback.complaint_id
+    );
     return { ...feedback, complaint };
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     if (!selectedComplaint) return;
 
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/feedbacks', {
+      const response = await fetch('${API_URL}/api/feedbacks', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           complaint_id: selectedComplaint.id,
           rating: data.rating,
-          comment: data.comment
-        })
+          comment: data.comment,
+        }),
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Add new feedback to state
         const newFeedback = {
           ...result.feedback,
-          complaint: selectedComplaint
+          complaint: selectedComplaint,
         };
-        
+
         setMyFeedbacks(prev => [newFeedback, ...prev]);
-        
+
         // Remove complaint from complaintsWithoutFeedback
-        setResolvedComplaints(prev => 
+        setResolvedComplaints(prev =>
           prev.filter(c => c.id !== selectedComplaint.id)
         );
 
@@ -288,8 +295,8 @@ const Feedback = () => {
               <CardContent className="py-12 text-center">
                 <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-semibold mb-2 text-black">
-                  {resolvedComplaints.length === 0 
-                    ? 'No Resolved Issues Yet' 
+                  {resolvedComplaints.length === 0
+                    ? 'No Resolved Issues Yet'
                     : 'All Resolved Issues Have Feedback'}
                 </h3>
                 <p className="text-gray-600 mb-4">
@@ -325,30 +332,34 @@ const Feedback = () => {
                       {complaint.issue_description}
                     </p>
 
-                   {complaint.maintenance_remarks ? (
-                    <div className="bg-blue-50 border border-blue-100 rounded p-2 mb-3">
-                      <p className="text-xs font-medium text-blue-800 mb-1">
-                        📝 Maintenance Remarks:
-                      </p>
-                      <p className="text-xs text-blue-700">
-                        {complaint.maintenance_remarks}
-                      </p>
-                      {complaint.assigned_maintenance && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          <span className="font-medium">Fixed by:</span> {complaint.assigned_maintenance}
-                          {complaint.resolution_date && (
-                            <span className="ml-2">
-                              • On: {new Date(complaint.resolution_date).toLocaleDateString('en-MY')}
-                            </span>
-                          )}
+                    {complaint.maintenance_remarks ? (
+                      <div className="bg-blue-50 border border-blue-100 rounded p-2 mb-3">
+                        <p className="text-xs font-medium text-blue-800 mb-1">
+                          📝 Maintenance Remarks:
                         </p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-gray-400 italic mb-3">
-                      No remarks from maintenance staff
-                    </p>
-                  )}
+                        <p className="text-xs text-blue-700">
+                          {complaint.maintenance_remarks}
+                        </p>
+                        {complaint.assigned_maintenance && (
+                          <p className="text-xs text-blue-600 mt-1">
+                            <span className="font-medium">Fixed by:</span>{' '}
+                            {complaint.assigned_maintenance}
+                            {complaint.resolution_date && (
+                              <span className="ml-2">
+                                • On:{' '}
+                                {new Date(
+                                  complaint.resolution_date
+                                ).toLocaleDateString('en-MY')}
+                              </span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic mb-3">
+                        No remarks from maintenance staff
+                      </p>
+                    )}
                     <div className="flex items-center justify-end">
                       <Button
                         size="sm"
@@ -391,11 +402,16 @@ const Feedback = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h4 className="font-semibold text-black mb-1">
-                          {feedbackItem.complaint?.facility_type || 'Unknown Facility'}
+                          {feedbackItem.complaint?.facility_type ||
+                            'Unknown Facility'}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Submitted: {feedbackItem.submitted_at ? 
-                            new Date(feedbackItem.submitted_at).toLocaleDateString('en-MY') : 'N/A'}
+                          Submitted:{' '}
+                          {feedbackItem.submitted_at
+                            ? new Date(
+                                feedbackItem.submitted_at
+                              ).toLocaleDateString('en-MY')
+                            : 'N/A'}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
@@ -443,15 +459,17 @@ const Feedback = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-black">
-              Provide Feedback
-            </DialogTitle>
+            <DialogTitle className="text-black">Provide Feedback</DialogTitle>
             <DialogDescription className="text-gray-600">
               {selectedComplaint && (
                 <>
-                  Share your experience for: <strong>{selectedComplaint.facility_type}</strong>
+                  Share your experience for:{' '}
+                  <strong>{selectedComplaint.facility_type}</strong>
                   <br />
-                  <span className="text-xs">Issue: {selectedComplaint.issue_description.substring(0, 50)}...</span>
+                  <span className="text-xs">
+                    Issue:{' '}
+                    {selectedComplaint.issue_description.substring(0, 50)}...
+                  </span>
                 </>
               )}
             </DialogDescription>
@@ -468,9 +486,7 @@ const Feedback = () => {
                   name="rating"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-black">
-                        Rating
-                      </FormLabel>
+                      <FormLabel className="text-black">Rating</FormLabel>
                       <FormControl>
                         <div className="flex space-x-2 justify-center">
                           {[1, 2, 3, 4, 5].map(star => (

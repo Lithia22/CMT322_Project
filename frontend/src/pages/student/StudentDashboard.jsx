@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +17,7 @@ const StudentDashboard = () => {
     total: 0,
     pending: 0,
     inProgress: 0,
-    resolved: 0
+    resolved: 0,
   });
 
   // Fetch complaints from backend
@@ -24,31 +25,40 @@ const StudentDashboard = () => {
     const fetchComplaints = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           setIsLoading(false);
           return;
         }
 
-        const response = await fetch('http://localhost:5000/api/complaints/my-complaints', {
-          headers: {
-            'Authorization': `Bearer ${token}`
+        const response = await fetch(
+          '${API_URL}/api/complaints/my-complaints',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
             console.log('✅ Complaints loaded:', result.complaints);
             setComplaints(result.complaints || []);
-            
+
             // Calculate stats
             const statsData = {
               total: result.complaints?.length || 0,
-              pending: result.complaints?.filter(c => c.status === 'pending')?.length || 0,
-              inProgress: result.complaints?.filter(c => c.status === 'in_progress')?.length || 0,
-              resolved: result.complaints?.filter(c => c.status === 'resolved')?.length || 0
+              pending:
+                result.complaints?.filter(c => c.status === 'pending')
+                  ?.length || 0,
+              inProgress:
+                result.complaints?.filter(c => c.status === 'in_progress')
+                  ?.length || 0,
+              resolved:
+                result.complaints?.filter(c => c.status === 'resolved')
+                  ?.length || 0,
             };
             setStats(statsData);
           } else {
@@ -77,19 +87,19 @@ const StudentDashboard = () => {
     const fetchFeedbacks = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           return;
         }
 
         // This endpoint needs to be created in your backend
-        const response = await fetch('http://localhost:5000/api/feedbacks/my-feedbacks', {
+        const response = await fetch('${API_URL}/api/feedbacks/my-feedbacks', {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
@@ -216,7 +226,8 @@ const StudentDashboard = () => {
             Student Dashboard
           </h1>
           <p className="text-white/90">
-            Welcome back, {user?.name}. Let's make your hostel the best it can be!
+            Welcome back, {user?.name}. Let's make your hostel the best it can
+            be!
           </p>
         </div>
       </div>
@@ -377,8 +388,12 @@ const StudentDashboard = () => {
                             Complaint #{feedback.complaint_id}
                           </p>
                           <p className="text-sm text-gray-600">
-                            Submitted: {feedback.submitted_at ? 
-                              new Date(feedback.submitted_at).toLocaleDateString('en-MY') : 'N/A'}
+                            Submitted:{' '}
+                            {feedback.submitted_at
+                              ? new Date(
+                                  feedback.submitted_at
+                                ).toLocaleDateString('en-MY')
+                              : 'N/A'}
                           </p>
                           <p className="text-sm text-gray-600 mt-2">
                             {feedback.comment}

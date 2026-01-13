@@ -1,3 +1,4 @@
+import { API_URL } from '@/config/api';
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ const MaintenanceDashboard = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           console.error('No token found');
           toast.error('Please login again');
@@ -72,31 +73,41 @@ const MaintenanceDashboard = () => {
         }
 
         console.log('🔍 Fetching complaints for maintenance dashboard...');
-        
+
         // Fetch complaints from backend
-        const complaintsResponse = await fetch('http://localhost:5000/api/complaints', {
+        const complaintsResponse = await fetch('${API_URL}/api/complaints', {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         });
-        
+
         if (complaintsResponse.ok) {
           const complaintsResult = await complaintsResponse.json();
           console.log('Complaints API result:', complaintsResult);
-          
+
           if (complaintsResult.success) {
-            console.log(`✅ Found ${complaintsResult.complaints?.length || 0} complaints`);
+            console.log(
+              `✅ Found ${complaintsResult.complaints?.length || 0} complaints`
+            );
             setComplaints(complaintsResult.complaints || []);
           } else {
-            console.error('Complaints API returned success: false', complaintsResult);
+            console.error(
+              'Complaints API returned success: false',
+              complaintsResult
+            );
             toast.error(complaintsResult.error || 'Failed to load complaints');
             setComplaints([]);
           }
         } else {
-          console.error('Complaints API error status:', complaintsResponse.status);
+          console.error(
+            'Complaints API error status:',
+            complaintsResponse.status
+          );
           const errorData = await complaintsResponse.json().catch(() => ({}));
-          toast.error(`Failed to load complaints: ${errorData.error || 'Unknown error'}`);
+          toast.error(
+            `Failed to load complaints: ${errorData.error || 'Unknown error'}`
+          );
           setComplaints([]);
         }
       } catch (error) {
@@ -114,14 +125,14 @@ const MaintenanceDashboard = () => {
   // Get complaints assigned to current maintenance staff
   const assignedComplaints = useMemo(() => {
     if (!user || user.role !== 'maintenance') return [];
-    
+
     console.log('Current user ID:', user.id);
     console.log('Total complaints:', complaints.length);
-    
+
     const filtered = complaints.filter(
       complaint => complaint.assigned_maintenance_id === user.id
     );
-    
+
     console.log(`Assigned complaints: ${filtered.length}`);
     return filtered;
   }, [complaints, user]);
@@ -148,11 +159,12 @@ const MaintenanceDashboard = () => {
           .includes(searchQuery.toLowerCase());
 
       const matchesStatus =
-        statusFilter === 'all' || 
-        (complaint.status && complaint.status.toLowerCase() === statusFilter.toLowerCase());
+        statusFilter === 'all' ||
+        (complaint.status &&
+          complaint.status.toLowerCase() === statusFilter.toLowerCase());
 
       const matchesFacility =
-        facilityFilter === 'all' || 
+        facilityFilter === 'all' ||
         (complaint.facility_type && complaint.facility_type === facilityFilter);
 
       return matchesSearch && matchesStatus && matchesFacility;
@@ -163,7 +175,8 @@ const MaintenanceDashboard = () => {
   const stats = {
     totalAssigned: assignedComplaints.length,
     pending: assignedComplaints.filter(c => c.status === 'pending').length,
-    inProgress: assignedComplaints.filter(c => c.status === 'in_progress').length,
+    inProgress: assignedComplaints.filter(c => c.status === 'in_progress')
+      .length,
     resolved: assignedComplaints.filter(c => c.status === 'resolved').length,
   };
 
@@ -478,7 +491,8 @@ const MaintenanceDashboard = () => {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm text-gray-600 max-w-[300px] truncate">
-                        {complaint.issue_description || complaint.issueDescription}
+                        {complaint.issue_description ||
+                          complaint.issueDescription}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -505,13 +519,14 @@ const MaintenanceDashboard = () => {
                           >
                             View Complaint
                           </DropdownMenuItem>
-                          {complaint.status !== 'resolved' && complaint.status !== 'Resolved' && (
-                            <DropdownMenuItem
-                              onClick={() => handleUpdateComplaint(complaint)}
-                            >
-                              Update Status
-                            </DropdownMenuItem>
-                          )}
+                          {complaint.status !== 'resolved' &&
+                            complaint.status !== 'Resolved' && (
+                              <DropdownMenuItem
+                                onClick={() => handleUpdateComplaint(complaint)}
+                              >
+                                Update Status
+                              </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -523,8 +538,8 @@ const MaintenanceDashboard = () => {
                     colSpan={6}
                     className="h-32 text-center text-sm text-gray-600"
                   >
-                    {assignedComplaints.length === 0 
-                      ? 'No complaints assigned to you yet.' 
+                    {assignedComplaints.length === 0
+                      ? 'No complaints assigned to you yet.'
                       : 'No complaints found matching your criteria.'}
                   </TableCell>
                 </TableRow>
@@ -560,29 +575,35 @@ const MaintenanceDashboard = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <span className="font-medium">Facility:</span>{' '}
-                    {selectedComplaint.facility_type || selectedComplaint.facilityType}
+                    {selectedComplaint.facility_type ||
+                      selectedComplaint.facilityType}
                   </div>
                   <div>
                     <span className="font-medium">Date:</span>{' '}
-                    {selectedComplaint.submitted_date || selectedComplaint.submittedDate}
+                    {selectedComplaint.submitted_date ||
+                      selectedComplaint.submittedDate}
                   </div>
                   <div>
                     <span className="font-medium">Hostel:</span>{' '}
-                    {selectedComplaint.hostel_name || selectedComplaint.hostelName}
+                    {selectedComplaint.hostel_name ||
+                      selectedComplaint.hostelName}
                   </div>
                   <div>
                     <span className="font-medium">Room:</span>{' '}
-                    {selectedComplaint.room_number || selectedComplaint.roomNumber}
+                    {selectedComplaint.room_number ||
+                      selectedComplaint.roomNumber}
                   </div>
                   <div className="col-span-2">
                     <span className="font-medium">Student:</span>{' '}
-                    {selectedComplaint.student_name || selectedComplaint.studentName}
+                    {selectedComplaint.student_name ||
+                      selectedComplaint.studentName}
                   </div>
                 </div>
                 <div className="text-sm pt-2 border-t">
                   <span className="font-medium">Issue:</span>
                   <p className="text-gray-600 mt-1">
-                    {selectedComplaint.issue_description || selectedComplaint.issueDescription}
+                    {selectedComplaint.issue_description ||
+                      selectedComplaint.issueDescription}
                   </p>
                 </div>
                 {selectedComplaint.maintenance_remarks && (
